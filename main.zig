@@ -1,71 +1,51 @@
 const std = @import("std");
 const fs = std.fs;
-const Managed = std.math.big.int.Managed;
-
-
-fn map(comptime Src: type, comptime Dst: type, comptime len: usize, array: [len]Src, function: fn(Src) Dst) [len]Dst {
-    var result: [len]Dst = undefined;
-    for (result) |*res ,index| {
-        res.* = function(array[index]);
-    }
-    return result;
-}
-const Complex = struct {
-    real: f64,
-    imag: f64,
-
-    fn magnitude(self: Complex) f64 {
-        return std.math.sqrt(self.real * self.real + self.imag * self.imag);
-    }
-    fn magnitude2(self: Complex) f64 {
-        return self.real * self.real + self.imag * self.imag;
-    }
-
-    fn square(self: Complex) Complex {
-        return Complex{
-            .real = self.real * self.real - self.imag * self.imag,
-            .imag = 2.0 * self.real * self.imag,
-        };
-    }
-
-    fn add(self: Complex, other: Complex) Complex {
-        return Complex{
-            .real = self.real + other.real,
-            .imag = self.imag + other.imag,
-        };
-    }
-};
-
-fn mandelbrot_iterations(c: Complex, bailout: usize) usize {
-    var z = Complex{ .real = 0.0, .imag = 0.0 };
-    const uzero: usize = 0;
-    for (uzero..bailout) |i| {
-        z = z.square().add(c);
-        if (z.magnitude2() > 4.0) {
-            return i;
-        }
-    }
-    return bailout;
-}
-
-fn fib_fast(n : i64) i64 {
-    if n <= 7 {
-        return [1,1,2,3,5,8,13,21][n]
-    }
-    fhalf = std.math.pow(fib_fast(n/2+1),2)
-    fhalfplusone = std.math.pow(fib_fast(n/2+1),2)
-    if (n % 2 ==1) {
-        return std.math.pow(fhalfplusone,2)+std.math.pow(fhalf,2)
-    }
-    fhalf = 
-}
-
-fn miller_rabin_primality(n : I)
-
 
 pub fn main() void {
-    const c = Complex{ .real = -0.5, .imag = 0.27015 };
-    const bailout = 100000;
-    const iterations = mandelbrot_iterations(c, bailout);
-    std.debug.print("Iterations: {}\n", .{iterations});
+
+    // Image
+    const image_width: i32 = 256;
+    const image_height: i32 = 256;
+
+    // Render
+    std.debug.print("P3\n{} {}\n255\n", .{ image_width, image_height });
+    for (0..image_height) |j| {
+        for (0..image_width) |i| {
+            const r = @as(f64, i) / (image_width - 1);
+            const g = @as(f64, j) / (image_height - 1);
+            const b: f64 = 0.0;
+            const ir = @as(i32, r * 255.999);
+            const ig = @as(i32, g * 255.999);
+            const ib = @as(i32, b * 255.999);
+            std.debug.print("{} {} {}\n", .{ ir, ig, ib });
+        }
+    }
 }
+
+// #include <iostream>
+//
+// int main() {
+//
+//     // Image
+//
+//     int image_width = 256;
+//     int image_height = 256;
+//
+//     // Render
+//
+//     std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+//
+//     for (int j = 0; j < image_height; j++) {
+//         for (int i = 0; i < image_width; i++) {
+//             auto r = double(i) / (image_width-1);
+//             auto g = double(j) / (image_height-1);
+//             auto b = 0.0;
+//
+//             int ir = int(255.999 * r);
+//             int ig = int(255.999 * g);
+//             int ib = int(255.999 * b);
+//
+//             std::cout << ir << ' ' << ig << ' ' << ib << '\n';
+//         }
+//     }
+// }
