@@ -1,14 +1,25 @@
 const std = @import("std");
 const fs = std.fs;
 
-pub fn main() void {
+pub fn main() !void {
+    const file = try std.fs.cwd().createFile(
+        "out.ppm",
+        .{ .read = true },
+    );
+    defer file.close();
+
+    const bytes_written = try file.writeAll("Hello File!");
+    const bytes_written_2 = try file.writeAll("Hello File!");
+    _ = bytes_written;
+    _ = bytes_written_2;
+    const stdout = std.io.getStdOut().writer();
 
     // Image
     const image_width: i32 = 256;
     const image_height: i32 = 256;
 
     // Render
-    std.debug.print("P3\n{} {}\n255\n", .{ image_width, image_height });
+    try stdout.print("P3\n{} {}\n255\n", .{ image_width, image_height });
     for (0..image_height) |j| {
         for (0..image_width) |i| {
             const r: f64 = @as(f64, @floatFromInt(i)) / (image_width - 1);
@@ -17,7 +28,7 @@ pub fn main() void {
             const ir = @as(i32, @intFromFloat(r * 255.999));
             const ig = @as(i32, @intFromFloat(g * 255.999));
             const ib = @as(i32, @intFromFloat(b * 255.999));
-            std.debug.print("{} {} {}\n", .{ ir, ig, ib });
+            try stdout.print("{} {} {}\n", .{ ir, ig, ib });
         }
     }
 }
