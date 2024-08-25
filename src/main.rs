@@ -2,8 +2,7 @@
 
 use dioxus::prelude::*;
 use manganis::*;
-const _STYLE: &str = manganis::mg!(file("public/tailwind.css"));
-const _TAILWIND_URL: &str = manganis::mg!(file("public/tailwind.css"));
+// const _STYLE: &str = manganis::mg!(file("public/tailwind.css"));
 fn main() {
     launch(app);
 }
@@ -21,16 +20,12 @@ pub fn app() -> Element {
                 div { class: "container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center",
                     a { class: "flex title-font font-medium items-center text-white mb-4 md:mb-0",
                         StacksIcon {}
-                        span { class: "ml-3 text-xl", "Hello Dioxus!" }
+                        span { class: "ml-3 text-xl", "Tryptamine Fractal Generator" }
                     }
                     nav { class: "md:ml-auto flex flex-wrap items-center text-base justify-center",
-                        a { class: "mr-5 hover:text-white", "First Link" }
-                        a { class: "mr-5 hover:text-white", "Second Link" }
-                        a { class: "mr-5 hover:text-white", "Third Link" }
-                        a { class: "mr-5 hover:text-white", "Fourth Link" }
                     }
                     button { class: "inline-flex items-center bg-gray-800 border-0 py-1 px-3 focus:outline-none hover:bg-gray-700 rounded text-base mt-4 md:mt-0",
-                        "Button"
+                        "Try out our main application Kessler"
                         RightArrowIcon {}
                     }
                 }
