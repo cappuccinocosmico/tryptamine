@@ -2,7 +2,14 @@
 
 use dioxus::prelude::*;
 use manganis::*;
-// const _STYLE: &str = manganis::mg!(file("public/tailwind.css"));
+const _STYLE: &str = manganis::mg!(file("public/tailwind.css"));
+pub const TEST_IMG: manganis::ImageAsset = manganis::mg!(image("./public/example-image.png")
+    // Manganis uses the builder pattern inside the macro. You can set the image size in pixels at compile time to send the smallest possible image to the client
+    .size(500, 300)
+    // You can also convert the image to a web friendly format at compile time. This can make your images significantly smaller
+    .format(ImageType::Webp)
+    // You can even tell manganis to preload the image so it's ready to be displayed as soon as it's needed
+    .preload());
 fn main() {
     launch(app);
 }
@@ -20,7 +27,7 @@ pub fn app() -> Element {
                 div { class: "container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center",
                     a { class: "flex title-font font-medium items-center text-white mb-4 md:mb-0",
                         StacksIcon {}
-                        span { class: "ml-3 text-xl", "Tryptamine Fractal Generator" }
+                        span { class: "ml-3 text-xl", "Tryptamine: A High Performance Rust Based Fractal Generator " }
                     }
                     nav { class: "md:ml-auto flex flex-wrap items-center text-base justify-center",
                     }
@@ -56,7 +63,7 @@ pub fn app() -> Element {
                     div { class: "lg:max-w-lg lg:w-full md:w-1/2 w-5/6",
                         img {
                             class: "object-cover object-center rounded",
-                            src: "https://i.imgur.com/oK6BLtw.png",
+                            src: "{TEST_IMG}",
                             referrerpolicy: "no-referrer",
                             alt: "hero"
                         }
