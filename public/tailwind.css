@@ -1,5 +1,5 @@
 /*
-! tailwindcss v3.4.10 | MIT License | https://tailwindcss.com
+! tailwindcss v3.4.11 | MIT License | https://tailwindcss.com
 */
 
 /*
@@ -586,6 +586,10 @@ video {
   .container {
     max-width: 1536px;
   }
+}
+
+.static {
+  position: static;
 }
 
 .mx-auto {
