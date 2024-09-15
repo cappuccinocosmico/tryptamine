@@ -1,89 +1,123 @@
-// The wasm-pack uses wasm-bindgen to build and generate JavaScript binding file.
-// Import the wasm-bindgen crate.
-use wasm_bindgen::prelude::*;
+#![allow(non_snake_case)]
 
-// Define the size of our "checkerboard"
-const CHECKERBOARD_SIZE: usize = 20;
+use crate::universe::{Cell, Universe};
+use dioxus::prelude::*;
+use wasm_bindgen::closure::Closure;
+use wasm_bindgen::JsCast;
 
-/*
- * 1. What is going on here?
- * Create a static mutable byte buffer.
- * We will use for putting the output of our graphics,
- * to pass the output to js.
- * NOTE: global `static mut` means we will have "unsafe" code
- * but for passing memory between js and wasm should be fine.
- *
- * 2. Why is the size CHECKERBOARD_SIZE * CHECKERBOARD_SIZE * 4?
- * We want to have 20 pixels by 20 pixels. And 4 colors per pixel (r,g,b,a)
- * Which, the Canvas API Supports.
- */
-const OUTPUT_BUFFER_SIZE: usize = CHECKERBOARD_SIZE * CHECKERBOARD_SIZE * 4;
-static mut OUTPUT_BUFFER: [u8; OUTPUT_BUFFER_SIZE] = [0; OUTPUT_BUFFER_SIZE];
+mod universe;
 
-// Function to return a pointer to our buffer
-// in wasm memory
-#[wasm_bindgen]
-pub fn get_output_buffer_pointer() -> *const u8 {
-    let pointer: *const u8;
-    unsafe {
-        pointer = OUTPUT_BUFFER.as_ptr();
-    }
+static CELL_SIZE: u32 = 5;
+static GRID_COLOR: &str = "#CCCCCC";
+static DEAD_COLOR: &str = "#FFFFFF";
+static ALIVE_COLOR: &str = "#000000";
 
-    return pointer;
+fn main() {
+    dioxus_web::launch(App);
 }
 
-// Function to generate our checkerboard, pixel by pixel
-#[wasm_bindgen]
-pub fn generate_checker_board(
-    dark_value_red: u8,
-    dark_value_green: u8,
-    dark_value_blue: u8,
-    light_value_red: u8,
-    light_value_green: u8,
-    light_value_blue: u8,
+fn App(cx: Scope) -> Element {
+    let universe = Universe::new();
+    let canvas_height = (CELL_SIZE + 1) * universe.height() + 1;
+    let canvas_width = (CELL_SIZE + 1) * universe.width() + 1;
+
+    use_effect!(cx, move |()| async move {
+        let context = start_render_loop();
+        loop {
+            render_loop(context, universe);
+            // Some async delay with https://docs.rs/gloo-timers/0.2.6/gloo_timers/, or https://docs.rs/async-std/latest/async_std/task/fn.sleep.html
+            async_std::task::sleep(Duration::from_millis(10)).await;
+        }
+    ]);
+
+    cx.render(rsx! {
+        canvas { id: "game-of-life-canvas", height: canvas_height as i64, width: canvas_width as i64}
+    })
+}
+
+fn start_render_loop(universe: Universe) -> web_sys::CanvasRenderingContext2d {
+    let window = web_sys::window().expect("global window does not exists");
+    let document = window.document().expect("expecting a document on window");
+    let canvas = document
+        .get_element_by_id("game-of-life-canvas")
+        .expect("expecting a canvas in the document")
+        .dyn_into::<web_sys::HtmlCanvasElement>()
+        .unwrap();
+    let context = canvas
+        .get_context("2d")
+        .unwrap()
+        .unwrap()
+        .dyn_into::<web_sys::CanvasRenderingContext2d>()
+        .unwrap();
+
+    context
+}
+
+fn render_loop(context: web_sys::CanvasRenderingContext2d, mut universe: Universe) {
+    universe.tick();
+
+    draw_cells(&context, &universe);
+    draw_grid(&context, &universe);
+
+    let closure = Closure::once(move || render_loop(context, universe));
+    web_sys::window()
+        .expect("global window does not exists")
+        .request_animation_frame(closure.as_ref().unchecked_ref())
+        .unwrap();
+}
+
+fn draw_grid(context: &web_sys::CanvasRenderingContext2d, universe: &Universe) {
+    context.begin_path();
+    context.set_stroke_style(&GRID_COLOR.into());
+
+    for i in 0..=universe.width() {
+        context.move_to((i * (CELL_SIZE + 1) + 1) as f64, 0f64);
+        context.line_to(
+            (i * (CELL_SIZE + 1) + 1) as f64,
+            ((CELL_SIZE + 1) * universe.height() + 1) as f64,
+        );
+    }
+
+    for i in 0..=universe.height() {
+        context.move_to(0f64, (i * (CELL_SIZE + 1) + 1) as f64);
+        context.line_to(
+            ((CELL_SIZE + 1) * universe.width() + 1) as f64,
+            (i * (CELL_SIZE + 1) + 1) as f64,
+        );
+    }
+
+    context.stroke();
+}
+
+fn draw_cells(context: &web_sys::CanvasRenderingContext2d, universe: &Universe) {
+    context.begin_path();
+
+    draw_cells_with_style(context, universe, |cell| cell == Cell::Alive, ALIVE_COLOR);
+    draw_cells_with_style(context, universe, |cell| cell == Cell::Dead, DEAD_COLOR);
+
+    context.stroke();
+}
+
+fn draw_cells_with_style(
+    context: &web_sys::CanvasRenderingContext2d,
+    universe: &Universe,
+    condition: impl Fn(Cell) -> bool,
+    style: &str,
 ) {
-    // Since Linear memory is a 1 dimensional array, but we want a grid
-    // we will be doing 2d to 1d mapping
-    // https://softwareengineering.stackexchange.com/questions/212808/treating-a-1d-data-structure-as-2d-grid
-    for y in 0..CHECKERBOARD_SIZE {
-        for x in 0..CHECKERBOARD_SIZE {
-            // Set our default case to be dark squares
-            let mut is_dark_square: bool = true;
-
-            // We should change our default case if
-            // We are on an odd y
-            if y % 2 == 0 {
-                is_dark_square = false;
+    context.set_fill_style(&style.into());
+    for row in 0..universe.height() {
+        for col in 0..universe.width() {
+            let idx = universe[(row, col)];
+            if !condition(universe.cells()[idx as usize]) {
+                continue;
             }
 
-            // Lastly, alternate on our x value
-            if x % 2 == 0 {
-                is_dark_square = !is_dark_square;
-            }
-
-            // Now that we determined if we are dark or light,
-            // Let's set our square value
-            let mut square_value_red: u8 = dark_value_red;
-            let mut square_value_green: u8 = dark_value_green;
-            let mut square_value_blue: u8 = dark_value_blue;
-            if !is_dark_square {
-                square_value_red = light_value_red;
-                square_value_green = light_value_green;
-                square_value_blue = light_value_blue;
-            }
-
-            // Let's calculate our index, using our 2d -> 1d mapping.
-            // And then multiple by 4, for each pixel property (r,g,b,a).
-            let square_number: usize = y * CHECKERBOARD_SIZE + x;
-            let square_rgba_index: usize = square_number * 4;
-
-            // Finally store the values.
-            unsafe {
-                OUTPUT_BUFFER[square_rgba_index + 0] = square_value_red; // Red
-                OUTPUT_BUFFER[square_rgba_index + 1] = square_value_green; // Green
-                OUTPUT_BUFFER[square_rgba_index + 2] = square_value_blue; // Blue
-                OUTPUT_BUFFER[square_rgba_index + 3] = 255; // Alpha (Always Opaque)
-            }
+            context.fill_rect(
+                (col * (CELL_SIZE + 1) + 1) as f64,
+                (row * (CELL_SIZE + 1) + 1) as f64,
+                CELL_SIZE as f64,
+                CELL_SIZE as f64,
+            );
         }
     }
 }
