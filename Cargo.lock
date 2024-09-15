@@ -2395,7 +2395,6 @@ dependencies = [
  "dioxus-logger",
  "dioxus-web",
  "manganis",
- "universe",
  "wasm-bindgen",
 ]
 
@@ -2431,12 +2430,6 @@ name = "unicode-xid"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "229730647fbc343e3a80e463c1db7f78f3855d3f3739bee0dda773c9a037c90a"
-
-[[package]]
-name = "universe"
-version = "0.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "32d4617110ad0340ca25c7a43813281a411a8caad0ba406590a45a6981a68acc"
 
 [[package]]
 name = "url"
