@@ -14,7 +14,43 @@ fn main() {
 }
 
 pub fn App() -> Element {
-    rsx! {div { class : "btn", "This is some text"}}
+    rsx! (
+                        p { class: "btn text-red-400",
+                            "Dioxus is a new UI framework that makes it easy and simple to write cross-platform apps using web
+                            technologies! It is functional, fast, and portable. Dioxus can run on the web, on the desktop, and
+                            on mobile and embedded platforms."
+                        }
+    )
+}
+
+pub fn StacksIcon() -> Element {
+    rsx!(
+        svg {
+            fill: "none",
+            stroke: "currentColor",
+            stroke_linecap: "round",
+            stroke_linejoin: "round",
+            stroke_width: "2",
+            class: "w-10 h-10 text-white p-2 bg-indigo-500 rounded-full",
+            view_box: "0 0 24 24",
+            path { d: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" }
+        }
+    )
+}
+
+pub fn RightArrowIcon() -> Element {
+    rsx!(
+        svg {
+            fill: "none",
+            stroke: "currentColor",
+            stroke_linecap: "round",
+            stroke_linejoin: "round",
+            stroke_width: "2",
+            class: "w-4 h-4 ml-1",
+            view_box: "0 0 24 24",
+            path { d: "M5 12h14M12 5l7 7-7 7" }
+        }
+    )
 }
 
 // fn App1(cx: Scope) -> Element {
