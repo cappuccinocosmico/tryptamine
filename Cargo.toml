@@ -1,19 +1,12 @@
 [package]
 name = "tryptamine"
 version = "0.1.0"
-authors = ["Nicole Venner <nvenner@protonmail.ch>"]
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+axum = "0.7.7"
+tokio =  { version = "1.4.0", features = ["rt", "rt-multi-thread"] }
 
-dioxus = { version = "0.5", features = ["web", "router"] }
-
-manganis = "0.2.2"
-# Debug
-dioxus-logger = "0.5.1"
-wasm-bindgen = "0.2.93"
-dioxus-web = "0.5.6"
-web-sys = "0.3.70"
-dioxus-daisyui = "=0.7.0"
+[[bin]]
+name = "tryptamine"
+path = "main.rs"
