@@ -5,6 +5,7 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
+use tower_http::services::ServeDir;
 #[derive(Template)] // this will generate the code...
 #[template(path = "test.html")] // using the template in this path, relative
                                 // to the `templates` dir in the crate root
@@ -18,11 +19,16 @@ struct HelloTemplate<'a> {
 // Use globbing
 async fn main() {
     // initialize tracing
+    let assets_path = std::env::current_dir().unwrap();
 
     // build our application with a route
     let app = Router::new()
         // `GET /` goes to `root`
-        .route("/", get(root));
+        .route("/", get(root))
+        .nest_service(
+            "/assets",
+            ServeDir::new(format!("{}/assets", assets_path.to_str().unwrap())),
+        );
     // `POST /users` goes to `create_user`
 
     // run our app with hyper, listening globally on port 3000
