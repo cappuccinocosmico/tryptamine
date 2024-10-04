@@ -1,11 +1,21 @@
+use askama::Template; // bring trait in scope
 use axum::{
     http::StatusCode,
     response::{Html, IntoResponse},
     routing::{get, post},
     Json, Router,
 };
+#[derive(Template)] // this will generate the code...
+#[template(path = "test.html")] // using the template in this path, relative
+                                // to the `templates` dir in the crate root
+struct HelloTemplate<'a> {
+    // the name of the struct can be anything
+    name: &'a str, // the field name should match the variable name
+                   // in your template
+}
 
 #[tokio::main]
+// Use globbing
 async fn main() {
     // initialize tracing
 
@@ -19,34 +29,8 @@ async fn main() {
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3003").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
-const test_html: &str = r#"<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Page</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
-        }
-        h1 {
-            color: #333;
-        }
-        p {
-            color: #666;
-        }
-    </style>
-</head>
-<body>
-
-    <h1>Welcome to the Test Page</h1>
-    <p>If you are seeing this message, the page is working correctly!</p>
-
-</body>
-</html>"#;
-// basic handler that responds with a static string
-async fn root() -> Html<&'static str> {
+async fn root() -> Html<String> {
+    let hello = HelloTemplate { name: "world" }; // instantiate your struct
+    let test_html = hello.render().unwrap();
     Html(test_html)
 }
