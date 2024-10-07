@@ -12,4 +12,4 @@ tower-http = {version = "0.6.1", features = ["fs"]}
 
 [[bin]]
 name = "tryptamine"
-path = "main.rs"
+path = "src/main.rs"
