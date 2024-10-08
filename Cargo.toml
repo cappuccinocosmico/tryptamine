@@ -10,6 +10,7 @@ comrak = "0.28.0"
 tokio =  { version = "1.4.0", features = ["full"] }
 tower = "0.5.1"
 tower-http = {version = "0.6.1", features = ["fs"]}
+walkdir = "2.5.0"
 
 [[bin]]
 name = "tryptamine"

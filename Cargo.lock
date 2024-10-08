@@ -1393,6 +1393,7 @@ dependencies = [
  "tokio",
  "tower",
  "tower-http",
+ "walkdir",
 ]
 
 [[package]]

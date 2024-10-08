@@ -16,16 +16,14 @@ struct HelloTemplate<'a> {
 }
 
 use comrak::{markdown_to_html, Options};
-
-assert_eq!(
-    markdown_to_html("Hello, **世界**!", &Options::default()),
-    "<p>Hello, <strong>世界</strong>!</p>\n"
-);
-
-use comrak::{markdown_to_html, Options};
 use std::fs::{self, create_dir_all, read_to_string, write};
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
+
+// assert_eq!(
+//     markdown_to_html("Hello, **世界**!", &Options::default()),
+//     "<p>Hello, <strong>世界</strong>!</p>\n"
+// );
 
 pub fn generate_blog_html(
     input_dir: &Path,
@@ -67,6 +65,7 @@ pub fn generate_blog_html(
 #[tokio::main]
 // Use globbing
 async fn main() {
+    generate_blog_html(&PathBuf::from("markdown"), &PathBuf::from("testing-html"));
     // initialize tracing
     let assets_path = std::env::current_dir().unwrap();
 
