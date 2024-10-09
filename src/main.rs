@@ -1,3 +1,5 @@
+pub const TAILWIND_CSS: &str = include_str!("../assets/main.css");
+
 use askama::Template; // bring trait in scope
 use axum::{
     http::StatusCode,
@@ -8,7 +10,8 @@ use axum::{
 use tower_http::services::ServeDir;
 #[derive(Template)] // this will generate the code...
 #[template(path = "app.html")] // using the template in this path, relative
-                               // to the `templates` dir in the crate root
+
+// to the `templates` dir in the crate root
 struct AppTemplate<'a> {
     // the name of the struct can be anything
     name: &'a str, // the field name should match the variable name
