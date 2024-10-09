@@ -9,7 +9,7 @@ use tower_http::services::ServeDir;
 #[derive(Template)] // this will generate the code...
 #[template(path = "app.html")] // using the template in this path, relative
                                // to the `templates` dir in the crate root
-struct HelloTemplate<'a> {
+struct AppTemplate<'a> {
     // the name of the struct can be anything
     name: &'a str, // the field name should match the variable name
                    // in your template
@@ -28,14 +28,31 @@ use std::fs::{self, create_dir_all, read_to_string, write};
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
-// assert_eq!(
-//     markdown_to_html("Hello, **世界**!", &Options::default()),
-//     "<p>Hello, <strong>世界</strong>!</p>\n"
-// );
+use std::error::Error;
+use yaml_rust::yaml::{Hash, Yaml};
+use yaml_rust::YamlLoader;
 
 fn generate_markdown_wrapper() -> impl Fn(&str) -> String {
     |md_post: &str| -> String {
-        let raw_html = markdown_to_html(md_post, &Options::default());
+        let parts: Vec<&str> = md_post.splitn(2, "\n---\n").collect();
+        if parts.len() < 2 {
+            println!("No YAML found in markdown file, just compiling as if it didnt exist.");
+            let raw_html = markdown_to_html(md_post, &Options::default());
+            let post_html = (PostTemplate { html: &raw_html }).render().unwrap();
+            return post_html;
+        }
+        let yaml_str = parts[0];
+        let yaml_str = if yaml_str.starts_with("---\n") {
+            &yaml_str[4..]
+        } else {
+            yaml_str
+        };
+        let markdown_str = parts[1];
+        println!("YAML: {}", yaml_str);
+        println!("Markdown: {}", markdown_str);
+
+        let header_hashmap = YamlLoader::load_from_str(yaml_str).unwrap();
+        let raw_html = markdown_to_html(markdown_str, &Options::default());
         let post_html = (PostTemplate { html: &raw_html }).render().unwrap();
         post_html
     }
@@ -105,7 +122,7 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 async fn root() -> Html<String> {
-    let hello = HelloTemplate { name: "world" }; // instantiate your struct
-    let test_html = hello.render().unwrap();
+    let app = AppTemplate { name: "world" }; // instantiate your struct
+    let test_html = app.render().unwrap();
     Html(test_html)
 }
