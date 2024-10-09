@@ -2,11 +2,10 @@
 title: Security Culture and Roger Hallam
 intro: What should
 tag: activism
-pubDate: 2024-08-01
+date: 2024-08-01
 author: Nicole Venner
 ---
 
-# This is a test
 
 Roger Hallam, the cofounder of Extinction Rebellion and Just Stop Oil was just handed a 5 year prison sentance for "conspiracy to cause a public nuisance". Ultimately these and similar convictions should cause every activist to adjust their security culture and other strategies going forward.
 

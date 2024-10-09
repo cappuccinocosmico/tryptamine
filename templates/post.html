@@ -1,12 +1,14 @@
 {% extends "layout.html" %}
 {% block title %}{{ title }}{% endblock %}
 {% block children %}
-
-<h1 class="text-3xl font-bold my-4">{{ title }}</h1>
-<h2 class="text-xl font-semibold my-2">By: {{ author }}</h2>
-<h3 class="text-lg my-1">{{ date }}</h3>
-<article class="prose">
+<div class="w-1/2"
+<h1 class="text-5xl font-bold my-4">{{ title }}</h1>
+<h2 class="text-3xl font-semibold my-2">By: {{ author }}</h2>
+<h3 class="text-xl my-1">{{ date }}</h3>
+<article class="prose"         style="maxWidth:100vw"
+>
 {{ html }}
 </article>
+</div>
 
 {% endblock %}
