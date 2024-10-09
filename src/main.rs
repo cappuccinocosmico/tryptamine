@@ -19,6 +19,9 @@ struct AppTemplate<'a> {
                                                  // to the `templates` dir in the crate root
 struct PostTemplate<'a> {
     // the name of the struct can be anything
+    title: &'a str,
+    author: &'a str,
+    date: &'a str,
     html: &'a str, // the field name should match the variable name
                    // in your template
 }
@@ -34,27 +37,54 @@ use yaml_rust::YamlLoader;
 
 fn generate_markdown_wrapper() -> impl Fn(&str) -> String {
     |md_post: &str| -> String {
+        let mut markdown_options = Options::default();
+        markdown_options.extension.strikethrough = true;
+        markdown_options.extension.table = true;
+        markdown_options.extension.description_lists = true;
+        markdown_options.extension.footnotes = true;
+        markdown_options.extension.autolink = true;
+        markdown_options.extension.tagfilter = true;
+        markdown_options.extension.math_dollars = true;
+
+        let md_post = md_post.trim_start();
         let parts: Vec<&str> = md_post.splitn(2, "\n---\n").collect();
-        if parts.len() < 2 {
-            println!("No YAML found in markdown file, just compiling as if it didnt exist.");
-            let raw_html = markdown_to_html(md_post, &Options::default());
-            let post_html = (PostTemplate { html: &raw_html }).render().unwrap();
+        if parts.len() == 2 {
+            let yaml_str = parts[0];
+            let yaml_str = if yaml_str.starts_with("---\n") {
+                &yaml_str[4..]
+            } else {
+                yaml_str
+            };
+            let markdown_str = parts[1];
+
+            let header_hashmap = YamlLoader::load_from_str(yaml_str).unwrap();
+            let header = header_hashmap[0].clone();
+            let get_field = |field: &str| header[field].as_str().unwrap_or("Unknown").to_string();
+            let title = get_field("title");
+            let author = get_field("author");
+            let date = get_field("date");
+            let raw_html = markdown_to_html(markdown_str, &markdown_options);
+            let post_html = (PostTemplate {
+                html: &raw_html,
+                title: &title,
+                author: &author,
+                date: &date,
+            })
+            .render()
+            .unwrap();
             return post_html;
         }
-        let yaml_str = parts[0];
-        let yaml_str = if yaml_str.starts_with("---\n") {
-            &yaml_str[4..]
-        } else {
-            yaml_str
-        };
-        let markdown_str = parts[1];
-        println!("YAML: {}", yaml_str);
-        println!("Markdown: {}", markdown_str);
-
-        let header_hashmap = YamlLoader::load_from_str(yaml_str).unwrap();
-        let raw_html = markdown_to_html(markdown_str, &Options::default());
-        let post_html = (PostTemplate { html: &raw_html }).render().unwrap();
-        post_html
+        println!("No YAML found in markdown file, just compiling as if it didnt exist.");
+        let raw_html = markdown_to_html(md_post, &Options::default());
+        let post_html = (PostTemplate {
+            html: &raw_html,
+            title: "Unknown",
+            author: "Unknown",
+            date: "Unknown",
+        })
+        .render()
+        .unwrap();
+        return post_html;
     }
 }
 
