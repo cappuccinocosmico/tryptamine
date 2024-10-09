@@ -8,7 +8,11 @@
     <title>Tryptamine</title>
   </head>
   <body>
-    {% children %} <p>An empty Layout</p> {% endblock %}
+    <div class="flex justify-center ">
+      <div>
+          {% block children %} <p>An empty Layout</p> {% endblock %}
+      </div>
+    </div>
   </body>
 </html>
 
