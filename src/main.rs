@@ -1,12 +1,15 @@
-pub const TAILWIND_CSS: &str = include_str!("../assets/main.css");
+pub const TAILWIND_CSS: &str = include_str!("../main.css");
+
 
 use askama::Template; // bring trait in scope
 use axum::{
     http::StatusCode,
-    response::{Html, IntoResponse},
+    http::{header, HeaderValue},
+    response::{Html, IntoResponse, Response},
     routing::{get, post},
     Json, Router,
 };
+use axum::body::Body;
 use tower_http::services::ServeDir;
 #[derive(Template)] // this will generate the code...
 #[template(path = "app.html")] // using the template in this path, relative
@@ -128,7 +131,6 @@ pub fn generate_blog_html(
     }
     Ok(())
 }
-
 #[tokio::main]
 // Use globbing
 async fn main() {
@@ -140,10 +142,7 @@ async fn main() {
     let app = Router::new()
         // `GET /` goes to `root`
         .route("/", get(root))
-        .nest_service(
-            "/assets",
-            ServeDir::new(format!("{}/assets", project_path.to_str().unwrap())),
-        )
+        .route("/main.css", get(main_tailwind_styles))
         .nest_service(
             "/static",
             ServeDir::new(format!("{}/static", project_path.to_str().unwrap())),
@@ -154,6 +153,18 @@ async fn main() {
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3003").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
+
+async fn main_tailwind_styles() -> Response<Body> {
+    let css = TAILWIND_CSS.to_string();
+
+    // Build the response
+    (
+        [(header::CONTENT_TYPE, HeaderValue::from_static("text/css"))],
+        css,
+    )
+        .into_response()
+}
+
 async fn root() -> Html<String> {
     let app = AppTemplate { name: "world" }; // instantiate your struct
     let test_html = app.render().unwrap();
