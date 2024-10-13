@@ -1,12 +1,53 @@
 {% extends "layout.html" %}
 
 {% block children %}
-<div>
-<h1 class="text-green-700 text-5xl">
-  Welcome to Fractal Engine, your name is: {{ name }}
-</h1>
+<div >
 
-<p>If you are seeing this message, the page is working correctly!</p>
-<div class="btn">Test Button Div</div>
+<!-- For all of these html elements, could you make it so that all the introductory stuff appears on the rightmost side of the screen taking up no more then a 1/3 of the space. The image should take up the 2/3 of the rightmost quadrent -->
+<div class="flex">
+  <div class="w-1/3 flex flex-col space-y-4">
+    <h1 class="text-green-700 text-5xl">
+      Welcome to Fractal Engine!
+    </h1>
+
+    <input type="range" min="0" max="100" value="25" class="range" step="25" />
+    <div class="flex w-full justify-between px-2 text-xs">
+      <span>|</span>
+      <span>|</span>
+      <span>|</span>
+      <span>|</span>
+      <span>|</span>
+    </div>
+    <select class="select select-bordered w-full max-w-xs">
+      <option disabled selected>Who shot first?</option>
+      <option>Han Solo</option>
+      <option>Greedo</option>
+    </select>
+    <input type="text" placeholder="Type here" class="input input-bordered w-full max-w-xs" />
+    <div class="flex flex-col">
+      <div class="form-control w-52">
+        <label class="label cursor-pointer">
+          <span class="label-text">Remember me</span>
+          <input type="checkbox" class="toggle toggle-primary" checked="checked" />
+        </label>
+      </div>
+      <div class="form-control w-52">
+        <label class="label cursor-pointer">
+          <span class="label-text">Remember me</span>
+          <input type="checkbox" class="toggle toggle-secondary" checked="checked" />
+        </label>
+      </div>
+      <div class="form-control w-52">
+        <label class="label cursor-pointer">
+          <span class="label-text">Remember me</span>
+          <input type="checkbox" class="toggle toggle-accent" checked="checked" />
+        </label>
+      </div>
+    </div>
+    <div class="btn">Render Image</div>
+  </div>
+  <div class="w-2/3">
+    <img src="/assets/milky_way.jpg" class="w-full h-full" />
+  </div>
 </div>
 {% endblock %}

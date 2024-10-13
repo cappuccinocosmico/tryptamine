@@ -143,6 +143,10 @@ async fn main() {
         .route("/", get(root))
         .route("/main.css", get(main_tailwind_styles))
         .nest_service(
+            "/assets",
+            ServeDir::new(format!("{}/assets", project_path.to_str().unwrap())),
+        )
+        .nest_service(
             "/blog",
             ServeDir::new(format!("{}/static/bog", project_path.to_str().unwrap())),
         )
