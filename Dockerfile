@@ -3,7 +3,7 @@ WORKDIR /app
 RUN curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64
 RUN chmod +x ./tailwindcss-linux-x64
 COPY . .
-RUN ./tailwindcss-linux-x64 -i styles/input.css -o styles/output.css --minify
+RUN ./tailwindcss-linux-x64 -i styles/input.css -o styles/main.css --minify
 RUN cargo build --release
 FROM alpine:3.20 as final-image
 WORKDIR /app

@@ -1,7 +1,7 @@
-pub const TAILWIND_CSS: &str = include_str!("../main.css");
-
+pub const TAILWIND_CSS: &str = include_str!("../styles/main.css");
 
 use askama::Template; // bring trait in scope
+use axum::body::Body;
 use axum::{
     http::StatusCode,
     http::{header, HeaderValue},
@@ -9,7 +9,6 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
-use axum::body::Body;
 use tower_http::services::ServeDir;
 #[derive(Template)] // this will generate the code...
 #[template(path = "app.html")] // using the template in this path, relative
@@ -144,8 +143,15 @@ async fn main() {
         .route("/", get(root))
         .route("/main.css", get(main_tailwind_styles))
         .nest_service(
-            "/static",
-            ServeDir::new(format!("{}/static", project_path.to_str().unwrap())),
+            "/blog",
+            ServeDir::new(format!("{}/static/bog", project_path.to_str().unwrap())),
+        )
+        .nest_service(
+            "/recipies",
+            ServeDir::new(format!(
+                "{}/static/recipies",
+                project_path.to_str().unwrap()
+            )),
         );
     // `POST /users` goes to `create_user`
 
