@@ -3,7 +3,6 @@ pub const TAILWIND_CSS: &str = include_str!("../styles/main.css");
 use askama::Template; // bring trait in scope
 use axum::body::Body;
 use axum::{
-    http::StatusCode,
     http::{header, HeaderValue},
     response::{Html, IntoResponse, Response},
     routing::{get, post},
@@ -14,10 +13,9 @@ use tower_http::services::ServeDir;
 #[template(path = "app.html")] // using the template in this path, relative
 
 // to the `templates` dir in the crate root
-struct AppTemplate<'a> {
+struct AppTemplate {
     // the name of the struct can be anything
-    name: &'a str, // the field name should match the variable name
-                   // in your template
+    // in your template
 }
 #[derive(Template)] // this will generate the code...
 #[template(path = "post.html", escape = "none")] // using the template in this path, relative
@@ -32,12 +30,10 @@ struct PostTemplate<'a> {
 }
 
 use comrak::{markdown_to_html, Options};
-use std::fs::{self, create_dir_all, read_to_string, write};
+use std::fs::{create_dir_all, read_to_string, write};
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
-use std::error::Error;
-use yaml_rust::yaml::{Hash, Yaml};
 use yaml_rust::YamlLoader;
 
 fn generate_markdown_wrapper() -> impl Fn(&str) -> String {
@@ -87,9 +83,8 @@ fn generate_markdown_wrapper() -> impl Fn(&str) -> String {
             author: "Unknown",
             date: "Unknown",
         })
-        .render()
-        .unwrap();
-        return post_html;
+        .render();
+        post_html.unwrap()
     }
 }
 
@@ -133,7 +128,7 @@ pub fn generate_blog_html(
 #[tokio::main]
 // Use globbing
 async fn main() {
-    generate_blog_html(&PathBuf::from("markdown"), &PathBuf::from("static"));
+    let _md_result = generate_blog_html(&PathBuf::from("markdown"), &PathBuf::from("static"));
     // initialize tracing
     let project_path = std::env::current_dir().unwrap();
 
@@ -176,7 +171,7 @@ async fn main_tailwind_styles() -> Response<Body> {
 }
 
 async fn root() -> Html<String> {
-    let app = AppTemplate { name: "world" }; // instantiate your struct
+    let app = AppTemplate {}; // instantiate your struct
     let test_html = app.render().unwrap();
     Html(test_html)
 }
