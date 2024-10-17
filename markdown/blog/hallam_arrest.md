@@ -6,7 +6,6 @@ date: 2024-08-01
 author: Nicole Venner
 ---
 
-
 Roger Hallam, the cofounder of Extinction Rebellion and Just Stop Oil was just handed a 5 year prison sentance for "conspiracy to cause a public nuisance". Ultimately these and similar convictions should cause every activist to adjust their security culture and other strategies going forward.
 
 Roger Hallam is a somewhat controversial figure in the activist community known for getting kicked out of extinction rebellion due to saying some highly questionable stuff. [^1]. These discussions that Hallam raised ultimately got so heated it lead to the death of XR on an international level. (I still have some thoughts about the fourth demand and how to best do coalition work with indigenous sovereignty organisations that I will talk about in a future post) Since then he has continued to be active in the movement, starting another org Just Stop Oil that was also able to effectively get its message out to millions of people, make salient point about how rich people overvalue the prestige of their art collections.

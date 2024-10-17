@@ -1,10 +1,12 @@
 Thoughts
-+ Tofu, probably 2 bricks 
-- Peanuts, but not too much, probably like 600-500 grams next time 
-- sugar, probably like 40 grams ideal 
 
+- Tofu, probably 2 bricks
+
+* Peanuts, but not too much, probably like 600-500 grams next time
+* sugar, probably like 40 grams ideal
 
 ## Dry Mix
+
 40 grams of chili powder
 800 grams peanuts
 40 gram salt
@@ -12,39 +14,45 @@ Thoughts
 20 gram garlic powder
 40 gram chicken powder
 50 gram sugar
+
 ## Wet Mix
+
 70 gram ginger paste
+
 ## Oil Mix
+
 1.2kg onion large weeknight dice
 1 Tofu brick, pressed and crumbled
 500 gram peanut oil
 
-
-
 # V3
+
 ## Dry Mix
+
 40 grams of chili powder
 1/2 container peanuts (all on hand)
 5 gram black pepper
 40 gram salt
 30 gram msg
+
 ## Wet Mix
+
 50 gram ginger paste
 40 gram fish sauce
 20 gram garlic powder
+
 ## Oil Mix
+
 1kg onion large weeknight dice
 500 gram peanut oil
-
-
 
 -- fish sauce, anything not dry tbh
 +++ peanuts, adds crunch, flavor and also bulk
 
 potentially add a bunch of cornstarch to the wet layer
 
-
 # V2
+
 70 grams of chili powder
 100 gram cashews
 30 gram ginger paste
@@ -57,20 +65,20 @@ potentially add a bunch of cornstarch to the wet layer
 850 gram peanut oil
 120 gram garlic
 
-
 Notes:
-Way way less oil, next time I would go w/ 400 grams or less. 
+Way way less oil, next time I would go w/ 400 grams or less.
 
-Weeknight dice was a huge success, although with these onions, you essentially need to ensure that they are absolutely bone dry. OR else the water will leak out and contaminate everything else. I think the best approach might be to try to boil them with an oil tempature of 250-280 for like 3-4 hours, and then add in everything else. 
+Weeknight dice was a huge success, although with these onions, you essentially need to ensure that they are absolutely bone dry. OR else the water will leak out and contaminate everything else. I think the best approach might be to try to boil them with an oil tempature of 250-280 for like 3-4 hours, and then add in everything else.
 
-Also the main thing to replicate the texture of the 
+Also the main thing to replicate the texture of the
 
 ++ peanuts, maybe 300 grams would be reasonable.
 -- Oil, 500 grams is a good idea
-+ Ginger 
 
+- Ginger
 
 # V1
+
 70 grams of chili powder
 70 grams peanut butter
 40 gram ginger paste
@@ -92,7 +100,7 @@ minor subtract: Regular Pepper
 minor addition: Ginger
 major addition: Onions
 
-Add 
+Add
 
 Grate onions on maximum mandolin setting, or even an extremely rough dice.
 
@@ -103,11 +111,13 @@ Onions(maybe toss in flour?)
 Garlic
 
 Wet Ingredients:
+
 - Ginger
 - Fish Sauce
 - Chicken Boulion
 
 Dry Ingredients
+
 - Pepper Flakes
 - Spices
 - Salt
@@ -116,9 +126,4 @@ Dry Ingredients
 
 Also consider different variations and potential different ingredients:
 
-
 https://youtu.be/MVh7Fu0_Y1o?si=8VaeLvbgMRPvCBRb
-
-
-
-

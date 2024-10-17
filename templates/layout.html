@@ -1,9 +1,10 @@
-
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <style>{{crate::TAILWIND_CSS}}</style>
+    <style>
+      {{crate::TAILWIND_CSS}}
+    </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %} Tryptamine {% endblock %}</title>
   </head>
@@ -15,17 +16,21 @@
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
-            class="inline-block h-5 w-5 stroke-current">
+            class="inline-block h-5 w-5 stroke-current"
+          >
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16"></path>
+              d="M4 6h16M4 12h16M4 18h16"
+            ></path>
           </svg>
         </button>
       </div>
       <div class="flex-1">
-        <a class="btn btn-ghost text-xl" href="/">Tryptamine Fractal Generator</a>
+        <a class="btn btn-ghost text-xl" href="/"
+          >Tryptamine Fractal Generator</a
+        >
       </div>
       <div class="flex-1">
         <a class="btn btn-ghost text-xl" href="/">Blog</a>
@@ -34,9 +39,10 @@
         <a class="btn btn-ghost text-xl" href="/">Recipies</a>
       </div>
     </div>
-    <div class="flex justify-center ">
-        {% block children %} <p>An empty Layout</p> {% endblock %}
+    <div class="flex justify-center">
+      {% block children %}
+      <p>An empty Layout</p>
+      {% endblock %}
     </div>
   </body>
 </html>
-

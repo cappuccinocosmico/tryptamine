@@ -4,7 +4,9 @@ tag: activism
 date: 2024-10-10
 author: Nicole Venner
 ---
+
 ## V1 Cabin Prep
+
 Tofu and Mushrooms sauteed seperately.
 
 - 2 tablespoons grated fresh ginger
@@ -35,16 +37,16 @@ Tofu and Mushrooms sauteed seperately.
 
 - 1/4 cup chopped Arugula
 
-
 ## Notes for Next Time
-extra teaspoon of sugar 
+
+extra teaspoon of sugar
 
 DONT FORGET THE FISH SAUCE
 
 less coconut milk, maybe 2 cans, or even one can
 
-
 ## v0 gotten from allrecipies
+
 Sautee tofu and mushrooms as high as you can go on a stove, if it starts sticking uncontrollably give up and try something else. Then add all ingredients together.
 
 - 2 tablespoons grated fresh ginger

@@ -1,4 +1,3 @@
-
 2 pieces Vietnamese licorice
 2 Fructus tsaoko (black cardamom)
 2-3 whole star anise
@@ -7,8 +6,6 @@
 1 tbs whole fennel seeds
 3-5 pieces of clove buds
 3 pieces Vietnamese cinnamon
-
-
 
 2 pieces Vietnamese licorice
 2 Fructus tsaoko (black cardamom)

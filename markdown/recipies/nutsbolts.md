@@ -3,8 +3,6 @@ up worch
 up butter
 down milk powder
 
-
-
 300 g Rice Chex
 100 g Cherios
 200 g Peanunts
@@ -18,8 +16,6 @@ down milk powder
 
 Emulsify Butter
 
- 
-
 3 cups Corn Chex™ cereal
 3 cups Rice Chex™ cereal
 3 cups Wheat Chex™ cereal
@@ -31,4 +27,3 @@ Emulsify Butter
 1 1/2 teaspoons seasoned salt
 3/4 teaspoon garlic powder
 1/2 teaspoon onion powder
-
