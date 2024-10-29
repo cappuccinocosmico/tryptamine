@@ -1,28 +1,26 @@
 
-    - 3 tablespoons vegetable oil
-    - 3 tablespoons unsalted butter
-    - 1.5 pounds brown mushrooms, halved
-    - 1.5 teaspoons kosher salt, plus more to taste
-    - 1.5 large yellow onions, diced
-    - 1.5 tablespoons tomato paste
-    - 3 tablespoons all-purpose flour
-    - 11 cups water
-    - 3 tablespoons yellow miso paste
-    - 3 tablespoons beef base (such as Better than Bouillon®)
-    - 2 large bay leaves
-    - 2 teaspoons Worcestershire sauce
-    - 2 teaspoons garlic powder
-    - 1 teaspoon freshly ground black pepper
-    - 0.5 teaspoon dried rosemary
-    - 0.5 teaspoon dried thyme
-    - 6 carrots, peeled and cut into 1.5-inch pieces
-    - 6 ribs celery, cut into 1.5-inch pieces
-    - 6 russet potatoes, peeled and quartered
-    - 3 tablespoons finely chopped Italian parsley (Optional)
+forgot
+- 1.5 tablespoons tomato paste
+- 3 tablespoons all-purpose flour
+
+Made
+- 1.5 pounds brown mushrooms, halved
+- 2 large yellow onions, diced/ 800 grams
+- 11 cups water
+- 50 gram miso paste, heaping small spoon
+- 30 gram better then beef boluion, all we had left
+- 2 teaspoons Worcestershire sauce
+- 2 teaspoons garlic powder
+- 1 teaspoon freshly ground black pepper
+- 200 gram carrots
+- 400 gram celery
+- 6 russet potatoes
+- 3 tablespoons finely chopped Italian parsley (Optional)
 
 
 # V0
-Gotten from Chef John's Marvelous: https://www.allrecipes.com/recipe/8472977/got-no-beef-stew/
+Gotten from Chef John's Marvelous: 
+https://www.allrecipes.com/recipe/8472977/got-no-beef-stew/
     - 2 tablespoons vegetable oil
     - 2 tablespoons unsalted butter
     - 1 pound brown mushrooms, halved
