@@ -151,7 +151,9 @@ async fn main() {
                 "{}/static/recipies",
                 project_path.to_str().unwrap()
             )),
-        );
+        )
+        .nest_service("/fractal", get(test_fractal));
+
     // `POST /users` goes to `create_user`
 
     // run our app with hyper, listening globally on port 3000
@@ -165,7 +167,15 @@ async fn main_tailwind_styles() -> Response<Body> {
     // Build the response
     (
         [(header::CONTENT_TYPE, HeaderValue::from_static("text/css"))],
-        css,
+        TAILWIND_CSS,
+    )
+        .into_response()
+}
+
+async fn test_fractal() -> Response<Body> {
+    (
+        [(header::CONTENT_TYPE, HeaderValue::from_static("text/css"))],
+        "hallo",
     )
         .into_response()
 }
