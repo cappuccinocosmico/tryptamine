@@ -15,7 +15,7 @@ pub mod static_html {
 
     use comrak::{markdown_to_html, Options};
     use std::fs::{create_dir_all, read_to_string, write};
-    use std::path::{Path, PathBuf};
+    use std::path::Path;
     use walkdir::WalkDir;
 
     use yaml_rust::YamlLoader;

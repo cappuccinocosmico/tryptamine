@@ -1,4 +1,4 @@
-mod fractals {
+mod julia {
     fn generate_julia_image() -> image::ImageBuffer<image::Rgb<u8>, Vec<u8>> {
         //! An example of generating julia fractals.
         let imgx = 800;

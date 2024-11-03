@@ -1,3 +1,5 @@
+mod fractals;
+mod website; // Declare the module
 pub const TAILWIND_CSS: &str = include_str!("../styles/main.css");
 
 use askama::Template; // bring trait in scope
@@ -5,14 +7,14 @@ use axum::body::Body;
 use axum::{
     http::{header, HeaderValue},
     response::{Html, IntoResponse, Response},
-    routing::{get, post},
-    Json, Router,
+    routing::get,
+    Router,
 };
 use tower_http::services::ServeDir;
 
 use std::path::PathBuf;
 
-use crate::website::static_html;
+pub use crate::website::static_html;
 #[derive(Template)] // this will generate the code...
 #[template(path = "app.html")] // using the template in this path, relative
 
@@ -67,12 +69,8 @@ async fn main_tailwind_styles() -> Response<Body> {
         .into_response()
 }
 
-async fn test_fractal() -> Response<Body> {
-    (
-        [(header::CONTENT_TYPE, HeaderValue::from_static("text/css"))],
-        "hallo",
-    )
-        .into_response()
+async fn test_fractal() -> String {
+    "gar gar man arg marg".to_string()
 }
 
 async fn root() -> Html<String> {
