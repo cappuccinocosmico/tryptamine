@@ -1,3 +1,20 @@
+# V0
+
+- One 2lb bag of tillapia
+
+- 4 cups white rice 
+- 5 cups water 
+- 1/2 cup rice vinegar 
+- 1/4 cup sugar
+
+- 50 grams miso 
+- MSG + Salt
+- 1 jar of mayo
+- 200 grams of siracha 
+- 20 gram garlic powder 
+
+
+
 For the Rice:
 
     1 quart uncooked medium-grain white rice (such as Calrose variety)
