@@ -16,4 +16,8 @@ In the world of lefty post election takes, a common concensus seems to be formin
 > - Robert Evans (Behind the bastards podcast guy)
 
 
-
+so I've said maybe a little bit hyperbolically a few times now that I think that the left project in America
+is dead I am I am speaking like you know poetically here obviously for one a project can't die uh it's not a person
+it's not a living thing for two it's not dead permanently so it can't really be dead left organizing in this country
+right now is going to have to go quiet for a little bit for the same reasons that left organizing historically has gone quiet in every country that is
+controlled by the far right
