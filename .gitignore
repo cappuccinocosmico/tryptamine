@@ -14,8 +14,57 @@ backend-rust/target
 # Added by cargo
 
 
-node_modules
-assets/main.css
-main.css
+backend-rust/node_modules
+backend-rust/assets/main.css
+backend-rust/main.css
 
-secret-drafts
+backend-rust/secret-drafts
+
+
+
+
+# dependencies
+frontend-nextjs/node_modules
+frontend-nextjs/.pnp
+frontend-nextjs/.pnp.js
+frontend-nextjs/.yarn/*
+!frontend-nextjs/.yarn/releases
+!frontend-nextjs/.yarn/plugins
+!frontend-nextjs/.yarn/sdks
+
+# testing
+frontend-nextjs/coverage
+
+# next.js
+frontend-nextjs/.next/
+frontend-nextjs/out/
+frontend-nextjs/public/sitemap.xml
+frontend-nextjs/.vercel
+
+# production
+frontend-nextjs/build
+frontend-nextjs/*.xml
+
+# rss feed
+frontend-nextjs/public/feed.xml
+
+# search
+frontend-nextjs/public/search.json
+
+# misc
+frontend-nextjs/.DS_Store
+
+# debug
+frontend-nextjs/*.log
+frontend-nextjs/npm-debug.log*
+frontend-nextjs/yarn-debug.log*
+frontend-nextjs/yarn-error.log*
+
+# local env files
+frontend-nextjs/.env.local
+frontend-nextjs/.env.development.local
+frontend-nextjs/.env.test.local
+frontend-nextjs/.env.production.local
+
+# Contentlayer
+frontend-nextjs/.contentlayer
