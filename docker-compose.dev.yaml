@@ -13,6 +13,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.namespace=tryptamine"
+
     expose:
       - 3000
     command:
@@ -22,9 +24,11 @@ services:
 
   reverse-proxy:
     image: traefik:v3.1.2
-    command: >
-      --api.insecure=true
-      --providers.docker
+
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.constraints=Label(`traefik.namespace`,`tryptamine`)"
     expose:
       - 80
       - 443
