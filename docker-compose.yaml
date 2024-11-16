@@ -1,8 +1,7 @@
 # local development docker compose
 services:
   reverse-proxy:
-    # official image
-    image: traefik:v3.0
+    image: traefik:v3.1.2
     command:
       # - "--log.level=DEBUG"
       - "--api.insecure=true"
@@ -10,22 +9,49 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.websecure.address=:443"
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - " -- traefik.http.routers.blog.tls.domains[0].main=example.com"
       # - "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-      - "--certificatesresolvers.myresolver.acme.email=mbright@kessler.xyz"
+      - "--certificatesresolvers.myresolver.acme.email=nvenner@protonmail.ch"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-      - "--providers.file.filename=/etc/traefik/traefik_dynamic.yaml"
+      - "--providers.docker.constraints=Label(`traefik.namespace`,`tryptamine`)"
+    expose:
+      - 80
+      - 443
     ports:
-      - "80:80"
-      - "443:443"
-      - "${PROXY_UI_PORT:-8083}:8080"
+      - 2443:443
+      - "${PROXY_UI_PORT:-8084}:8080"
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
       - "${VOLUMES_DIRECTORY:-./volumes}/letsencrypt:/letsencrypt"
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./traefik_dynamic.yaml:/etc/traefik/traefik_dynamic.yaml:ro"
-  frontend:
+  frpc:
+    image: snowdreamtech/frpc:alpine
+    restart: always
+    network_mode: "host"
+    volumes:
+      - ./frpc.toml:/etc/frp/frpc.toml
+  rust-backend:
+    build:
+      context: ./backend-rust/
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./backend-rust/:/app
+    labels:
+      - "traefik.enable=true"
+      - "traefik.namespace=tryptamine"
+      - "traefik.http.routers.thaumaturgy-python.rule=Host(`n.kessler.xyz`) && (PathPrefix(`/api/`)"
+      - "traefik.http.routers.thaumaturgy-python.entrypoints=websecure"
+      - "traefik.http.routers.thaumaturgy-python.tls.certresolver=myresolver"
+    command:
+
+    expose:
+      - 5505
+    ports:
+      - 5506:5505
+
+  frontend-nextjs:
     build:
       context: ./frontend-nextjs
-      dockerfile: ./Dockerfile
+      dockerfile: ./Dockerfile-dev
     env_file:
       - config/global.env
     volumes:
@@ -33,14 +59,12 @@ services:
       - ./config/global.env:/app/.env
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`kessler.xyz`) && PathPrefix(`/`)"
-      - "traefik.http.routers.frontend.rule=HostRegexp(`{state:al|ak|az|ar|ca|co|ct|de|fl|ga|hi|id|il|in|ia|ks|ky|la|me|md|ma|mi|mn|ms|mo|mt|ne|nv|nh|nj|nm|ny|nc|nd|oh|ok|or|pa|ri|sc|sd|tn|tx|ut|vt|va|wa|wv|wi|wy}.kessler.xyz`)"
-      - traefik.http.routers.blog.tls.domains[0].main=kessler.xyz
-      - traefik.http.routers.blog.tls.domains[0].sans=*.kessler.xyz
+      - "traefik.namespace=kessler"
+      - "traefik.http.routers.frontend.rule=Host(`n.kessler.xyz`) && PathPrefix(`/`)"
       # - "traefik.http.routers.frontend.middlewares=state-redirect@file"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls.certresolver=myresolver"
-      - "traefik.http.routers.whoami.rule=Host(`kessler.xyz`)"
+      - "traefik.http.routers.whoami.rule=Host(`n.kessler.xyz`)"
       - "traefik.http.routers.whoami.entrypoints=websecure"
       - "traefik.http.routers.whoami.tls.certresolver=myresolver"
     expose:
