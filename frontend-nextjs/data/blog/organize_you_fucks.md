@@ -44,7 +44,29 @@ I feel like this is something most leftist analysis misses, because the movement
 
 (You probably shouldn't trust my recollections about this too much since I am relying on memories from when I was 7-15. )
 
-I remember this organizing in this time period felt like you were being gaslit constantly, when you tried to get any politician or anyone in power to do something an endless string of platitudes would come out of their mouth "we hear your concerns, but now is not the right time becasue of _blahblahblahblah_". With a common concensus emerging
+I remember this organizing in this time period felt like you were being gaslit constantly, when you tried to get any politician or anyone in power to do something an endless string of platitudes would come out of their mouth "we hear your concerns, but now is not the right time because of _blahblahblahblah_". There was a common consensus that the path to political victory lay in showing "An Inconvenient Truth"\footnote[1] to every person in the US. Major mass mobilization orgs like 350 or Al Gore's Climate Reality Project were (Note: Check to see how active greenpeace was in this time period and see if they were doing majorly escalating stuff during this time.)
+
+This made criticising the current administration an absolute nightmare, both because you would get tons of pushback from obama worshipers, but also because playing nice and currying favor with the current administration was the only way to get them to take your concerns seriously and listen to you. Every other form of activism was dismissed as "unserious".
+
+This even effected largely technocratic projects. In the first year of the Juliana vs US lawsuit, the vast majority of our interviews always included a question asking why we were suing the poor Obama administration with all of its super ambitious climate goals, with us (a bunch of literal children) needing to explain that all of their measures didn't actually impose limits on industry that they weren't already obeying for economic reasons, and was also placing the us on a 4-5 degree warming path instead of a 2 degree one. When Trump got elected I remember recieving legal advice saying "This election really helps your case, since it really highlights your main argument that the executive and legislative branches are incapable of addressing climate change."
+
+However, no movement was damaged by this sentiment as much as Occupy Wall Street, it was mercilessly mocked by everyone, mainstream media, progressive media, comedy shows, and even other activists circles. The popular sentiment was captured very well by a bit john oliver did for the daily show at the time:
+
+> Oliver uses the "people's mic" to tell the crowd, "The human microphone... while well-intentioned... is incredibly annoying... and embodies everything... people find frustrating... about movements like this!" He later repairs to a local bar where he shares a beer with "normal people" (i.e. olds) who also object to the inequities in the economic system but agree the Occupy Wall Street movement needs normal folk. "You know what my favorite part of your point is?" Oliver asks one of them. "You don't have crazy tattoos all over your face."
+
+Afterwards occupy is largely viewed as a total failure, a "blip", and a movement that was more engaged in performative outrage and wasn't able to accomplish any of its actual goals.
+
+I think its better to think of it as a spark from which the rest of the protest movement grew.
+
+# 2016
+
+The 2 main important events that happened in 2016 to help catalyze this movement were.
+
+1. The extremely popular campaign of Bernie Sanders, and the rallying of all the DNC figureheads and obama behind hillary Clinton's primary. Making it crystal clear to lots of progressives that the democratic leadership are categorically opposed to almost all of the positive improvements we were wanting to make. And blaming the republicans or their own incompetence was just an excuse to hide the fact that they didnt actually want to do any of it. (In addition to being the political awakening for a lot of young people.)
+
+2. Clinton loosing to Trump, cutting off the ability of liberals to lobby the presidency to achieve their goals, and also striking a huge blow to their faith that "the system has it all figured out".
+
+# The people who were in occupy eventually lead other movements
 
 On the bright side, taking such a shallow view is a really bad way of judging the health of a movement and in particular the ability of said movement to grow.
 
@@ -54,4 +76,4 @@ I think both of these perspectives illustrate huge failures
 
 # The State of Organizing Has Been much weaker then before.
 
-[^1]:
+[^1]: Or alternatively its much better cousin, "Chasing Ice", or even propoganda films like bill mckibbens
