@@ -9,7 +9,7 @@ serverPort = 7000
 # customDomains = ["frpmedia.kessler.xyz"]
 
 [[proxies]]
-name = "thaumaturgy-secure"
+name = "actionable-neighborhoods"
 type = "https"
 localPort = 3443
 # localIP = "reverse-proxy"
