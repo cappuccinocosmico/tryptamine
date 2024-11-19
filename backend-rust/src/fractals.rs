@@ -1,8 +1,12 @@
-mod julia {
-    fn generate_julia_image() -> image::ImageBuffer<image::Rgb<u8>, Vec<u8>> {
+pub mod images_fractal {
+
+    use num_complex::Complex;
+    fn generate_julia_image(
+        imgx: u32,
+        imgy: u32,
+        seed_value: Complex<f32>,
+    ) -> image::ImageBuffer<image::Rgb<u8>, Vec<u8>> {
         //! An example of generating julia fractals.
-        let imgx = 800;
-        let imgy = 800;
 
         let scalex = 3.0 / imgx as f32;
         let scaley = 3.0 / imgy as f32;
@@ -23,7 +27,7 @@ mod julia {
                 let cx = y as f32 * scalex - 1.5;
                 let cy = x as f32 * scaley - 1.5;
 
-                let c = num_complex::Complex::new(-0.4, 0.6);
+                let c = seed_value;
                 let mut z = num_complex::Complex::new(cx, cy);
 
                 let mut i = 0;
@@ -39,9 +43,6 @@ mod julia {
         }
         imgbuf
     }
-}
-
-pub mod images_fractal {
     fn generate_test_image() -> image::ImageBuffer<image::Rgb<u8>, Vec<u8>> {
         let width = 3000;
         let height = 3000;
@@ -68,7 +69,7 @@ pub mod images_fractal {
         bytes
     }
     pub fn test_webp() -> Vec<u8> {
-        let img = generate_test_image();
+        let img = generate_julia_image(3000, 3000, Complex::new(-0.3, 0.4));
         image_buffer_to_webp_bytes(img)
     }
 }
