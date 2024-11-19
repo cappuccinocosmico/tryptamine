@@ -41,7 +41,7 @@ services:
       - ./config/global.env:/app/.env
     labels:
       - "traefik.enable=true"
-      - "traefik.namespace=kessler"
+      - "traefik.namespace=tryptamine"
       - "traefik.http.routers.frontend.rule=Host(`an.kessler.xyz`) && PathPrefix(`/`)"
       # - "traefik.http.routers.frontend.middlewares=state-redirect@file"
       - "traefik.http.routers.frontend.entrypoints=websecure"
