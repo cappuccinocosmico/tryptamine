@@ -11,7 +11,7 @@ serverPort = 7000
 [[proxies]]
 name = "actionable-neighborhoods"
 type = "https"
-localPort = 3443
+localPort = 4443
 # localIP = "reverse-proxy"
 customDomains = ["an.kessler.xyz"]
 

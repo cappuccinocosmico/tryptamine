@@ -1,6 +1,6 @@
 ---
-title: Organize You Fucks
-summary: Leftist Infrastructure is in a bad space, so you shouldnt try to fix it - Absolute Morons
+title: A Confalgration is Coming
+summary: Leftist organizing is in a great space, dispite claims to the contrary.
 tags: ['activism']
 type: Blog
 draft: false
