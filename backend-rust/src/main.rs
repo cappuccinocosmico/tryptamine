@@ -14,6 +14,7 @@ use tower_http::services::ServeDir;
 
 use std::path::PathBuf;
 
+pub use crate::fractals::images_fractal;
 pub use crate::website::static_html;
 #[derive(Template)] // this will generate the code...
 #[template(path = "app.html")] // using the template in this path, relative
@@ -69,8 +70,13 @@ async fn main_tailwind_styles() -> Response<Body> {
         .into_response()
 }
 
-async fn test_fractal() -> String {
-    "gar gar man arg marg".to_string()
+async fn test_fractal() -> Response<Body> {
+    // Build the response
+    (
+        [(header::CONTENT_TYPE, HeaderValue::from_static("image/webp"))],
+        images_fractal::test_webp(),
+    )
+        .into_response()
 }
 
 async fn root() -> Html<String> {
