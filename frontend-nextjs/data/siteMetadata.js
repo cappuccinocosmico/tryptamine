@@ -1,6 +1,6 @@
 /** @type {import("pliny/config").PlinyConfig } */
 const siteMetadata = {
-  title: 'Tryptamine - Thoughts on Social Movements',
+  title: 'Actionable Neighborhoods - A Political Handbook',
   author: 'Nic Venner',
   headerTitle: 'Tryptamine',
   description: 'Practical Actionable Advice on doing a Revolution',
