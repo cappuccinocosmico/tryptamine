@@ -5,7 +5,8 @@ backend-rust/target/
 backend-rust/dist/
 backend-rust/static/
 backend-rust/.dioxus/
-backend-rust/assets/tailwind.css
+backend-rust/styles/main.css
+
 backend-rust/target
 
 **/*.rs.bk
