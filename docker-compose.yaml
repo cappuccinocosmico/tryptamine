@@ -34,10 +34,10 @@ services:
     build:
       context: ./frontend-nextjs
       dockerfile: ./Dockerfile-dev
-    env_file:
-      - config/global.env
+    # env_file:
+    #   - config/global.env
     volumes:
-      - ./config/frontend.env.local:/app.env.local
+      # - ./config/frontend.env.local:/app.env.local
       - ./config/global.env:/app/.env
     labels:
       - "traefik.enable=true"
