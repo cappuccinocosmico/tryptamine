@@ -1,9 +1,13 @@
 ---
 title: Organize You Fucks
-intro: Leftist Infrastructure is in a bad space, so you shouldnt try to fix it - Absolute Morons
-tag: activism
-date: 2024-08-01
-author: Nicole Venner
+summary: Leftist Infrastructure is in a bad space, so you shouldnt try to fix it - Absolute Morons
+tags: ['activism']
+type: Blog
+draft: false
+date: 2024-10-19
+lastmod: 2024-10-19
+images: ['/static/images/canada/mountains.jpg', '/static/images/canada/toronto.jpg']
+authors: ['nic']
 ---
 
 In the world of lefty post election takes, a consensus seems to be forming that the left is in such a defeated state that it might just be better to give up on organizing entirely.

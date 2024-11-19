@@ -9,11 +9,14 @@ services:
     volumes:
       # - ./config/frontend.env.local:/app/.env.local
       # - ./config/global.env:/app/.env
-      - ./frontend/src/:/app/src
+      - ./frontend-nextjs/:/app/
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
       - "traefik.namespace=tryptamine"
+
+    ports:
+      - 3001:3000
 
     expose:
       - 3000
@@ -21,6 +24,23 @@ services:
       - "npm"
       - "run"
       - "dev"
+
+  backend-rust:
+    build:
+      context: ./backend-rust/
+      dockerfile: ./Dockerfile
+    # env_file:
+    #   - config/global.env
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/api`)"
+      - "traefik.namespace=tryptamine"
+
+    expose:
+      - 3000
+    command:
+      - "./tryptamine"
 
   reverse-proxy:
     image: traefik:v3.1.2
