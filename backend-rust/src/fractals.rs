@@ -61,14 +61,12 @@ pub mod images_fractal {
         };
         // Create the image buffer with parallel iterator
         let start = std::time::Instant::now();
-        let buff_pixels: Vec<[u8; 3]> = (0..imgx * imgy).into_par_iter().map(iterator).collect();
+        let buff: Vec<u8> = (0..imgx * imgy)
+            .into_par_iter()
+            .flat_map(iterator)
+            .collect();
         let duration = start.elapsed();
         println!("Fractal Mathematics took: {:?}", duration);
-
-        let start = std::time::Instant::now();
-        let buff: Vec<u8> = buff_pixels.iter().flat_map(|x| x.iter()).copied().collect();
-        let duration = start.elapsed();
-        println!("Buffer flattening took: {:?}", duration);
 
         // Calculate expected buffer size
         let expected_size = (imgx * imgy * 3) as usize;
