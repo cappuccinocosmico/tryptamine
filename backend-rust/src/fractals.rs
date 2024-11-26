@@ -59,15 +59,31 @@ pub mod images_fractal {
             render_iterations(i)
         };
         // Create the image buffer with parallel iterator
-        let buff_pixels: Vec<[u8; 3]> = (1..imgx * imgy).map(iterator).collect();
+        let buff_pixels: Vec<[u8; 3]> = (0..imgx * imgy).map(iterator).collect();
         let buff: Vec<u8> = buff_pixels.iter().flat_map(|x| x.iter()).copied().collect();
 
+        // Calculate expected buffer size
+        let expected_size = (imgx * imgy * 3) as usize;
+
+        // Validate buffer size
+        if buff.len() != expected_size {
+            return Err(format!(
+                "Buffer size mismatch. Expected {} bytes ({}x{}x3), got {} bytes",
+                expected_size,
+                imgx,
+                imgy,
+                buff.len()
+            ));
+        }
+
         let img_option = image::ImageBuffer::from_vec(imgx, imgy, buff);
-        let img = match img_option {
+        let img: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = match img_option {
             Some(img) => img,
             None => {
-                println!("Failed to generate image buffer");
-                return Err("Failed to generate image buffer".to_string());
+                return Err(format!(
+                    "Failed to create image buffer with dimensions {}x{}",
+                    imgx, imgy
+                ));
             }
         };
         let webp: Vec<u8> = image_buffer_to_webp_bytes(img);
