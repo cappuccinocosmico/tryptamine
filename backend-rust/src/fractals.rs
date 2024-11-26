@@ -1,22 +1,21 @@
 pub mod images_fractal {
 
-    use image::Rgb as ImRgb;
     use num_complex::Complex;
     use palette::{num::Round, IntoColor, Oklch, Srgb};
-    fn srgb_to_imrgb(srgb: Srgb<f32>) -> ImRgb<u8> {
-        ImRgb([
+    fn srgb_to_rgbvals(srgb: Srgb<f32>) -> [u8; 3] {
+        [
             (srgb.red * 256.0).floor() as u8,
             (srgb.green * 256.0).floor() as u8,
             (srgb.blue * 256.0).floor() as u8,
-        ])
+        ]
     }
 
-    fn generate_color_gradient(size: i32) -> Vec<ImRgb<u8>> {
+    fn generate_color_gradient(size: i32) -> Vec<[u8; 3]> {
         let mut array = Vec::new();
         for i in 0..size {
-            let oklch_color = Oklch::new(0.5, 0.2, ((i * 10) % 360) as f32);
+            let oklch_color = Oklch::new(0.7, 0.2, ((i * 30) % 360) as f32);
             let srgb_color_float: Srgb<f32> = oklch_color.into_color();
-            let im_rgb: ImRgb<u8> = srgb_to_imrgb(srgb_color_float);
+            let im_rgb = srgb_to_rgbvals(srgb_color_float);
             array.push(im_rgb);
         }
         array
@@ -26,7 +25,7 @@ pub mod images_fractal {
         imgx: u32,
         imgy: u32,
         seed_value: Complex<f32>,
-    ) -> image::ImageBuffer<image::Rgb<u8>, Vec<u8>> {
+    ) -> Result<Vec<u8>, String> {
         //! An example of generating julia fractals.
 
         let scalex = 3.0 / imgx as f32;
@@ -34,18 +33,18 @@ pub mod images_fractal {
 
         // Create a new ImgBuf with width: imgx and height: imgy
         // Move render_iterations outside the loop
-        fn render_iterations(iterator: i32, colors: &[ImRgb<u8>]) -> image::Rgb<u8> {
+        let colors = generate_color_gradient(10);
+        let render_iterations = |iterator: i32| -> [u8; 3] {
             if iterator == 300 {
-                image::Rgb([0, 0, 0])
+                [0, 0, 0]
             } else {
                 colors[iterator as usize % colors.len()]
             }
-        }
+        };
 
-        let colors = generate_color_gradient(10);
-
-        // Create the image buffer with parallel iterator
-        image::ImageBuffer::from_fn(imgx, imgy, |x, y| {
+        let iterator = |index: u32| -> [u8; 3] {
+            let x = index % imgx;
+            let y = index / imgx;
             let cx = y as f32 * scalex - 1.5;
             let cy = x as f32 * scaley - 1.5;
 
@@ -57,8 +56,22 @@ pub mod images_fractal {
                 i += 1;
             }
 
-            render_iterations(i, &colors)
-        })
+            render_iterations(i)
+        };
+        // Create the image buffer with parallel iterator
+        let buff_pixels: Vec<[u8; 3]> = (1..imgx * imgy).map(iterator).collect();
+        let buff: Vec<u8> = buff_pixels.iter().flat_map(|x| x.iter()).copied().collect();
+
+        let img_option = image::ImageBuffer::from_vec(imgx, imgy, buff);
+        let img = match img_option {
+            Some(img) => img,
+            None => {
+                println!("Failed to generate image buffer");
+                return Err("Failed to generate image buffer".to_string());
+            }
+        };
+        let webp: Vec<u8> = image_buffer_to_webp_bytes(img);
+        Ok(webp)
     }
 
     fn image_buffer_to_webp_bytes(buffer: image::ImageBuffer<image::Rgb<u8>, Vec<u8>>) -> Vec<u8> {
@@ -68,11 +81,10 @@ pub mod images_fractal {
                 &mut std::io::Cursor::new(&mut bytes),
                 image::ImageFormat::WebP,
             )
-            .expect("Failed to encode image as PNG");
+            .expect("Failed to encode image as Webp");
         bytes
     }
-    pub fn test_webp() -> Vec<u8> {
-        let img = generate_julia_image(600, 600, Complex::new(-0.3, 0.4));
-        image_buffer_to_webp_bytes(img)
+    pub fn test_webp() -> Result<Vec<u8>, String> {
+        generate_julia_image(300, 300, Complex::new(-0.3, 0.4))
     }
 }
