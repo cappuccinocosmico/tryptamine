@@ -1,6 +1,16 @@
 pub mod images_fractal {
 
     use num_complex::Complex;
+    use palette::{LinSrgb, Srgb};
+
+    fn generate_color_gradient(size: i32) -> Vec<image::Rgb<u8>> {
+        let mut array = Vec::new();
+        for i in 0..size {
+            array.push(image::Rgb([0, 0, 0]));
+        }
+        array
+    }
+
     fn generate_julia_image(
         imgx: u32,
         imgy: u32,
@@ -14,13 +24,6 @@ pub mod images_fractal {
         // Create a new ImgBuf with width: imgx and height: imgy
         let mut imgbuf = image::ImageBuffer::new(imgx, imgy);
 
-        // Iterate over the coordinates and pixels of the image
-        for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
-            let r = (0.3 * x as f32) as u8;
-            let b = (0.3 * y as f32) as u8;
-            *pixel = image::Rgb([r, 0, b]);
-        }
-
         // A redundant loop to demonstrate reading image data
         for x in 0..imgx {
             for y in 0..imgy {
@@ -31,30 +34,23 @@ pub mod images_fractal {
                 let mut z = num_complex::Complex::new(cx, cy);
 
                 let mut i = 0;
-                while i < 255 && z.norm() <= 2.0 {
+                while i < 300 && z.norm() <= 2.0 {
                     z = z * z + c;
                     i += 1;
+                }
+                fn render_iterations(iterator: i32, basin: u8) -> image::Rgb<u8> {
+                    if iterator == 300 {
+                        image::Rgb([0, 0, 0])
+                    } else {
+                        image::Rgb([(10 * iterator) as u8, 0, 0])
+                    }
                 }
 
                 let pixel = imgbuf.get_pixel_mut(x, y);
                 let image::Rgb(data) = *pixel;
-                *pixel = image::Rgb([data[0], i as u8, data[2]]);
+                *pixel = render_iterations(i, 0);
             }
         }
-        imgbuf
-    }
-    fn generate_test_image() -> image::ImageBuffer<image::Rgb<u8>, Vec<u8>> {
-        let width = 3000;
-        let height = 3000;
-
-        let mut imgbuf = image::ImageBuffer::new(width, height);
-
-        for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
-            let intensity =
-                ((x as f32 / width as f32 + y as f32 / height as f32) / 2.0 * 255.0) as u8;
-            *pixel = image::Rgb([intensity, intensity, intensity]);
-        }
-
         imgbuf
     }
 
@@ -69,7 +65,7 @@ pub mod images_fractal {
         bytes
     }
     pub fn test_webp() -> Vec<u8> {
-        let img = generate_julia_image(3000, 3000, Complex::new(-0.3, 0.4));
+        let img = generate_julia_image(600, 600, Complex::new(-0.3, 0.4));
         image_buffer_to_webp_bytes(img)
     }
 }
