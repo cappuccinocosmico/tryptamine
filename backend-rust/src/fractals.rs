@@ -60,8 +60,15 @@ pub mod images_fractal {
             render_iterations(i)
         };
         // Create the image buffer with parallel iterator
+        let start = std::time::Instant::now();
         let buff_pixels: Vec<[u8; 3]> = (0..imgx * imgy).into_par_iter().map(iterator).collect();
+        let duration = start.elapsed();
+        println!("Fractal Mathematics took: {:?}", duration);
+
+        let start = std::time::Instant::now();
         let buff: Vec<u8> = buff_pixels.iter().flat_map(|x| x.iter()).copied().collect();
+        let duration = start.elapsed();
+        println!("Buffer flattening took: {:?}", duration);
 
         // Calculate expected buffer size
         let expected_size = (imgx * imgy * 3) as usize;
@@ -77,6 +84,7 @@ pub mod images_fractal {
             ));
         }
 
+        let start = std::time::Instant::now();
         let img_option = image::ImageBuffer::from_vec(imgx, imgy, buff);
         let img: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = match img_option {
             Some(img) => img,
@@ -87,7 +95,13 @@ pub mod images_fractal {
                 ));
             }
         };
+        let duration = start.elapsed();
+        println!("Image buffer creation took: {:?}", duration);
+
+        let start = std::time::Instant::now();
         let webp: Vec<u8> = image_buffer_to_webp_bytes(img);
+        let duration = start.elapsed();
+        println!("WebP encoding took: {:?}", duration);
         Ok(webp)
     }
 
@@ -105,7 +119,7 @@ pub mod images_fractal {
         let start = std::time::Instant::now();
         let result = generate_julia_image(3000, 3000, Complex::new(-0.3, 0.4));
         let duration = start.elapsed();
-        println!("Julia set generation took: {:?}", duration);
+        println!("Total Image generation took: {:?}", duration);
         result
     }
 }
