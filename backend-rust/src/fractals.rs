@@ -2,6 +2,7 @@ pub mod images_fractal {
 
     use num_complex::Complex;
     use palette::{num::Round, IntoColor, Oklch, Srgb};
+    use rayon::iter::{IntoParallelIterator, ParallelIterator};
     fn srgb_to_rgbvals(srgb: Srgb<f32>) -> [u8; 3] {
         [
             (srgb.red * 256.0).floor() as u8,
@@ -59,7 +60,7 @@ pub mod images_fractal {
             render_iterations(i)
         };
         // Create the image buffer with parallel iterator
-        let buff_pixels: Vec<[u8; 3]> = (0..imgx * imgy).map(iterator).collect();
+        let buff_pixels: Vec<[u8; 3]> = (0..imgx * imgy).into_par_iter().map(iterator).collect();
         let buff: Vec<u8> = buff_pixels.iter().flat_map(|x| x.iter()).copied().collect();
 
         // Calculate expected buffer size
@@ -101,6 +102,10 @@ pub mod images_fractal {
         bytes
     }
     pub fn test_webp() -> Result<Vec<u8>, String> {
-        generate_julia_image(300, 300, Complex::new(-0.3, 0.4))
+        let start = std::time::Instant::now();
+        let result = generate_julia_image(3000, 3000, Complex::new(-0.3, 0.4));
+        let duration = start.elapsed();
+        println!("Julia set generation took: {:?}", duration);
+        result
     }
 }
