@@ -3,6 +3,7 @@ pub mod images_fractal {
     use num_complex::Complex;
     use palette::{num::Round, IntoColor, Oklch, Srgb};
     use rayon::iter::{IntoParallelIterator, ParallelIterator};
+    use std::num;
     fn srgb_to_rgbvals(srgb: Srgb<f32>) -> [u8; 3] {
         [
             (srgb.red * 256.0).floor() as u8,
@@ -22,7 +23,16 @@ pub mod images_fractal {
         array
     }
 
-    fn generate_julia_basins() -> i32 {
+    struct JuliaBasin {
+        basin: Option<Complex<f32>>,
+        neighborhood: f32,
+    }
+
+    fn generate_julia_basins(c: Complex<f32>) -> Vec<JuliaBasin> {
+        let mut basins = vec![JuliaBasin {
+            basin: None,
+            neighborhood: 2.0,
+        }];
         // x+ = x^2 + c
         // 0 = x^2 -x + c
         // 0 = (x^2-x+1/4)-1/4+c
@@ -30,7 +40,21 @@ pub mod images_fractal {
         // 1/4 -c = (x-1/2)^2
         // \pm sqrt(1/4-c) = x-1/2
         // x = 1/2 \pm sqrt(1/4 - c)
-        3
+        let val1 = 1.0 / 2.0 + (1.0 / 4.0 - c).sqrt();
+        let val2 = 1.0 / 2.0 - (1.0 / 4.0 - c).sqrt();
+        fn validate_basin(val: Complex<f32>, basins: &mut Vec<JuliaBasin>) {
+            let valprime = 2.0 * val - 1.0;
+            let is_valid = valprime.norm() <= 1.0;
+            if is_valid {
+                basins.push(JuliaBasin {
+                    basin: Some(val),
+                    neighborhood: 0.001,
+                });
+            }
+        }
+        validate_basin(val1, &mut basins);
+        validate_basin(val2, &mut basins);
+        basins
     }
 
     fn generate_julia_image(
