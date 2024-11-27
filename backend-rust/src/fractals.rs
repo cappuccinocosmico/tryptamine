@@ -22,6 +22,17 @@ pub mod images_fractal {
         array
     }
 
+    fn generate_julia_basins() -> i32 {
+        // x+ = x^2 + c
+        // 0 = x^2 -x + c
+        // 0 = (x^2-x+1/4)-1/4+c
+        // 0 = (x-1/2)^2-1/4+c
+        // 1/4 -c = (x-1/2)^2
+        // \pm sqrt(1/4-c) = x-1/2
+        // x = 1/2 \pm sqrt(1/4 - c)
+        3
+    }
+
     fn generate_julia_image(
         imgx: u32,
         imgy: u32,
@@ -52,7 +63,7 @@ pub mod images_fractal {
             let mut z = Complex::new(cx, cy);
 
             let mut i = 0;
-            while i < 300 && z.norm() <= 2.0 {
+            while i < 300 && z.norm_sqr() <= 4.0 {
                 z = z * z + seed_value;
                 i += 1;
             }
