@@ -56,6 +56,7 @@ pub mod images_fractal {
         validate_basin(val2, &mut basins);
         basins
     }
+    fn generate_basins_conditional( basins : &Vec<JuliaBasin>) ->  {}
 
     fn generate_julia_image(
         imgx: u32,
@@ -70,13 +71,14 @@ pub mod images_fractal {
         // Create a new ImgBuf with width: imgx and height: imgy
         // Move render_iterations outside the loop
         let colors = generate_color_gradient(10);
-        let render_iterations = |iterator: i32| -> [u8; 3] {
+        let render_iterations = |iterator: i32, basin: u8| -> [u8; 3] {
             if iterator == 300 {
                 [0, 0, 0]
             } else {
                 colors[iterator as usize % colors.len()]
             }
         };
+        let basins = generate_julia_basins(seed_value);
 
         let iterator = |index: u32| -> [u8; 3] {
             let x = index % imgx;
@@ -84,15 +86,22 @@ pub mod images_fractal {
             let cx = y as f32 * scalex - 1.5;
             let cy = x as f32 * scaley - 1.5;
 
+
             let mut z = Complex::new(cx, cy);
 
             let mut i = 0;
-            while i < 300 && z.norm_sqr() <= 4.0 {
+            
+            while i < 300 {
                 z = z * z + seed_value;
                 i += 1;
+                for basin in &basins {
+                    if z.norm() <= basin.neighborhood {
+                        return render_iterations(i, 0);
+                    }
+                }
             }
 
-            render_iterations(i)
+            render_iterations(i, 0)
         };
         // Create the image buffer with parallel iterator
         let start = std::time::Instant::now();
