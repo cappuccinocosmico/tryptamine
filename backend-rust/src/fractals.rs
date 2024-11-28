@@ -252,6 +252,17 @@ pub mod images_fractal {
         println!("Image buffer creation took: {:?}", duration);
         Ok(img)
     }
+    pub enum ImageType {
+        Jpeg,
+        Webp,
+    }
+    pub fn str_image_extension(image_type_str: &str) -> Option<ImageType> {
+        match image_type_str {
+            "jpeg" => Some(ImageType::Jpeg),
+            "webp" => Some(ImageType::Webp),
+            _ => None,
+        }
+    }
 
     fn image_buffer_to_webp_bytes(buffer: image::ImageBuffer<image::Rgb<u8>, Vec<u8>>) -> Vec<u8> {
         let mut bytes: Vec<u8> = Vec::new();
@@ -264,25 +275,38 @@ pub mod images_fractal {
         bytes
     }
 
-    fn image_buffer_to_png_bytes(buffer: image::ImageBuffer<image::Rgb<u8>, Vec<u8>>) -> Vec<u8> {
+    fn image_buffer_to_jpeg_bytes(buffer: image::ImageBuffer<image::Rgb<u8>, Vec<u8>>) -> Vec<u8> {
         let mut bytes: Vec<u8> = Vec::new();
         buffer
             .write_to(
                 &mut std::io::Cursor::new(&mut bytes),
-                image::ImageFormat::Png,
+                image::ImageFormat::Jpeg,
             )
-            .expect("Failed to encode image as Webp");
+            .expect("Failed to encode image as Jpeg");
         bytes
     }
-    pub fn test_webp(resolution: u32) -> Result<Vec<u8>, String> {
+    pub fn test_image(resolution: u32, image_type: ImageType) -> Result<Vec<u8>, String> {
         let start = std::time::Instant::now();
         let img = generate_julia_image(resolution, resolution, Complex::new(-0.3, 0.4))?;
-        let start_webp = std::time::Instant::now();
-        let webp: Vec<u8> = image_buffer_to_webp_bytes(img);
-        let duration_webp = start_webp.elapsed();
-        println!("WebP encoding took: {:?}", duration_webp);
-        let duration = start.elapsed();
-        println!("Total Image generation took: {:?}", duration);
-        Ok(webp)
+        match image_type {
+            ImageType::Webp => {
+                let start_webp = std::time::Instant::now();
+                let webp: Vec<u8> = image_buffer_to_webp_bytes(img);
+                let duration_webp = start_webp.elapsed();
+                println!("WebP encoding took: {:?}", duration_webp);
+                let duration = start.elapsed();
+                println!("Total Image generation took: {:?}", duration);
+                Ok(webp)
+            }
+            ImageType::Jpeg => {
+                let start_png = std::time::Instant::now();
+                let png: Vec<u8> = image_buffer_to_jpeg_bytes(img);
+                let duration_png = start_png.elapsed();
+                println!("Jpeg encoding took: {:?}", duration_png);
+                let duration = start.elapsed();
+                println!("Total Image generation took: {:?}", duration);
+                Ok(png)
+            }
+        }
     }
 }

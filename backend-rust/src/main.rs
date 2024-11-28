@@ -11,6 +11,7 @@ use axum::{
     routing::get,
     Router,
 };
+use fractals::images_fractal::str_image_extension;
 use tower_http::services::ServeDir;
 
 use std::path::PathBuf;
@@ -53,7 +54,7 @@ async fn main() {
                 project_path.to_str().unwrap()
             )),
         )
-        .nest_service("/test-fractal/:resolution", get(test_fractal));
+        .nest_service("/test-fractal/:resolution/:format", get(test_fractal));
 
     // `POST /users` goes to `create_user`
 
@@ -71,11 +72,21 @@ async fn main_tailwind_styles() -> Response<Body> {
         .into_response()
 }
 
-async fn test_fractal(Path(resolution): Path<u32>) -> Response<Body> {
+async fn test_fractal(Path((resolution, format_str)): Path<(u32, String)>) -> Response<Body> {
     // Build the response
+    let image_type = match str_image_extension(&format_str) {
+        Some(image_type) => image_type,
+        None => {
+            return "Unknown image type".to_string().into_response();
+        }
+    };
+    let header_str = format!("image/{}", format_str);
     (
-        [(header::CONTENT_TYPE, HeaderValue::from_static("image/webp"))],
-        images_fractal::test_webp(resolution),
+        [(
+            header::CONTENT_TYPE,
+            HeaderValue::from_str(&header_str).unwrap(),
+        )],
+        images_fractal::test_image(resolution, image_type),
     )
         .into_response()
 }
