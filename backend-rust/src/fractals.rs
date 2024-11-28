@@ -12,71 +12,62 @@ pub mod images_fractal {
         ]
     }
 
-    fn generate_rainbow_gradient(size: usize) -> Vec<[u8; 3]> {
+    fn generate_generic_gradient(
+        size: usize,
+        color_generator: impl Fn(usize) -> Oklch,
+    ) -> Vec<[u8; 3]> {
         let mut array = Vec::new();
         for i in 0..size {
-            let oklch_color = Oklch::new(0.73, 0.17, ((i * 30) % 360) as f32);
+            let oklch_color = color_generator(i);
             let srgb_color_float: Srgb<f32> = oklch_color.into_color();
             let im_rgb = srgb_to_rgbvals(srgb_color_float);
             array.push(im_rgb);
         }
         array
+    }
+
+    fn generate_rainbow_gradient(size: usize) -> Vec<[u8; 3]> {
+        generate_generic_gradient(size, |i| Oklch::new(0.73, 0.17, (i * 30 % 360) as f32))
     }
 
     fn generate_warm_reds(size: usize) -> Vec<[u8; 3]> {
-        let mut array = Vec::new();
-        for i in 0..size {
-            let oklch_color = Oklch::new(0.65, 0.2, (15.0 + (i as f32 * 25.0) % 45.0));
-            let srgb_color_float: Srgb<f32> = oklch_color.into_color();
-            let im_rgb = srgb_to_rgbvals(srgb_color_float);
-            array.push(im_rgb);
-        }
-        array
+        generate_generic_gradient(size, |i| {
+            Oklch::new(
+                0.7 - (i as f32 * 0.02),
+                0.2,
+                15.0 + (i as f32 * 25.0) % 45.0,
+            )
+        })
     }
 
     fn generate_forest_greens(size: usize) -> Vec<[u8; 3]> {
-        let mut array = Vec::new();
-        for i in 0..size {
-            let oklch_color = Oklch::new(
+        generate_generic_gradient(size, |i| {
+            Oklch::new(
                 0.55 + (i as f32 * 0.03),
                 0.15,
                 140.0 + (i as f32 * 10.0) % 40.0,
-            );
-            let srgb_color_float: Srgb<f32> = oklch_color.into_color();
-            let im_rgb = srgb_to_rgbvals(srgb_color_float);
-            array.push(im_rgb);
-        }
-        array
+            )
+        })
     }
 
     fn generate_royal_violets(size: usize) -> Vec<[u8; 3]> {
-        let mut array = Vec::new();
-        for i in 0..size {
-            let oklch_color = Oklch::new(
+        generate_generic_gradient(size, |i| {
+            Oklch::new(
                 0.6,
                 0.18 + (i as f32 * 0.01),
                 280.0 + (i as f32 * 15.0) % 40.0,
-            );
-            let srgb_color_float: Srgb<f32> = oklch_color.into_color();
-            let im_rgb = srgb_to_rgbvals(srgb_color_float);
-            array.push(im_rgb);
-        }
-        array
+            )
+        })
     }
 
     fn generate_ocean_blues(size: usize) -> Vec<[u8; 3]> {
-        let mut array = Vec::new();
-        for i in 0..size {
-            let oklch_color = Oklch::new(
+        generate_generic_gradient(size, |i| {
+            Oklch::new(
                 0.7 - (i as f32 * 0.02),
                 0.12 + (i as f32 * 0.01),
                 220.0 + (i as f32 * 20.0) % 40.0,
-            );
-            let srgb_color_float: Srgb<f32> = oklch_color.into_color();
-            let im_rgb = srgb_to_rgbvals(srgb_color_float);
-            array.push(im_rgb);
-        }
-        array
+            )
+        })
     }
 
     #[derive(Debug)]
@@ -181,7 +172,7 @@ pub mod images_fractal {
         // Move render_iterations outside the loop
         let color_size: usize = 10;
         let color_schemes = [
-            generate_warm_reds(color_size),
+            generate_rainbow_gradient(color_size),
             generate_ocean_blues(color_size),
         ];
         let render_iterations = |iterator: u32, basin: usize| -> [u8; 3] {
