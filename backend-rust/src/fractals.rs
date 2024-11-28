@@ -23,6 +23,62 @@ pub mod images_fractal {
         array
     }
 
+    fn generate_warm_reds(size: usize) -> Vec<[u8; 3]> {
+        let mut array = Vec::new();
+        for i in 0..size {
+            let oklch_color = Oklch::new(0.65, 0.2, (15.0 + (i as f32 * 25.0) % 45.0));
+            let srgb_color_float: Srgb<f32> = oklch_color.into_color();
+            let im_rgb = srgb_to_rgbvals(srgb_color_float);
+            array.push(im_rgb);
+        }
+        array
+    }
+
+    fn generate_forest_greens(size: usize) -> Vec<[u8; 3]> {
+        let mut array = Vec::new();
+        for i in 0..size {
+            let oklch_color = Oklch::new(
+                0.55 + (i as f32 * 0.03),
+                0.15,
+                140.0 + (i as f32 * 10.0) % 40.0,
+            );
+            let srgb_color_float: Srgb<f32> = oklch_color.into_color();
+            let im_rgb = srgb_to_rgbvals(srgb_color_float);
+            array.push(im_rgb);
+        }
+        array
+    }
+
+    fn generate_royal_violets(size: usize) -> Vec<[u8; 3]> {
+        let mut array = Vec::new();
+        for i in 0..size {
+            let oklch_color = Oklch::new(
+                0.6,
+                0.18 + (i as f32 * 0.01),
+                280.0 + (i as f32 * 15.0) % 40.0,
+            );
+            let srgb_color_float: Srgb<f32> = oklch_color.into_color();
+            let im_rgb = srgb_to_rgbvals(srgb_color_float);
+            array.push(im_rgb);
+        }
+        array
+    }
+
+    fn generate_ocean_blues(size: usize) -> Vec<[u8; 3]> {
+        let mut array = Vec::new();
+        for i in 0..size {
+            let oklch_color = Oklch::new(
+                0.7 - (i as f32 * 0.02),
+                0.12 + (i as f32 * 0.01),
+                220.0 + (i as f32 * 20.0) % 40.0,
+            );
+            let srgb_color_float: Srgb<f32> = oklch_color.into_color();
+            let im_rgb = srgb_to_rgbvals(srgb_color_float);
+            array.push(im_rgb);
+        }
+        array
+    }
+
     #[derive(Debug)]
     struct JuliaBasin {
         basin: Option<Complex<f32>>,
@@ -63,6 +119,36 @@ pub mod images_fractal {
         validate_basin(val2, &mut basins);
         basins
     }
+    fn get_basin_index(basins: &[JuliaBasin]) -> impl Fn(Complex<f32>) -> usize + '_ {
+        // Check escape condition first (most likely to be true in typical Julia sets)
+        move |z: Complex<f32>| {
+            if let Some((idx, escape_basin)) =
+                basins.iter().enumerate().find(|(_, b)| b.basin.is_none())
+            {
+                if z.norm_sqr() >= escape_basin.neighborhood {
+                    return idx;
+                }
+            }
+
+            // Then check all attraction basins
+            if let Some((idx, _)) = basins
+                .iter()
+                .enumerate()
+                .filter(|(_, b)| b.basin.is_some())
+                .find(|(_, basin)| {
+                    let basin_val = basin.basin.unwrap();
+                    (z - basin_val).norm_sqr() <= basin.neighborhood
+                })
+            {
+                return idx;
+            } else {
+                return 0;
+            }
+        }
+
+        // Default basin if no conditions met
+    }
+
     fn generate_basins_conditional(basins: &[JuliaBasin]) -> impl Fn(Complex<f32>) -> bool + '_ {
         // Create a single closure that directly evaluates all conditions
         move |z: Complex<f32>| {
@@ -94,16 +180,20 @@ pub mod images_fractal {
         // Create a new ImgBuf with width: imgx and height: imgy
         // Move render_iterations outside the loop
         let color_size: usize = 10;
-        let color_schemes = [generate_rainbow_gradient(color_size)];
-        let render_iterations = |iterator: i32, basin: u8| -> [u8; 3] {
+        let color_schemes = [
+            generate_warm_reds(color_size),
+            generate_ocean_blues(color_size),
+        ];
+        let render_iterations = |iterator: u32, basin: usize| -> [u8; 3] {
             if iterator == 300 {
                 [0, 0, 0]
             } else {
-                color_schemes[basin as usize][iterator as usize % color_size]
+                color_schemes[basin][iterator as usize % color_size]
             }
         };
         let basins = generate_julia_basins(seed_value);
-        let conditional = generate_basins_conditional(&basins);
+        let basin_conditional = generate_basins_conditional(&basins);
+        let basin_index_extractor = get_basin_index(&basins);
 
         let iterator = |index: u32| -> [u8; 3] {
             let x = index % imgx;
@@ -118,14 +208,15 @@ pub mod images_fractal {
             while i < 300 {
                 z = z * z + seed_value;
                 i += 1;
-                if conditional(z) {
+                if basin_conditional(z) {
                     break;
                 }
             }
+            let basin_id = basin_index_extractor(z);
             if i == 300 {
                 println!("Pixel ({z}) ended iterator at no escape point");
             }
-            render_iterations(i, 0)
+            render_iterations(i, basin_id)
         };
         println!("{basins:?}");
         // Create the image buffer with parallel iterator
