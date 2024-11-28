@@ -27,7 +27,9 @@ pub mod images_fractal {
     }
 
     fn generate_rainbow_gradient(size: usize) -> Vec<[u8; 3]> {
-        generate_generic_gradient(size, |i| Oklch::new(0.73, 0.17, (i * 30 % 360) as f32))
+        generate_generic_gradient(size, |i| {
+            Oklch::new(0.7, 0.16, (i * (360 / size) % 360) as f32)
+        })
     }
 
     fn generate_warm_reds(size: usize) -> Vec<[u8; 3]> {
@@ -162,7 +164,7 @@ pub mod images_fractal {
         imgx: u32,
         imgy: u32,
         seed_value: Complex<f32>,
-    ) -> Result<Vec<u8>, String> {
+    ) -> Result<image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, String> {
         //! An example of generating julia fractals.
 
         let scalex = 3.0 / imgx as f32;
@@ -248,12 +250,7 @@ pub mod images_fractal {
         };
         let duration = start.elapsed();
         println!("Image buffer creation took: {:?}", duration);
-
-        let start = std::time::Instant::now();
-        let webp: Vec<u8> = image_buffer_to_webp_bytes(img);
-        let duration = start.elapsed();
-        println!("WebP encoding took: {:?}", duration);
-        Ok(webp)
+        Ok(img)
     }
 
     fn image_buffer_to_webp_bytes(buffer: image::ImageBuffer<image::Rgb<u8>, Vec<u8>>) -> Vec<u8> {
@@ -266,11 +263,26 @@ pub mod images_fractal {
             .expect("Failed to encode image as Webp");
         bytes
     }
+
+    fn image_buffer_to_png_bytes(buffer: image::ImageBuffer<image::Rgb<u8>, Vec<u8>>) -> Vec<u8> {
+        let mut bytes: Vec<u8> = Vec::new();
+        buffer
+            .write_to(
+                &mut std::io::Cursor::new(&mut bytes),
+                image::ImageFormat::Png,
+            )
+            .expect("Failed to encode image as Webp");
+        bytes
+    }
     pub fn test_webp(resolution: u32) -> Result<Vec<u8>, String> {
         let start = std::time::Instant::now();
-        let result = generate_julia_image(resolution, resolution, Complex::new(-0.3, 0.4));
+        let img = generate_julia_image(resolution, resolution, Complex::new(-0.3, 0.4))?;
+        let start_webp = std::time::Instant::now();
+        let webp: Vec<u8> = image_buffer_to_webp_bytes(img);
+        let duration_webp = start_webp.elapsed();
+        println!("WebP encoding took: {:?}", duration_webp);
         let duration = start.elapsed();
         println!("Total Image generation took: {:?}", duration);
-        result
+        Ok(webp)
     }
 }
