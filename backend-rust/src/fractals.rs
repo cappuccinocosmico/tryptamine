@@ -12,10 +12,10 @@ pub mod images_fractal {
         ]
     }
 
-    fn generate_color_gradient(size: i32) -> Vec<[u8; 3]> {
+    fn generate_rainbow_gradient(size: usize) -> Vec<[u8; 3]> {
         let mut array = Vec::new();
         for i in 0..size {
-            let oklch_color = Oklch::new(0.7, 0.2, ((i * 30) % 360) as f32);
+            let oklch_color = Oklch::new(0.73, 0.17, ((i * 30) % 360) as f32);
             let srgb_color_float: Srgb<f32> = oklch_color.into_color();
             let im_rgb = srgb_to_rgbvals(srgb_color_float);
             array.push(im_rgb);
@@ -23,6 +23,7 @@ pub mod images_fractal {
         array
     }
 
+    #[derive(Debug)]
     struct JuliaBasin {
         basin: Option<Complex<f32>>,
         neighborhood: f32,
@@ -43,7 +44,13 @@ pub mod images_fractal {
         let val1 = 1.0 / 2.0 + (1.0 / 4.0 - c).sqrt();
         let val2 = 1.0 / 2.0 - (1.0 / 4.0 - c).sqrt();
         fn validate_basin(val: Complex<f32>, basins: &mut Vec<JuliaBasin>) {
-            let valprime = 2.0 * val - 1.0;
+            println!("validating basin: {}", val);
+            let valprime = 2.0 * val;
+            println!(
+                "basin has derivative: {}, with norm: {}",
+                valprime,
+                valprime.norm()
+            );
             let is_valid = valprime.norm() <= 1.0;
             if is_valid {
                 basins.push(JuliaBasin {
@@ -56,7 +63,23 @@ pub mod images_fractal {
         validate_basin(val2, &mut basins);
         basins
     }
-    fn generate_basins_conditional( basins : &Vec<JuliaBasin>) ->  {}
+    fn generate_basins_conditional(basins: &[JuliaBasin]) -> impl Fn(Complex<f32>) -> bool + '_ {
+        // Create a single closure that directly evaluates all conditions
+        move |z: Complex<f32>| {
+            // Check escape condition first (most likely to be true in typical Julia sets)
+            if let Some(escape_basin) = basins.iter().find(|b| b.basin.is_none()) {
+                if z.norm_sqr() >= escape_basin.neighborhood {
+                    return true;
+                }
+            }
+
+            // Then check all attraction basins
+            basins.iter().filter(|b| b.basin.is_some()).any(|basin| {
+                let basin_val = basin.basin.unwrap();
+                (z - basin_val).norm_sqr() <= basin.neighborhood
+            })
+        }
+    }
 
     fn generate_julia_image(
         imgx: u32,
@@ -70,15 +93,17 @@ pub mod images_fractal {
 
         // Create a new ImgBuf with width: imgx and height: imgy
         // Move render_iterations outside the loop
-        let colors = generate_color_gradient(10);
+        let color_size: usize = 10;
+        let color_schemes = [generate_rainbow_gradient(color_size)];
         let render_iterations = |iterator: i32, basin: u8| -> [u8; 3] {
             if iterator == 300 {
                 [0, 0, 0]
             } else {
-                colors[iterator as usize % colors.len()]
+                color_schemes[basin as usize][iterator as usize % color_size]
             }
         };
         let basins = generate_julia_basins(seed_value);
+        let conditional = generate_basins_conditional(&basins);
 
         let iterator = |index: u32| -> [u8; 3] {
             let x = index % imgx;
@@ -86,23 +111,23 @@ pub mod images_fractal {
             let cx = y as f32 * scalex - 1.5;
             let cy = x as f32 * scaley - 1.5;
 
-
             let mut z = Complex::new(cx, cy);
 
             let mut i = 0;
-            
+
             while i < 300 {
                 z = z * z + seed_value;
                 i += 1;
-                for basin in &basins {
-                    if z.norm() <= basin.neighborhood {
-                        return render_iterations(i, 0);
-                    }
+                if conditional(z) {
+                    break;
                 }
             }
-
+            if i == 300 {
+                println!("Pixel ({z}) ended iterator at no escape point");
+            }
             render_iterations(i, 0)
         };
+        println!("{basins:?}");
         // Create the image buffer with parallel iterator
         let start = std::time::Instant::now();
         let buff_pixels: Vec<[u8; 3]> = (0..imgx * imgy).into_par_iter().map(iterator).collect();
@@ -159,9 +184,9 @@ pub mod images_fractal {
             .expect("Failed to encode image as Webp");
         bytes
     }
-    pub fn test_webp() -> Result<Vec<u8>, String> {
+    pub fn test_webp(resolution: u32) -> Result<Vec<u8>, String> {
         let start = std::time::Instant::now();
-        let result = generate_julia_image(3000, 3000, Complex::new(-0.3, 0.4));
+        let result = generate_julia_image(resolution, resolution, Complex::new(-0.3, 0.4));
         let duration = start.elapsed();
         println!("Total Image generation took: {:?}", duration);
         result

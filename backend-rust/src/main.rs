@@ -5,6 +5,7 @@ pub const TAILWIND_CSS: &str = include_str!("../styles/main.css");
 use askama::Template; // bring trait in scope
 use axum::body::Body;
 use axum::{
+    extract::Path,
     http::{header, HeaderValue},
     response::{Html, IntoResponse, Response},
     routing::get,
@@ -52,7 +53,7 @@ async fn main() {
                 project_path.to_str().unwrap()
             )),
         )
-        .nest_service("/fractal", get(test_fractal));
+        .nest_service("/test-fractal/:resolution", get(test_fractal));
 
     // `POST /users` goes to `create_user`
 
@@ -70,11 +71,11 @@ async fn main_tailwind_styles() -> Response<Body> {
         .into_response()
 }
 
-async fn test_fractal() -> Response<Body> {
+async fn test_fractal(Path(resolution): Path<u32>) -> Response<Body> {
     // Build the response
     (
         [(header::CONTENT_TYPE, HeaderValue::from_static("image/webp"))],
-        images_fractal::test_webp(),
+        images_fractal::test_webp(resolution),
     )
         .into_response()
 }
