@@ -74,7 +74,13 @@ In my opinion the 3 main events that happened in 2016 to help catalyze these lat
 
 Even though lots of organizers were galvanized by point 1, it pales in significance compared to 2 and 3. Mass movements are fundamentally growth driven enterprises,
 
-for every person who attends
+for every person who attends who attends an action, you need to convert enough of them into organizer and advocated who can recurit people and bring friends to the next event. And since protest movements only last around 5 years, you need to scale from 5-10 people when starting to 10's of millions internationally, so for every single action you maybe need to bring in 50% more if you are looking to have something successful.
+
+Under normal circumstances, I tend to think that maintaining that growth rate is impossible. The only time I have seen it work is where people are depressed and angry enough with the current state of affairs so it takes less pushing to get them to attend actions, and once there having an insanely good process for getting those people involved in more organizing activities.
+
+During the first trump admin, you saw these come together in 2019, and to an absolutely huge degree during the summer of 2020. And even though another giant pandemic is unlikely, all of those favorable conditions made those afforementioned movements possible,
+
+This has even continued a bit under biden, and expecially in the protest
 
 # The people who were in occupy eventually lead other movements
 
