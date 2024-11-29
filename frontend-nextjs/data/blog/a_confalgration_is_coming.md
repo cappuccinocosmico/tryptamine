@@ -52,7 +52,7 @@ I remember this organizing in this time period felt like you were being gaslit c
 
 This made criticising the current administration an absolute nightmare, both because you would get tons of pushback from obama worshipers, but also because playing nice and currying favor with the current administration was the only way to get them to take your concerns seriously and listen to you. Every other form of activism was dismissed as "unserious".
 
-This even effected largely technocratic projects. In the first year of the Juliana vs US lawsuit, the vast majority of our interviews always included a question asking why we were suing the poor Obama administration with all of its super ambitious climate goals, with us (a bunch of literal children) needing to explain that all of their measures didn't actually impose limits on industry that they weren't already obeying for economic reasons, and was also placing the us on a 4-5 degree warming path instead of a 2 degree one. When Trump got elected I remember recieving legal advice saying "This election really helps your case, since it really highlights your main argument that the executive and legislative branches are incapable of addressing climate change."
+This even effected largely technocratic projects. In the first year of the Juliana vs US lawsuit, the vast majority of our interviews always included a question asking why we were suing the poor Obama administration with all of its super ambitious climate goals, with us (a bunch of literal children) needing to explain that all of their measures didn't actually impose limits on industry that they weren't already obeying for economic reasons, and was also placing the us on a 4-5 degree warming path instead of a 2 degree one. When Trump got elected I remember receiving legal advice saying "This election really helps your case, since it really highlights your main argument that the executive and legislative branches are incapable of addressing climate change."
 
 However, no movement was damaged by this sentiment as much as Occupy Wall Street, it was mercilessly mocked by everyone, mainstream media, progressive media, comedy shows, and even other activists circles. The popular sentiment was captured very well by a bit john oliver did for the daily show at the time:
 
@@ -60,15 +60,21 @@ However, no movement was damaged by this sentiment as much as Occupy Wall Street
 
 Afterwards occupy is largely viewed as a total failure, a "blip", and a movement that was more engaged in performative outrage and wasn't able to accomplish any of its actual goals.
 
-I think its better to think of it as a spark from which the rest of the protest movement grew.
+I think its better to think of it as fire that was hastily extinguished whoes ashes eventually ignited the largest protest movement since the 1960's when the underlying conditions were more favorable.
 
 # 2016
 
-The 2 main important events that happened in 2016 to help catalyze this movement were.
+In my opinion the 3 main events that happened in 2016 to help catalyze these later movements were.
 
 1. The extremely popular campaign of Bernie Sanders, and the rallying of all the DNC figureheads and obama behind hillary Clinton's primary. Making it crystal clear to lots of progressives that the democratic leadership are categorically opposed to almost all of the positive improvements we were wanting to make. And blaming the republicans or their own incompetence was just an excuse to hide the fact that they didnt actually want to do any of it. (In addition to being the political awakening for a lot of young people.)
 
 2. Clinton loosing to Trump, cutting off the ability of liberals to lobby the presidency to achieve their goals, and also striking a huge blow to their faith that "the system has it all figured out".
+
+3. The thermostatic equilibrium of political opinion (a statistical tendency for people to dislike incumbents) shifting to favor democrats under a trump presidency.
+
+Even though lots of organizers were galvanized by point 1, it pales in significance compared to 2 and 3. Mass movements are fundamentally growth driven enterprises,
+
+for every person who attends
 
 # The people who were in occupy eventually lead other movements
 
