@@ -1,3 +1,4 @@
+mod colors;
 mod fractals;
 mod website; // Declare the module
 pub const TAILWIND_CSS: &str = include_str!("../styles/main.css");

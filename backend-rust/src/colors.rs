@@ -1,4 +1,6 @@
 pub mod gradients {
+
+    use palette::{num::Round, IntoColor, Oklch, Srgb};
     fn srgb_to_rgbvals(srgb: Srgb<f32>) -> [u8; 3] {
         [
             (srgb.red * 256.0).floor() as u8,
@@ -21,13 +23,13 @@ pub mod gradients {
         array
     }
 
-    fn generate_rainbow_gradient(size: usize) -> Vec<[u8; 3]> {
+    pub fn generate_rainbow_gradient(size: usize) -> Vec<[u8; 3]> {
         generate_generic_gradient(size, |i| {
             Oklch::new(0.7, 0.16, ((i + 4) * (360 / size) % 360) as f32)
         })
     }
 
-    fn generate_warm_reds(size: usize) -> Vec<[u8; 3]> {
+    pub fn generate_warm_reds(size: usize) -> Vec<[u8; 3]> {
         generate_generic_gradient(size, |i| {
             Oklch::new(
                 0.8 - ((i + 4) as f32 * 0.03) % size as f32,
@@ -37,7 +39,7 @@ pub mod gradients {
         })
     }
 
-    fn generate_forest_greens(size: usize) -> Vec<[u8; 3]> {
+    pub fn generate_forest_greens(size: usize) -> Vec<[u8; 3]> {
         generate_generic_gradient(size, |i| {
             Oklch::new(
                 0.55 + (i as f32 * 0.03),
@@ -47,7 +49,7 @@ pub mod gradients {
         })
     }
 
-    fn generate_royal_violets(size: usize) -> Vec<[u8; 3]> {
+    pub fn generate_royal_violets(size: usize) -> Vec<[u8; 3]> {
         generate_generic_gradient(size, |i| {
             Oklch::new(
                 0.6,
@@ -57,7 +59,7 @@ pub mod gradients {
         })
     }
 
-    fn generate_ocean_blues(size: usize) -> Vec<[u8; 3]> {
+    pub fn generate_ocean_blues(size: usize) -> Vec<[u8; 3]> {
         generate_generic_gradient(size, |i| {
             Oklch::new(
                 0.7 - (i as f32 * 0.02),

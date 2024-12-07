@@ -1,9 +1,8 @@
 pub mod images_fractal {
 
+    use crate::colors::gradients;
     use num_complex::Complex;
-    use palette::{num::Round, IntoColor, Oklch, Srgb};
     use rayon::iter::{IntoParallelIterator, ParallelIterator};
-    use std::num;
 
     #[derive(Debug)]
     struct JuliaBasin {
@@ -107,8 +106,8 @@ pub mod images_fractal {
         // Move render_iterations outside the loop
         let color_size: usize = 10;
         let color_schemes = [
-            generate_rainbow_gradient(color_size),
-            generate_warm_reds(color_size),
+            gradients::generate_rainbow_gradient(color_size),
+            gradients::generate_warm_reds(color_size),
         ];
         let render_iterations = |iterator: u32, basin: usize| -> [u8; 3] {
             if iterator == 300 {
