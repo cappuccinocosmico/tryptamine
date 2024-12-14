@@ -1,5 +1,7 @@
 use num::One;
 use num_bigint::BigUint;
+use num_complex::Complex;
+use palette::white_point::C;
 fn miller_rabin_primality(num: &BigUint) -> bool {
     let small_primes: Vec<u32> = vec![2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47];
     // let largest_small_prime = small_primes[small_primes.len() - 1];
@@ -49,4 +51,24 @@ fn miller_rabin_primality(num: &BigUint) -> bool {
         }
     }
     true
+}
+
+fn eitau_real(x: &f32) -> Complex<f32> {
+    Complex::new(x.cos(), x.sin())
+}
+
+fn slow_fourier_transform(sequence: &Vec<Complex<f32>>) -> Vec<Complex<f32>> {
+    let mut res: Vec<Complex<f32>> = Vec::new();
+    for i in 0..sequence.len() {
+        let mut sum = Complex::new(0.0, 0.0);
+        for j in 0..sequence.len() {
+            sum += sequence[j] * eitau_real(&((i * j) as f32 / sequence.len() as f32));
+        }
+        res.push(sum);
+    }
+    res
+}
+
+fn fast_fourier_transform(sequence: &Vec<Complex<f32>>) -> Vec<Complex<f32>> {
+    return slow_fourier_transform(sequence);
 }
