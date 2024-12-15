@@ -1,7 +1,6 @@
 use num::One;
 use num_bigint::BigUint;
 use num_complex::Complex;
-use palette::white_point::C;
 fn miller_rabin_primality(num: &BigUint) -> bool {
     let small_primes: Vec<u32> = vec![2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47];
     // let largest_small_prime = small_primes[small_primes.len() - 1];
@@ -69,6 +68,34 @@ fn slow_fourier_transform(sequence: &Vec<Complex<f32>>) -> Vec<Complex<f32>> {
     res
 }
 
+// A(x)=a_n x^(n) + a_(n-1) x^(n-1) + ... + a_1 x + a_0
+// This polynomial needs to be evaulated at n different values of x
+// For two polynomials, then Odd(x)=-Odd(-x), and Even(x)=Even(-x)
+// For every polynomial A(x) = B(x^2) + xC(x^2)
+// And therefore A(-x) = B(x^2) - xC(x^2)
+// So for any polynomial, we can compute A(-x) and A(x) at the same time.
+// Ideally we want to do the same for B(x), and C(x), but in order to get a good set of pairs, we
+// evaluate ut at zeta, where zeta^(2^n)-1=0
+// then for B(x) and C(x) have to be evaulated at zeta^(2^(n-1)). Half the valuations of
+// previously.
+// What I dont understand is how to generalize this outside powers of 2.
+// One spoiler free wikipedia glance and I got that it only works for composites, and cant break
+// down primes. Thats helpful. We can see that it can split off factors of 2. How about 3?
+//
+// Split A(x) = B(x^3) + xC(x^3) + x^2D(x^3)
+// Then let w^3=1. Then we should have
+// A(x) = B(x^3) + xC(x^3) + x^2D(x^3)
+// A(wx) = B(w^3x^3) + wxC(w^3x^3) + w^2x^2D(w^3x^3) = B(x^3) + wxC(x^3) + w^2x^2D(x^3)
+// A(w^2x) = B(w^6x^3) + w^2xC(w^6x^3) + w^4x^2D(w^6x^3) = B(x^3) + w^2xC(x^3) + wx^2D(x^3)
+// also
+// more generally any polynomial P(x) with order pq, can be split
+// P(x) = sum [x^i*P_i(x^p) for i in 0..q]
+// and for any zeta^(p)-1=0
+// P(zeta^k) = sum [x^i zeta^ik * P_i(x^p) for i in 0..q]
+// So how much does it cost to compute the whole DFT for zeta^pq -1 =0, how much does
+// computing P(zeta^k) for k=0..pq cost? (assuming pq coprime so I dont have to think about
+// recursion)
+//
 fn fast_fourier_transform(sequence: &Vec<Complex<f32>>) -> Vec<Complex<f32>> {
     return slow_fourier_transform(sequence);
 }
