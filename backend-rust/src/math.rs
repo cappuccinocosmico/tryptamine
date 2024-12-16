@@ -53,7 +53,8 @@ fn miller_rabin_primality(num: &BigUint) -> bool {
 }
 
 fn eitau_real(x: &f32) -> Complex<f32> {
-    Complex::new(x.cos(), x.sin())
+    let z = x * std::f32::consts::TAU;
+    Complex::new(z.cos(), z.sin())
 }
 
 fn slow_fourier_transform(sequence: &[Complex<f32>]) -> Vec<Complex<f32>> {
@@ -124,11 +125,11 @@ fn fast_fourier_transform_recursive(
     }
     let leftover_factorized = &(length_factorized[1..].to_vec());
     let small_fourier = |sub_sequence: &Vec<Complex<f32>>| -> Vec<Complex<f32>> {
-        return fast_fourier_transform_recursive(sub_sequence, leftover_factorized);
+        fast_fourier_transform_recursive(sub_sequence, leftover_factorized)
     };
     let sub_fourier_results: Vec<Vec<Complex<f32>>> =
         smaller_polynomials.iter().map(small_fourier).collect();
-    let fourier_return: Vec<Complex<f32>> = vec![Complex::ZERO; length];
+    let mut fourier_return: Vec<Complex<f32>> = vec![Complex::ZERO; length];
     for j in 0..leftovers {
         for i in 0..main_prime {
             let mut sum = Complex::ZERO;
@@ -136,11 +137,11 @@ fn fast_fourier_transform_recursive(
                 sum += sub_fourier_results[k][j]
                     * Complex::from_polar(
                         1.0,
-                        2.0 * f32::consts::PI * i as f32 * k as f32 / main_prime as f32,
+                        std::f32::consts::TAU * i as f32 * k as f32 / main_prime as f32,
                     );
             }
             fourier_return[j * main_prime + i] = sum;
         }
     }
-    return fourier_return;
+    fourier_return
 }
