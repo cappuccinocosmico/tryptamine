@@ -1,14 +1,7 @@
-use num::One;
+use num::{FromPrimitive, One};
 use num_bigint::BigUint;
 use num_complex::Complex;
 fn miller_rabin_primality(num: &BigUint) -> bool {
-    let small_primes: Vec<u32> = vec![2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47];
-    // let largest_small_prime = small_primes[small_primes.len() - 1];
-    for prime in small_primes {
-        if num % prime == BigUint::ZERO {
-            return false;
-        }
-    }
     fn even_exp_factorize(num: &BigUint) -> (BigUint, u64) {
         let exp = num.trailing_zeros();
         if let Some(exp) = exp {
@@ -55,6 +48,48 @@ fn miller_rabin_primality(num: &BigUint) -> bool {
 fn eitau_real(x: &f32) -> Complex<f32> {
     let z = x * std::f32::consts::TAU;
     Complex::new(z.cos(), z.sin())
+}
+
+fn small_prime_factorize(num: &BigUint) -> Option<[BigUint; 2]> {
+    let small_primes: Vec<u32> = vec![2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47];
+    // let largest_small_prime = small_primes[small_primes.len() - 1];
+    for prime in small_primes {
+        if num % prime == BigUint::ZERO {
+            return Some([num.clone() / prime, BigUint::from_u32(prime).unwrap()]);
+        }
+    }
+    None
+}
+
+fn quadratic_number_sieve_factor(num: &BigUint) -> Option<[BigUint; 2]> {
+    None
+}
+
+fn factor_number(num: &BigUint) -> Result<Vec<BigUint>, String> {
+    let mut main_num = num.clone();
+    let mut results: Vec<BigUint> = vec![];
+    while let Some([big, small]) = small_prime_factorize(&main_num) {
+        results.push(small);
+        main_num = big;
+    }
+    fn factor_number_recursive(num: BigUint) -> Result<Vec<BigUint>, String> {
+        if miller_rabin_primality(&num) {
+            return Ok(vec![num]);
+        }
+        match quadratic_number_sieve_factor(&num) {
+            Some([factor1, factor2]) => {
+                let mut factorized_1 = factor_number_recursive(factor1)?;
+                let mut factorized_2 = factor_number_recursive(factor2)?;
+                factorized_1.append(&mut factorized_2);
+                Ok(factorized_1)
+            }
+            None => Err("Error factoring num with quadratic number sieve.".to_string()),
+        }
+    }
+    let mut quadratic_results = factor_number_recursive(main_num)?;
+    results.append(&mut quadratic_results);
+    results.sort_unstable();
+    Ok(results)
 }
 
 fn slow_fourier_transform(sequence: &[Complex<f32>]) -> Vec<Complex<f32>> {
@@ -134,11 +169,8 @@ fn fast_fourier_transform_recursive(
         for i in 0..main_prime {
             let mut sum = Complex::ZERO;
             for k in 0..main_prime {
-                sum += sub_fourier_results[k][j]
-                    * Complex::from_polar(
-                        1.0,
-                        std::f32::consts::TAU * i as f32 * k as f32 / main_prime as f32,
-                    );
+                sum +=
+                    sub_fourier_results[k][j] * eitau_real(&((i * k) as f32 / main_prime as f32));
             }
             fourier_return[j * main_prime + i] = sum;
         }
