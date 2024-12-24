@@ -8,6 +8,53 @@ const SMALL_PRIMES: [usize; 58] = [
     197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271,
 ];
 
+fn first_n_primes(n: usize) -> Vec<usize> {
+    if n < SMALL_PRIMES.len() {
+        return SMALL_PRIMES[..n].to_vec();
+    };
+    let max_limit = (n as f64) * (n as f64).ln();
+}
+
+fn numerical_differential_inverse(
+    f: impl Fn(&f64) -> f64,
+    fprime: impl Fn(&f64) -> f64,
+) -> impl Fn(&f64) -> f64 {
+    move |x: &f64| -> f64 {
+        let newton_func = |z| f(z) - x;
+        let inverse = newtons_method_rootfind_primative(newton_func, fprime, x);
+        inverse
+    }
+}
+fn newtons_method_rootfind_primative(
+    f: impl Fn(&f64) -> f64,
+    fprime: impl Fn(&f64) -> f64,
+    guess: &f64,
+) -> f64 {
+    let mut iterator_guess = guess - f(guess) / fprime(guess);
+    const MAX_ITER: u32 = 5;
+    for _ in 0..MAX_ITER {
+        iterator_guess = iterator_guess - f(&iterator_guess) / fprime(&iterator_guess);
+    }
+    return iterator_guess;
+}
+
+fn hallys_method_rootfind_primative(
+    f: impl Fn(&f64) -> f64,
+    fprime: impl Fn(&f64) -> f64,
+    fprimeprime: impl Fn(&f64) -> f64,
+    guess: f64,
+) -> f64 {
+    let mut iterator_guess = guess;
+    const MAX_ITER: u32 = 5;
+    for _ in 0..MAX_ITER {
+        iterator_guess = iterator_guess
+            - 2.0 * (f(&iterator_guess) * fprime(&iterator_guess))
+                / (2.0 * fprime(&iterator_guess).powf(2.0)
+                    - f(&iterator_guess) * fprimeprime(&iterator_guess));
+    }
+    return iterator_guess;
+}
+
 fn miller_rabin_primality(num: &BigUint) -> bool {
     if num == &BigUint::ZERO {
         return false;
