@@ -2,18 +2,19 @@ use num::{FromPrimitive, One};
 use num_bigint::BigUint;
 use num_complex::Complex;
 
-const SMALL_PRIMES: [usize; 58] = [
+const SMALL_PRIMES: [usize; 128] = [
     2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97,
     101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193,
-    197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271,
+    197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307,
+    311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421,
+    431, 433, 435, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541,
+    547, 557, 561, 563, 569, 571, 577, 587, 593, 599, 601, 607, 613, 617, 619, 631, 641, 643, 647,
+    653, 659, 661, 673, 677, 683, 691, 701,
 ];
 pub fn first_n_primes(n: usize) -> Vec<usize> {
-    if n < SMALL_PRIMES.len() {
-        return SMALL_PRIMES[..n].to_vec();
-    };
-    let mut results = SMALL_PRIMES.to_vec();
+    let mut results = [2, 3, 5, 7].to_vec();
     let max_limit = inverse_primecount_estimator_upper(&(n as f64)).round() as usize;
-    let start_count = SMALL_PRIMES.last().unwrap() + 1;
+    let start_count = 8;
     for i in start_count..max_limit {
         if miller_rabin_primality(&BigUint::from_usize(i).unwrap()) {
             results.push(i);
