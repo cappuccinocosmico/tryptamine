@@ -12,48 +12,80 @@ fn first_n_primes(n: usize) -> Vec<usize> {
     if n < SMALL_PRIMES.len() {
         return SMALL_PRIMES[..n].to_vec();
     };
-    let max_limit = (n as f64) * (n as f64).ln();
+    let mut results = SMALL_PRIMES.to_vec();
+    let max_limit = inverse_primecount_estimator_upper(&(n as f64)).round() as usize;
+    let last_prime = SMALL_PRIMES.last().unwrap().clone();
+    for i in last_prime..max_limit {
+        if !miller_rabin_primality(&BigUint::from_usize(i).unwrap()) {
+            results.push(i);
+        }
+        if results.len() >= n {
+            return results;
+        }
+    }
+    panic!("Could not find enough primes ({} found, {} needed), despite more than {} primes existing under {}", results.len(), n, n,max_limit);
 }
 
-fn numerical_differential_inverse(
-    f: impl Fn(&f64) -> f64,
-    fprime: impl Fn(&f64) -> f64,
-) -> impl Fn(&f64) -> f64 {
-    move |x: &f64| -> f64 {
-        let newton_func = |z| f(z) - x;
-        let inverse = newtons_method_rootfind_primative(newton_func, fprime, x);
-        inverse
-    }
-}
-fn newtons_method_rootfind_primative(
-    f: impl Fn(&f64) -> f64,
-    fprime: impl Fn(&f64) -> f64,
-    guess: &f64,
-) -> f64 {
-    let mut iterator_guess = guess - f(guess) / fprime(guess);
-    const MAX_ITER: u32 = 5;
-    for _ in 0..MAX_ITER {
-        iterator_guess = iterator_guess - f(&iterator_guess) / fprime(&iterator_guess);
-    }
-    return iterator_guess;
+// So the prime count estimator pi(x) is always strictly less than x/ln(x) for x>69 according to a
+// stackoverflow theorem. (Starting with SMALL_PRIMES ensures we are always over that threshold)
+// However, we have a secondary problem, trying to guess how many numbers we have to guess for an
+// upper bound so we can have a finite bound for how many numbers to check. So we want to get a
+// number strictly bigger than the inverse of x/ln(x). Using algebra, we can create our inverse g(x)
+// as g(x)=x*ln(g(x))
+// So given an nth order approximation
+// g_n(x)=x*ln(g_{n-1}(x))
+// if we start with a g_0 strictly greater then g, for example g_0 = x^2. (I am 60% sure that this
+// will make sure the approximations will be universally bigger, but I am far to lazy to throw
+// together a proof) Then we get the approximations
+// g_1 = x * ln(x^2) = 2x*ln(x)
+// g_2 = x* ln(2x * ln(x))
+// g_3 = x * ln( x * ln( 2x * ln ( x)))
+// going with the second approximation, since this whole investigation is an optimization with
+// absolutely no performance benefit and is deeply unimportant.
+
+fn inverse_primecount_estimator_upper(x: &f64) -> f64 {
+    x * (x * 2.0 * x.ln()).ln()
 }
 
-fn hallys_method_rootfind_primative(
-    f: impl Fn(&f64) -> f64,
-    fprime: impl Fn(&f64) -> f64,
-    fprimeprime: impl Fn(&f64) -> f64,
-    guess: f64,
-) -> f64 {
-    let mut iterator_guess = guess;
-    const MAX_ITER: u32 = 5;
-    for _ in 0..MAX_ITER {
-        iterator_guess = iterator_guess
-            - 2.0 * (f(&iterator_guess) * fprime(&iterator_guess))
-                / (2.0 * fprime(&iterator_guess).powf(2.0)
-                    - f(&iterator_guess) * fprimeprime(&iterator_guess));
-    }
-    return iterator_guess;
-}
+// fn numerical_differential_inverse(
+//     f: impl Fn(&f64) -> f64,
+//     fprime: impl Fn(&f64) -> f64,
+// ) -> impl Fn(&f64) -> f64 {
+//     move |x: &f64| -> f64 {
+//         let newton_func = |z| f(z) - x;
+//         let inverse = newtons_method_rootfind_primative(newton_func, fprime, x);
+//         inverse
+//     }
+// }
+// fn newtons_method_rootfind_primative(
+//     f: impl Fn(&f64) -> f64,
+//     fprime: impl Fn(&f64) -> f64,
+//     guess: &f64,
+// ) -> f64 {
+//     let mut iterator_guess = guess - f(guess) / fprime(guess);
+//     const MAX_ITER: u32 = 5;
+//     for _ in 0..MAX_ITER {
+//         iterator_guess = iterator_guess - f(&iterator_guess) / fprime(&iterator_guess);
+//     }
+//     return iterator_guess;
+// }
+//
+// fn hallys_method_rootfind_primative(
+//     f: impl Fn(&f64) -> f64,
+//     fprime: impl Fn(&f64) -> f64,
+//     fprimeprime: impl Fn(&f64) -> f64,
+//     guess: f64,
+// ) -> f64 {
+//     let mut iterator_guess = guess;
+//     const MAX_ITER: u32 = 5;
+//     for _ in 0..MAX_ITER {
+//         iterator_guess = iterator_guess
+//             - 2.0 * (f(&iterator_guess) * fprime(&iterator_guess))
+//                 / (2.0 * fprime(&iterator_guess).powf(2.0)
+//                     - f(&iterator_guess) * fprimeprime(&iterator_guess));
+//     }
+//     return iterator_guess;
+// }
 
 fn miller_rabin_primality(num: &BigUint) -> bool {
     if num == &BigUint::ZERO {
