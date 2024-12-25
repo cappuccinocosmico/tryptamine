@@ -7,16 +7,15 @@ const SMALL_PRIMES: [usize; 58] = [
     101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193,
     197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271,
 ];
-
-fn first_n_primes(n: usize) -> Vec<usize> {
+pub fn first_n_primes(n: usize) -> Vec<usize> {
     if n < SMALL_PRIMES.len() {
         return SMALL_PRIMES[..n].to_vec();
     };
     let mut results = SMALL_PRIMES.to_vec();
     let max_limit = inverse_primecount_estimator_upper(&(n as f64)).round() as usize;
-    let last_prime = SMALL_PRIMES.last().unwrap().clone();
-    for i in last_prime..max_limit {
-        if !miller_rabin_primality(&BigUint::from_usize(i).unwrap()) {
+    let start_count = SMALL_PRIMES.last().unwrap() + 1;
+    for i in start_count..max_limit {
+        if miller_rabin_primality(&BigUint::from_usize(i).unwrap()) {
             results.push(i);
         }
         if results.len() >= n {
@@ -87,8 +86,8 @@ fn inverse_primecount_estimator_upper(x: &f64) -> f64 {
 //     return iterator_guess;
 // }
 
-fn miller_rabin_primality(num: &BigUint) -> bool {
-    if num == &BigUint::ZERO {
+pub fn miller_rabin_primality(num: &BigUint) -> bool {
+    if num % 2 as usize == BigUint::ZERO {
         return false;
     }
     fn even_exp_factorize(num: &BigUint) -> (BigUint, u64) {
@@ -126,7 +125,7 @@ fn miller_rabin_primality(num: &BigUint) -> bool {
     let z = num - (1 as u32);
     let (z_odd, z_exp) = even_exp_factorize(&z);
 
-    for witness in [2, 7, 61] {
+    for witness in [2, 3, 5, 7, 61] {
         if !miller_rabin_iteration(witness, &z, &z_odd, z_exp, num) {
             return false;
         }

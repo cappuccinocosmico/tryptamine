@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 askama = "0.12.1"
-axum = "0.7.7"
+axum = {version="0.7.7", features=["macros"]}
 comrak = "0.28.0"
 image = "0.25.4"
 num = "0.4.3"

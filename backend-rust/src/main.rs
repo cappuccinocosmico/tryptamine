@@ -16,9 +16,11 @@ use axum::{
 use fractals::images_fractal::str_image_extension;
 use tower_http::services::ServeDir;
 
+use num_bigint::BigUint;
 use std::path::PathBuf;
 
 pub use crate::fractals::images_fractal;
+pub use crate::math::{first_n_primes, miller_rabin_primality};
 pub use crate::website::static_html;
 #[derive(Template)] // this will generate the code...
 #[template(path = "app.html")] // using the template in this path, relative
@@ -31,31 +33,33 @@ struct AppTemplate {
 #[tokio::main]
 // Use globbing
 async fn main() {
-    let _md_result =
-        static_html::generate_blog_html(&PathBuf::from("markdown"), &PathBuf::from("static"));
-    // initialize tracing
-    let project_path = std::env::current_dir().unwrap();
+    // let _md_result =
+    //     static_html::generate_blog_html(&PathBuf::from("markdown"), &PathBuf::from("static"));
+    // // initialize tracing
+    // let project_path = std::env::current_dir().unwrap();
 
     // build our application with a route
     let app = Router::new()
         // `GET /` goes to `root`
         .route("/", get(root))
         .route("/main.css", get(main_tailwind_styles))
-        .nest_service(
-            "/assets",
-            ServeDir::new(format!("{}/assets", project_path.to_str().unwrap())),
-        )
-        .nest_service(
-            "/blog",
-            ServeDir::new(format!("{}/static/bog", project_path.to_str().unwrap())),
-        )
-        .nest_service(
-            "/recipies",
-            ServeDir::new(format!(
-                "{}/static/recipies",
-                project_path.to_str().unwrap()
-            )),
-        )
+        .route("/get-primes/:num_primes", get(get_prime_list))
+        .route("/is_prime/:num_primes", get(is_prime))
+        // .nest_service(
+        //     "/assets",
+        //     ServeDir::new(format!("{}/assets", project_path.to_str().unwrap())),
+        // )
+        // .nest_service(
+        //     "/blog",
+        //     ServeDir::new(format!("{}/static/bog", project_path.to_str().unwrap())),
+        // )
+        // .nest_service(
+        //     "/recipies",
+        //     ServeDir::new(format!(
+        //         "{}/static/recipies",
+        //         project_path.to_str().unwrap()
+        //     )),
+        // )
         .nest_service("/test-fractal/:resolution/:format", get(test_fractal));
 
     // `POST /users` goes to `create_user`
@@ -72,6 +76,16 @@ async fn main_tailwind_styles() -> Response<Body> {
         TAILWIND_CSS,
     )
         .into_response()
+}
+
+async fn get_prime_list(Path(num_primes): Path<u32>) -> impl IntoResponse {
+    let primes = first_n_primes(num_primes as usize);
+    axum::Json(primes)
+}
+
+async fn is_prime(Path(num): Path<u32>) -> impl IntoResponse {
+    let is_prime = miller_rabin_primality(&BigUint::from(num));
+    axum::Json(is_prime)
 }
 
 async fn test_fractal(Path((resolution, format_str)): Path<(u32, String)>) -> Response<Body> {
