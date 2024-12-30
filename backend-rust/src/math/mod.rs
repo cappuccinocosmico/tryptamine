@@ -22,11 +22,14 @@ pub fn first_n_primes<Nat: SmallNatural>(n: usize) -> Vec<Nat> {
     ]
     .to_vec();
     let max_limit = inverse_primecount_estimator_upper(&(n as f64)).round() as usize;
-    let start_count = 6;
-    for i in start_count..max_limit {
+    let start_count = 7;
+    for i in (start_count..max_limit).step_by(2) {
         let big_i = i.to_big_uint();
-        if small_is_prime(&n) {
-            results.push(SmallNatural::from_big_uint(&big_i).unwrap());
+        if miller_rabin_primality(&big_i) {
+            results.push(
+                SmallNatural::from_big_uint(&big_i)
+                    .expect("Failed to get small natural from big uint"),
+            );
         }
         if results.len() >= n {
             return results;
