@@ -23,7 +23,7 @@ use utoipa::{OpenApi, ToSchema};
 use utoipa_swagger_ui::SwaggerUi;
 
 pub use crate::fractals::images_fractal;
-pub use crate::math::{first_n_primes, miller_rabin_primality, WitnessSet};
+pub use crate::math::{check_primality_test, first_n_primes, miller_rabin_primality, WitnessSet};
 pub use crate::website::static_html;
 #[derive(Template)] // this will generate the code...
 #[template(path = "app.html")] // using the template in this path, relative
@@ -36,6 +36,7 @@ struct AppTemplate {
 #[tokio::main]
 // Use globbing
 async fn main() {
+    env_logger::init();
     // let _md_result =
     //     static_html::generate_blog_html(&PathBuf::from("markdown"), &PathBuf::from("static"));
     // // initialize tracing
@@ -48,6 +49,7 @@ async fn main() {
         .route("/main.css", get(main_tailwind_styles))
         .route("/get-primes/:num_primes", get(get_prime_list))
         .route("/is_prime/:num_primes", get(is_prime))
+        .route("/run_tests", get(run_testing_code))
         // .nest_service(
         //     "/assets",
         //     ServeDir::new(format!("{}/assets", project_path.to_str().unwrap())),
@@ -131,6 +133,17 @@ async fn is_prime(Path(num): Path<u32>) -> impl IntoResponse {
     let is_prime = small_is_prime(&num);
     axum::Json(is_prime)
 }
+#[utoipa::path(
+    get,
+    path = "/run_tests",
+    responses(
+        (status = 200, description = "Ran tests", content_type = "text/plain", body = bool)
+    )
+)]
+async fn run_testing_code() -> impl IntoResponse {
+    check_primality_test();
+    "Success!"
+}
 
 #[utoipa::path(
     get,
@@ -164,5 +177,5 @@ async fn test_fractal(Path((resolution, format_str)): Path<(u32, String)>) -> Re
 }
 
 #[derive(OpenApi)]
-#[openapi(paths(test_fractal, is_prime, get_prime_list, root, main_tailwind_styles))]
+#[openapi(paths(test_fractal, is_prime, get_prime_list, root, run_testing_code))]
 struct ApiDoc;

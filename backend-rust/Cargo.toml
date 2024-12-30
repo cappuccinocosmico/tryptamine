@@ -7,6 +7,7 @@ edition = "2021"
 askama = "0.12.1"
 axum = {version="0.7.7", features=["macros"]}
 comrak = "0.28.0"
+env_logger = "0.11.6"
 image = "0.25.4"
 log = "0.4.22"
 num = "0.4.3"
