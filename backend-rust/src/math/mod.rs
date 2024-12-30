@@ -1,4 +1,6 @@
-use num::{FromPrimitive, One};
+use std::usize;
+
+use num::{FromPrimitive, One, ToPrimitive};
 use num_bigint::BigUint;
 use num_complex::Complex;
 
@@ -12,13 +14,19 @@ use num_complex::Complex;
 //     661, 673, 677, 683, 691, 701, 703, 709, 719,
 // ];
 const SMALL_PRIMES: [usize; 8] = [2, 3, 5, 7, 11, 13, 17, 19];
-pub fn first_n_primes(n: usize) -> Vec<usize> {
-    let mut results = [2, 3, 5, 7].to_vec();
+pub fn first_n_primes<Nat: SmallNatural>(n: usize) -> Vec<Nat> {
+    let mut results: Vec<Nat> = [
+        SmallNatural::from_u8(2),
+        SmallNatural::from_u8(3),
+        SmallNatural::from_u8(5),
+    ]
+    .to_vec();
     let max_limit = inverse_primecount_estimator_upper(&(n as f64)).round() as usize;
-    let start_count = 8;
+    let start_count = 6;
     for i in start_count..max_limit {
-        if miller_rabin_primality(&BigUint::from_usize(i).unwrap()) {
-            results.push(i);
+        let big_i = i.to_big_uint();
+        if small_is_prime(&n) {
+            results.push(SmallNatural::from_big_uint(&big_i).unwrap());
         }
         if results.len() >= n {
             return results;
@@ -27,6 +35,45 @@ pub fn first_n_primes(n: usize) -> Vec<usize> {
     panic!("Could not find enough primes ({} found, {} needed), despite more than {} primes existing under {}", results.len(), n, n,max_limit);
 }
 
+pub trait SmallNatural: Clone {
+    fn to_big_uint(&self) -> BigUint;
+
+    fn from_big_uint(big_uint: &BigUint) -> Option<Self>
+    where
+        Self: Sized;
+    fn from_u8(n: u8) -> Self;
+}
+impl SmallNatural for usize {
+    fn to_big_uint(&self) -> BigUint {
+        BigUint::from_usize(*self).unwrap()
+    }
+    fn from_big_uint(big_uint: &BigUint) -> Option<usize> {
+        let result: Result<usize, _> = big_uint.try_into();
+        match result {
+            Ok(n) => Some(n),
+            Err(_) => None,
+        }
+    }
+    fn from_u8(n: u8) -> Self {
+        n as usize
+    }
+}
+
+impl SmallNatural for u32 {
+    fn to_big_uint(&self) -> BigUint {
+        BigUint::from_u32(*self).unwrap()
+    }
+    fn from_big_uint(big_uint: &BigUint) -> Option<u32> {
+        let result: Result<u32, _> = big_uint.try_into();
+        match result {
+            Ok(n) => Some(n),
+            Err(_) => None,
+        }
+    }
+    fn from_u8(n: u8) -> u32 {
+        n as u32
+    }
+}
 // So the prime count estimator pi(x) is always strictly less than x/ln(x) for x>69 according to a
 // stackoverflow theorem. (Starting with SMALL_PRIMES ensures we are always over that threshold)
 // However, we have a secondary problem, trying to guess how many numbers we have to guess for an
@@ -48,49 +95,12 @@ fn inverse_primecount_estimator_upper(x: &f64) -> f64 {
     x * (x * 2.0 * x.ln()).ln()
 }
 
-// fn numerical_differential_inverse(
-//     f: impl Fn(&f64) -> f64,
-//     fprime: impl Fn(&f64) -> f64,
-// ) -> impl Fn(&f64) -> f64 {
-//     move |x: &f64| -> f64 {
-//         let newton_func = |z| f(z) - x;
-//         let inverse = newtons_method_rootfind_primative(newton_func, fprime, x);
-//         inverse
-//     }
-// }
-// fn newtons_method_rootfind_primative(
-//     f: impl Fn(&f64) -> f64,
-//     fprime: impl Fn(&f64) -> f64,
-//     guess: &f64,
-// ) -> f64 {
-//     let mut iterator_guess = guess - f(guess) / fprime(guess);
-//     const MAX_ITER: u32 = 5;
-//     for _ in 0..MAX_ITER {
-//         iterator_guess = iterator_guess - f(&iterator_guess) / fprime(&iterator_guess);
-//     }
-//     return iterator_guess;
-// }
-//
-// fn hallys_method_rootfind_primative(
-//     f: impl Fn(&f64) -> f64,
-//     fprime: impl Fn(&f64) -> f64,
-//     fprimeprime: impl Fn(&f64) -> f64,
-//     guess: f64,
-// ) -> f64 {
-//     let mut iterator_guess = guess;
-//     const MAX_ITER: u32 = 5;
-//     for _ in 0..MAX_ITER {
-//         iterator_guess = iterator_guess
-//             - 2.0 * (f(&iterator_guess) * fprime(&iterator_guess))
-//                 / (2.0 * fprime(&iterator_guess).powf(2.0)
-//                     - f(&iterator_guess) * fprimeprime(&iterator_guess));
-//     }
-//     return iterator_guess;
-// }
-
 // TODO: Since the results with with only 2 as a witness are identical for <2,047. Test that the
 // results under that threshold are identical with a huge witness set. Same for {2,3} being valid
 // for <1,373,653.
+pub fn small_is_prime<N: SmallNatural>(n: &N) -> bool {
+    miller_rabin_primality(&n.to_big_uint())
+}
 pub fn miller_rabin_primality(num: &BigUint) -> bool {
     if num % 2 as usize == BigUint::ZERO {
         return false;
@@ -322,3 +332,43 @@ fn fast_fourier_transform_recursive(
     }
     fourier_return
 }
+
+// fn numerical_differential_inverse(
+//     f: impl Fn(&f64) -> f64,
+//     fprime: impl Fn(&f64) -> f64,
+// ) -> impl Fn(&f64) -> f64 {
+//     move |x: &f64| -> f64 {
+//         let newton_func = |z| f(z) - x;
+//         let inverse = newtons_method_rootfind_primative(newton_func, fprime, x);
+//         inverse
+//     }
+// }
+// fn newtons_method_rootfind_primative(
+//     f: impl Fn(&f64) -> f64,
+//     fprime: impl Fn(&f64) -> f64,
+//     guess: &f64,
+// ) -> f64 {
+//     let mut iterator_guess = guess - f(guess) / fprime(guess);
+//     const MAX_ITER: u32 = 5;
+//     for _ in 0..MAX_ITER {
+//         iterator_guess = iterator_guess - f(&iterator_guess) / fprime(&iterator_guess);
+//     }
+//     return iterator_guess;
+// }
+//
+// fn hallys_method_rootfind_primative(
+//     f: impl Fn(&f64) -> f64,
+//     fprime: impl Fn(&f64) -> f64,
+//     fprimeprime: impl Fn(&f64) -> f64,
+//     guess: f64,
+// ) -> f64 {
+//     let mut iterator_guess = guess;
+//     const MAX_ITER: u32 = 5;
+//     for _ in 0..MAX_ITER {
+//         iterator_guess = iterator_guess
+//             - 2.0 * (f(&iterator_guess) * fprime(&iterator_guess))
+//                 / (2.0 * fprime(&iterator_guess).powf(2.0)
+//                     - f(&iterator_guess) * fprimeprime(&iterator_guess));
+//     }
+//     return iterator_guess;
+// }

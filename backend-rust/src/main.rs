@@ -14,6 +14,7 @@ use axum::{
     Router,
 };
 use fractals::images_fractal::str_image_extension;
+use math::small_is_prime;
 use tower_http::services::ServeDir;
 
 use num_bigint::BigUint;
@@ -79,12 +80,12 @@ async fn main_tailwind_styles() -> Response<Body> {
 }
 
 async fn get_prime_list(Path(num_primes): Path<u32>) -> impl IntoResponse {
-    let primes = first_n_primes(num_primes as usize);
+    let primes: Vec<u32> = first_n_primes(num_primes as usize);
     axum::Json(primes)
 }
 
 async fn is_prime(Path(num): Path<u32>) -> impl IntoResponse {
-    let is_prime = miller_rabin_primality(&BigUint::from(num));
+    let is_prime = small_is_prime(&num);
     axum::Json(is_prime)
 }
 
