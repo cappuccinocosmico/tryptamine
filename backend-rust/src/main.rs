@@ -19,6 +19,8 @@ use tower_http::services::ServeDir;
 
 use num_bigint::BigUint;
 use std::path::PathBuf;
+use utoipa::{OpenApi, ToSchema};
+use utoipa_swagger_ui::SwaggerUi;
 
 pub use crate::fractals::images_fractal;
 pub use crate::math::{first_n_primes, miller_rabin_primality};
@@ -61,7 +63,8 @@ async fn main() {
         //         project_path.to_str().unwrap()
         //     )),
         // )
-        .nest_service("/test-fractal/:resolution/:format", get(test_fractal));
+        .nest_service("/test-fractal/:resolution/:format", get(test_fractal))
+        .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()));
 
     // `POST /users` goes to `create_user`
 
@@ -70,6 +73,13 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
+#[utoipa::path(
+    get,
+    path = "/main.css",
+    responses(
+        (status = 200, description = "Returns the Tailwind CSS styles", content_type = "text/css")
+    )
+)]
 async fn main_tailwind_styles() -> Response<Body> {
     // Build the response
     (
@@ -79,16 +89,61 @@ async fn main_tailwind_styles() -> Response<Body> {
         .into_response()
 }
 
+#[utoipa::path(
+    get,
+    path = "/get-primes/{num_primes}",
+    params(
+        ("num_primes" = u32, Path, description = "Number of prime numbers to return")
+    ),
+    responses(
+        (status = 200, description = "Returns a list of prime numbers", content_type = "application/json", body = Vec<u32>)
+    )
+)]
 async fn get_prime_list(Path(num_primes): Path<u32>) -> impl IntoResponse {
     let primes: Vec<u32> = first_n_primes(num_primes as usize);
     axum::Json(primes)
 }
 
+#[utoipa::path(
+    get,
+    path = "/",
+    responses(
+        (status = 200, description = "Returns the main HTML template", content_type = "text/html")
+    )
+)]
+async fn root() -> Html<String> {
+    let app = AppTemplate {}; // instantiate your struct
+    let test_html = app.render().unwrap();
+    Html(test_html)
+}
+
+#[utoipa::path(
+    get,
+    path = "/is_prime/{num}",
+    params(
+        ("num" = u32, Path, description = "Number to check for primality")
+    ),
+    responses(
+        (status = 200, description = "Returns whether the number is prime", content_type = "application/json", body = bool)
+    )
+)]
 async fn is_prime(Path(num): Path<u32>) -> impl IntoResponse {
     let is_prime = small_is_prime(&num);
     axum::Json(is_prime)
 }
 
+#[utoipa::path(
+    get,
+    path = "/test-fractal/{resolution}/{format_str}",
+    params(
+        ("resolution" = u32, Path, description = "Image resolution"),
+        ("format_str" = String, Path, description = "Image format (e.g., 'png', 'jpg')")
+    ),
+    responses(
+        (status = 200, description = "Returns a fractal image", content_type = "image/*"),
+        (status = 400, description = "Unknown image type", content_type = "text/plain")
+    )
+)]
 async fn test_fractal(Path((resolution, format_str)): Path<(u32, String)>) -> Response<Body> {
     // Build the response
     let image_type = match str_image_extension(&format_str) {
@@ -108,8 +163,6 @@ async fn test_fractal(Path((resolution, format_str)): Path<(u32, String)>) -> Re
         .into_response()
 }
 
-async fn root() -> Html<String> {
-    let app = AppTemplate {}; // instantiate your struct
-    let test_html = app.render().unwrap();
-    Html(test_html)
-}
+#[derive(OpenApi)]
+#[openapi(paths(test_fractal, is_prime, get_prime_list, root, main_tailwind_styles))]
+struct ApiDoc;
