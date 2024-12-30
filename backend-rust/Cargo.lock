@@ -2474,6 +2474,7 @@ dependencies = [
  "num-bigint",
  "num-complex",
  "palette",
+ "rand",
  "rayon",
  "tokio",
  "tower",

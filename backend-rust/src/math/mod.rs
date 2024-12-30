@@ -3,6 +3,7 @@ use std::usize;
 use num::{FromPrimitive, One, ToPrimitive};
 use num_bigint::BigUint;
 use num_complex::Complex;
+use rand::Rng;
 
 // const SMALL_PRIMES: [usize; 128] = [
 //     2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 67, 71, 73, 79, 83, 89, 97,
@@ -14,7 +15,7 @@ use num_complex::Complex;
 //     661, 673, 677, 683, 691, 701, 703, 709, 719,
 // ];
 const SMALL_PRIMES: [usize; 8] = [2, 3, 5, 7, 11, 13, 17, 19];
-pub fn first_n_primes<Nat: SmallNatural>(n: usize) -> Vec<Nat> {
+pub fn first_n_primes<Nat: SmallNatural>(n: usize, witnesses: WitnessSet) -> Vec<Nat> {
     let mut results: Vec<Nat> = [
         SmallNatural::from_u8(2),
         SmallNatural::from_u8(3),
@@ -25,7 +26,7 @@ pub fn first_n_primes<Nat: SmallNatural>(n: usize) -> Vec<Nat> {
     let start_count = 7;
     for i in (start_count..max_limit).step_by(2) {
         let big_i = i.to_big_uint();
-        if miller_rabin_primality(&big_i) {
+        if miller_rabin_primality(&big_i, &witnesses.gen()) {
             results.push(
                 SmallNatural::from_big_uint(&big_i)
                     .expect("Failed to get small natural from big uint"),
@@ -35,7 +36,10 @@ pub fn first_n_primes<Nat: SmallNatural>(n: usize) -> Vec<Nat> {
             return results;
         }
     }
-    panic!("Could not find enough primes ({} found, {} needed), despite more than {} primes existing under {}", results.len(), n, n,max_limit);
+    if results.len() < n {
+        log::error!("Could not find enough primes ({} found, {} needed), despite more than {} primes existing under {}", results.len(), n, n, max_limit);
+    }
+    results
 }
 
 pub trait SmallNatural: Clone {
@@ -102,9 +106,38 @@ fn inverse_primecount_estimator_upper(x: &f64) -> f64 {
 // results under that threshold are identical with a huge witness set. Same for {2,3} being valid
 // for <1,373,653.
 pub fn small_is_prime<N: SmallNatural>(n: &N) -> bool {
-    miller_rabin_primality(&n.to_big_uint())
+    miller_rabin_primality(&n.to_big_uint(), &WitnessSet::WitnessOnly23.gen())
 }
-pub fn miller_rabin_primality(num: &BigUint) -> bool {
+
+// This enum should store values of type <const N: usize>[u32; N]. But I dont know how to do that.
+// Ideally everything should have a declared result at compile time.
+#[derive(Default)]
+pub enum WitnessSet {
+    WitnessOnly2,
+    WitnessOnly23,
+    #[default]
+    WitnessAll,
+    WitnessRandom(usize),
+}
+impl WitnessSet {
+    fn gen(&self) -> Vec<u32> {
+        match self {
+            WitnessSet::WitnessOnly2 => vec![2],
+            WitnessSet::WitnessOnly23 => vec![2, 3],
+            WitnessSet::WitnessAll => vec![2, 7, 61],
+            WitnessSet::WitnessRandom(n) => {
+                let mut rng = rand::thread_rng();
+                let mut results = Vec::with_capacity(*n);
+                while results.len() < *n {
+                    results.push(rng.gen_range(11..usize::MAX) as u32);
+                }
+                results
+            }
+        }
+    }
+}
+
+pub fn miller_rabin_primality(num: &BigUint, witnesses: &Vec<u32>) -> bool {
     if num % 2 as usize == BigUint::ZERO {
         return false;
     }
@@ -118,14 +151,14 @@ pub fn miller_rabin_primality(num: &BigUint) -> bool {
     }
 
     fn miller_rabin_iteration(
-        witness: u32,
+        witness: &u32,
         z: &BigUint,
         z_odd: &BigUint,
         z_exp: u64,
         num: &BigUint,
     ) -> bool {
         // Choose a witness between 2 and n-2
-        let mut x = BigUint::from(witness).modpow(z_odd, num);
+        let mut x = BigUint::from(witness.clone()).modpow(z_odd, num);
         if x.is_one() {
             return true;
         }
@@ -143,7 +176,13 @@ pub fn miller_rabin_primality(num: &BigUint) -> bool {
     let z = num - (1 as u32);
     let (z_odd, z_exp) = even_exp_factorize(&z);
 
-    for witness in [2, 3, 5, 7, 61] {
+    for witness in witnesses {
+        if num % witness == BigUint::ZERO {
+            if num > &BigUint::from(witness.clone()) {
+                return false;
+            }
+            return true;
+        }
         if !miller_rabin_iteration(witness, &z, &z_odd, z_exp, num) {
             return false;
         }
@@ -231,7 +270,7 @@ fn factor_number(num: &BigUint) -> Result<Vec<BigUint>, String> {
         main_num = big;
     }
     fn factor_number_recursive(num: BigUint) -> Result<Vec<BigUint>, String> {
-        if miller_rabin_primality(&num) {
+        if miller_rabin_primality(&num, &WitnessSet::default().gen()) {
             return Ok(vec![num]);
         }
         match quadratic_number_sieve_factor(&num) {

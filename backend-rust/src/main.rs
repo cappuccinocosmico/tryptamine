@@ -23,7 +23,7 @@ use utoipa::{OpenApi, ToSchema};
 use utoipa_swagger_ui::SwaggerUi;
 
 pub use crate::fractals::images_fractal;
-pub use crate::math::{first_n_primes, miller_rabin_primality};
+pub use crate::math::{first_n_primes, miller_rabin_primality, WitnessSet};
 pub use crate::website::static_html;
 #[derive(Template)] // this will generate the code...
 #[template(path = "app.html")] // using the template in this path, relative
@@ -100,7 +100,7 @@ async fn main_tailwind_styles() -> Response<Body> {
     )
 )]
 async fn get_prime_list(Path(num_primes): Path<u32>) -> impl IntoResponse {
-    let primes: Vec<u32> = first_n_primes(num_primes as usize);
+    let primes: Vec<u32> = first_n_primes(num_primes as usize, WitnessSet::default());
     axum::Json(primes)
 }
 

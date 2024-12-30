@@ -13,6 +13,7 @@ num = "0.4.3"
 num-bigint = "0.4.6"
 num-complex = "0.4.6"
 palette = "0.7.6"
+rand = "0.8.5"
 rayon = "1.10.0"
 tokio =  { version = "1.4.0", features = ["full"] }
 tower = "0.5.1"
