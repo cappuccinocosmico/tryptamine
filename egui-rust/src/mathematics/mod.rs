@@ -5,6 +5,8 @@ use num_bigint::BigUint;
 use num_complex::Complex;
 use rand::Rng;
 
+mod primes;
+
 fn eitau_real(x: &f32) -> Complex<f32> {
     let z = x * std::f32::consts::TAU;
     Complex::new(z.cos(), z.sin())
