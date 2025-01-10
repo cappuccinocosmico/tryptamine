@@ -9,6 +9,7 @@ pub struct MathApp {
     #[serde(skip)] // This how you opt-out of serialization of a field
     value: u32,
     is_prime: bool,
+    prime_list: Vec<u32>,
 }
 
 impl Default for MathApp {
@@ -18,6 +19,7 @@ impl Default for MathApp {
             label: "Hello World!".to_owned(),
             value: 3,
             is_prime: true,
+            prime_list: [2, 3, 5].to_vec(),
         }
     }
 }
@@ -77,19 +79,28 @@ impl eframe::App for MathApp {
             //     ui.text_edit_singleline(&mut self.label);
             // });
 
-            ui.add(egui::Slider::new(&mut self.value, 0..=200).text("value"));
-            if ui.button("Increment").clicked() {
-                self.value += 1;
-                self.is_prime = primes::small_is_prime(&self.value);
+            ui.add(
+                egui::Slider::new(&mut self.value, 0..=200).text("Number of primes to generate"),
+            );
+            if ui.button("Generate Primes").clicked() {
+                self.prime_list = primes::first_n_primes(
+                    self.value.try_into().unwrap_or(10000),
+                    primes::WitnessSet::default(),
+                );
             }
 
             ui.separator();
             //
             ui.heading(format!(
-                "{} is {}",
-                self.value,
-                if self.is_prime { "prime" } else { "not prime" }
+                "First {} primes are: {:?}",
+                self.prime_list.len(),
+                self.prime_list
             ));
+            // ui.heading(format!(
+            //     "{} is {}",
+            //     self.value,
+            //     if self.is_prime { "prime" } else { "not prime" }
+            // ));
 
             // ui.add(egui::github_link_file!(
             //     "https://github.com/emilk/eframe_template/blob/main/",

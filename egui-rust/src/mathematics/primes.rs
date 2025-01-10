@@ -1,4 +1,4 @@
-use num::{FromPrimitive, One, ToPrimitive};
+use num::{traits::ConstZero, FromPrimitive, One, ToPrimitive};
 use num_bigint::BigUint;
 use rand::Rng;
 // const SMALL_PRIMES: [usize; 128] = [
@@ -145,6 +145,11 @@ fn inverse_primecount_estimator_upper(x: &f64) -> f64 {
 // results under that threshold are identical with a huge witness set. Same for {2,3} being valid
 // for <1,373,653.
 pub fn small_is_prime<N: SmallNatural>(n: &N) -> bool {
+    println!("Computing primality");
+    let num = &n.to_big_uint();
+    if num <= &BigUint::one() {
+        return false;
+    }
     miller_rabin_primality(&n.to_big_uint(), &WitnessSet::Only23.gen())
 }
 
