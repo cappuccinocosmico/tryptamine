@@ -1,3 +1,4 @@
+use crate::mathematics::primes;
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
@@ -7,6 +8,7 @@ pub struct MathApp {
 
     #[serde(skip)] // This how you opt-out of serialization of a field
     value: u32,
+    is_prime: bool,
 }
 
 impl Default for MathApp {
@@ -15,6 +17,7 @@ impl Default for MathApp {
             // Example stuff:
             label: "Hello World!".to_owned(),
             value: 3,
+            is_prime: true,
         }
     }
 }
@@ -69,17 +72,24 @@ impl eframe::App for MathApp {
             // The central panel the region left after adding TopPanel's and SidePanel's
             ui.heading("eframe template");
 
-            ui.horizontal(|ui| {
-                ui.label("Write something: ");
-                ui.text_edit_singleline(&mut self.label);
-            });
+            // ui.horizontal(|ui| {
+            //     ui.label("Write something: ");
+            //     ui.text_edit_singleline(&mut self.label);
+            // });
 
             ui.add(egui::Slider::new(&mut self.value, 0..=200).text("value"));
             if ui.button("Increment").clicked() {
                 self.value += 1;
+                self.is_prime = primes::small_is_prime(&self.value);
             }
 
             ui.separator();
+            //
+            ui.heading(format!(
+                "{} is {}",
+                self.value,
+                if self.is_prime { "prime" } else { "not prime" }
+            ));
 
             // ui.add(egui::github_link_file!(
             //     "https://github.com/emilk/eframe_template/blob/main/",

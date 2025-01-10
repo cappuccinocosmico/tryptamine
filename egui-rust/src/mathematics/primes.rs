@@ -1,5 +1,6 @@
 use num::{FromPrimitive, One, ToPrimitive};
 use num_bigint::BigUint;
+use rand::Rng;
 // const SMALL_PRIMES: [usize; 128] = [
 //     2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 67, 71, 73, 79, 83, 89, 97,
 //     101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193,
@@ -10,6 +11,7 @@ use num_bigint::BigUint;
 //     661, 673, 677, 683, 691, 701, 703, 709, 719,
 // ];
 const SMALL_PRIMES: [usize; 8] = [2, 3, 5, 7, 11, 13, 17, 19];
+
 pub fn first_n_primes<Nat: SmallNatural>(n: usize, witnesses: WitnessSet) -> Vec<Nat> {
     let mut results: Vec<Nat> = [
         SmallNatural::from_u8(2),
