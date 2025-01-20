@@ -32,6 +32,14 @@ everyone who comes into a movement is
 {footnote}
 Another problem that a lot of these presentations is that integration with an activist movement involves you emotionally processing the outcomes of the climate work and getting in touch after 1 hour of processing time or less. This is even worse with social media where dealing with these apocolyptic emotions is harder since you have absolutely no support network.
 
+## Goal based thinking leads to bad outcomes.
+
+The most miserable people in any math/programming class are people that are focused on grades. And a big reason this exists is because you are thinking about the outcomes and not the actual process of doing the thing. And studies have shown that this leads to a
+
+For activism this is kind of a similar pipeline, where most activists will focus exclusively on the outcomes, what is the coming climate apocalypse going to look like,
+
+In this sense reading a lot about theory and unders
+
 ## Our Ideas Are Poisonus
 
 ## Understanding an extremely counterintuitive point.
