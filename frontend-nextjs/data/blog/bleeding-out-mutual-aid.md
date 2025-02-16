@@ -16,6 +16,10 @@ It seems like solving this problem could be really rough, but luckily we have a 
 
 ## Mutual Aid: How it is done currently
 
+- Increase the popularity of leftist economics by showing that it can provide regular resources for people.
+
+-
+
 ## Mutual Aid: A New Framework for Supporting the Movement
 
 If mutual aid really wants to contribute to the movement by:
@@ -28,15 +32,37 @@ Then there are a couple of things that would need to change about how we current
 
 Currently the methodology for a traditonal mutual aid group works like so:
 
-- Use money gotten from a job (or donations) to directly purchase all comoditites under capitalism. (99% of the time food)
+- Use money gotten from a job (or donations) to directly purchase all commodities under capitalism. (99% of the time food)
 
-- Spend most of the money and effort distributing said comoditites to people in need. (I think the commonality of naming Mutual aid events "distros" is somewhat revealing here.)
+- Spend most of the money and effort distributing said commodities to people in need. (I think the commonality of naming Mutual aid events "distros" is somewhat revealing here.)
 
 However this runs into some problems, expecially since most radical socialists are poor, so trying to support an activist movement off the backs of this is unlikely to work out super well. There are a couple solutions:
 
 - Radically decrease the cost of services provided by mutual aid
 
-- Radically increase the productivity of said mutual aid services
+- Radically increase the productivity of said mutual aid services.
+
+There is also another huge problem namely that in order to exist as a human under capitalism you need certain basic needs met, namely:
+
+- Food/Water/Clothing
+
+- Shelter
+
+- Medical Care
+
+- Transportation
+
+- Emotional Connection and Community
+
+However I feel like most mutual aid groups fall short in providing all but Food/Water. Which makes sense, in a country like the US where 1/3 of all food grown is wasted, and its possible to feed large numbers very cheaply with foods like beans and rice. However, the fact that it is so easy is explicitly why it isnt really that helpful. The average american spends 1.5 as much on transportation as on food, and around 2.5 times as much on housing compared to food.
+
+Its also eminantly possible to budget and spend as little as 0-3$ a day on food. (While admittedly sacrificing both neutritional value, and time to actually cook the food. Going completely free with Dumpster Diving + Food Banks is always an option. ) However, for other aspects like housing, transportation or medical care there is always a floor (probably in the realm of 1.5-2x savings, but not the 10x savings you can get with food), you can only save so much on a rent bill now that even studio's or 1 bedroom apartments in cities are going for 1k a month. And other aspects like transportation and medical care get more expensive as you try to spend less.
+
+## So how could we potentially solve this problem?
+
+### Housing
+
+At least for most activists out there the main reason land is expensive is because the land in cities is expensive.
 
 ## Retention and the Economic Problem
 
