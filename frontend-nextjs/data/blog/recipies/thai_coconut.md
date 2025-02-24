@@ -15,7 +15,7 @@ Tofu and Mushrooms sauteed seperately.
 
 - 4 cups water
 
-- 2 tablespoons chicken powder (less next time, start with 2 or something)
+- 2 tablespoons chicken powder 
 
 - 1 tablespoons fish sauce (forgot)
 
