@@ -24,4 +24,24 @@ $$D_S =23241 $$
 I thought I would start off with newton's law of gravitation
 
 $$
+F = G \frac{m_1m_2}{r^2}
 $$
+
+From here its actually possible to deduce some basic orbital mechanics without any calculus. By considering discrete timesteps. Lets consider that a small body is orbiting around a large body with radius $\mathcal{R}$. And its orbit is $t$ seconds long, thus the body travels $\alpha = 2\pi/t$ radians every second. Using some basic euclidean geometry and the law of sines.
+
+[https://www.geogebra.org/geometry/cjnesrgx]
+
+Lets us conclude that if the object traveled in a straight line instead of a circle for it to travel the same angular distance we observer, would mean that it would have to deviate from the circle by a distance of
+
+$$2\mathcal{R}\frac{\sin^2(\alpha/2)}{\cos(\alpha)}$$
+
+furthermore since most celestial bodies have orbits much much longer than one second, you can use the small angle approximation to clean up the math a bit
+$$\mathcal{R}\frac{alpha^2}{2}$$
+
+So in order to force the body back onto the circle you must apply an acceleration every second of
+
+$$\mathcal{R}\frac{alpha^2}{2} \frac{m}{s^2}$$
+
+(dubious math over)
+
+So consider
