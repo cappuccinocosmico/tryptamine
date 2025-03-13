@@ -27,7 +27,7 @@ And because this is just a regular set in ZFC, you can just use all your existin
 
 However, if you try to do the same thing to these alternate theories, the elements of your model dont look like "sets of a certain size", they kinda behave like "vaugely setlike things with internal geometric structure". So if we want to make a model we essentially need to find a mathematical object that behaves like that, and sheaves are that mathematical object.
 
-## What Is a Sheaf
+# What Is a Sheaf
 
 I found it really hard to think about what a "sheaf" or a "category of sheaves" are aside from "the class of object that streaches across a bunch of examples." All of which have their own interpretations on what they actually are
 
@@ -45,19 +45,39 @@ Def: Presheaf on the Real Numbers.
 
 A Preseaf $\mathcal{S}$ Is an association, for every open subset $U$ of $\mathbb{R}$. To a set $\mathcal{S}(U)$.
 
-(The following axiom is stated in two ways to help with generalizing this definition later, the first one specific, the second more general.)
+For every open subset $V \subseteq U$. There exists a function
 
-- Specific definition.
-  For every open subset $V \subseteq U$. There exists a function $\text{restrict}(U,V):S(U) -> S(V)$. And if there is a chain of subsets $U \supseteq V \supseteq T$. Then $\text{restrict}(U,T) = \text{restrict}(U,V) \circ \text{restrict}(V,T)$
+$$\mathcal{S}(U) \xrightarrow{\text{restrict}_\mathcal{S}(U,V)} \mathcal{S}(V)$$
 
-Also $\text{restrict}(U,U) = \text{the identity function on }(\mathcal{S}(U))$
+And if there is a chain of subsets $U \supseteq V \supseteq W$. Then
 
-- General Definition
-  Its possible to define a "subset" relationship in a topological space is by using a graph like so:
+$$\text{restrict}(U,W) = \text{restrict}(U,V) \circ \text{restrict}(V,W)$$
+
+And also since restricting to the same set shouldnt do anything we can express that like so:
+
+$$\text{restrict}(U,U) = \text{the identity function on }(\mathcal{S}(U))$$
+
+### General Definition of a Sheaf and Presheaf
+
+Its possible to define a "subset" relationship in a topological space is by using a graph like so:
 
 <!-- https://q.uiver.app/#q=WzAsNixbMSwwLCJcXG1hdGhiYntSfSJdLFswLDEsIigtMSw1KSJdLFsxLDEsIigtXFxpbmZ0eSwwKVxcY3VwKDAsXFxpbmZ0eSkiXSxbMCwyLCIoLTEsMSkiXSxbMSwyLCIoMCwyKSJdLFsxLDMsIlxccGhpIl0sWzAsMV0sWzAsMl0sWzEsM10sWzEsNF0sWzIsNF0sWzMsNV0sWzQsNV1d -->
 <iframe class="quiver-embed" src="https://q.uiver.app/#q=WzAsNixbMSwwLCJcXG1hdGhiYntSfSJdLFswLDEsIigtMSw1KSJdLFsxLDEsIigtXFxpbmZ0eSwwKVxcY3VwKDAsXFxpbmZ0eSkiXSxbMCwyLCIoLTEsMSkiXSxbMSwyLCIoMCwyKSJdLFsxLDMsIlxccGhpIl0sWzAsMV0sWzAsMl0sWzEsM10sWzEsNF0sWzIsNF0sWzMsNV0sWzQsNV1d&embed" width="501" height="560" style="border-radius: 8px; border: none;"></iframe>
 
-So if $V$ is a subset of $U$ if and only if there is an arrow $U \xrightarrow{f} V$
+So if $V$ is a subset of $U$ if and only if there is an arrow $U \xrightarrow{f}{} V$. And since every set is a subset of itself, we donote that special arrow $id_U$.
 
-Sheaves at least under most formulations are valuble for exploring different kinds of mathematical universes
+We can also express the fact that subsets are transitive, by saying that if there exists another arrow $V \xrightarrow{g} W$. Then their should exist another arrow $g\circ f$ (backwards because function composition is weird) going from $U$ to $W$:
+
+$$
+U \xrightarrow{g\circ f} W
+$$
+
+Then we can codify our rules from previously by saying that:
+
+1. For every object in our graph $\mathcal{S}$ associates it with a set $S(U)$
+2. For every arrow in our graph $U \xrightarrow{f}{} V$, gets associated with an equivalent function between the sets: $\mathcal{S}(U) \xrightarrow{\mathcal{S}(f)} \mathcal{S}(V)$
+   And this association must obey the following 2 properties namely the identity property
+   $$\mathcal{S}(id_U)=id_{\mathcal{S}(U)}$$
+   and the associative property
+   $$\mathcal{S}(g\circ f)=\mathcal{S}(g) \circ \mathcal{S}(f)$$
+   Sheaves at least under most formulations are valuble for exploring different kinds of mathematical universes
