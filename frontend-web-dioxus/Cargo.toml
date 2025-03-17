@@ -10,6 +10,7 @@ edition = "2021"
 dioxus = { version = "0.6.0", features = ["router", "fullstack"] }
 include_dir = "0.7.4"
 lazy_static = "1.5.0"
+markdown = "1.0.0-alpha.23"
 pulldown-cmark = "0.13.0"
 
 [features]

@@ -2,7 +2,7 @@ use crate::Route;
 use dioxus::prelude::*;
 use include_dir::{include_dir, Dir};
 use lazy_static::lazy_static;
-use pulldown_cmark::Parser;
+use markdown::{to_html_with_options, CompileOptions, Options};
 
 const BLOG_CSS: &str = "/assets/styling/blog.css";
 const BLOG_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/assets/blog");
@@ -51,6 +51,21 @@ pub fn BlogPost(slug: String) -> Element {
         }
     }
 }
+fn RenderMarkdown(markdown: &str) -> String {
+    to_html_with_options(
+        markdown,
+        &Options {
+            compile: CompileOptions {
+                allow_dangerous_html: true,
+                allow_dangerous_protocol: true,
+                ..CompileOptions::default()
+            },
+            ..Options::default()
+        },
+    )
+    .unwrap_or("<p>Failed To Parse Markdown</p>".to_string())
+}
+
 #[derive(Props, Clone, PartialEq)]
 pub struct MarkdownProps {
     #[props(default)]
@@ -62,11 +77,7 @@ pub struct MarkdownProps {
 }
 pub fn Markdown(props: MarkdownProps) -> Element {
     let content = &*props.content.read();
-    let parser = Parser::new(content);
-
-    let mut html_buf = String::new();
-    pulldown_cmark::html::push_html(&mut html_buf, parser);
-
+    let html_buf = RenderMarkdown(content);
     rsx! {
         div {
             id: "{&*props.id.read()}",
