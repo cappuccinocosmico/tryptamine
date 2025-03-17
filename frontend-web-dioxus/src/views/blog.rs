@@ -1,24 +1,24 @@
 use crate::Route;
 use dioxus::prelude::*;
-use dioxus_markdown::Markdown;
 use include_dir::{include_dir, Dir};
 use lazy_static::lazy_static;
+use pulldown_cmark::Parser;
 
 const BLOG_CSS: &str = "/assets/styling/blog.css";
 const BLOG_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/assets/blog");
 
 lazy_static! {
-    static ref SLUGS: Vec<String> = {
+    pub static ref SLUGS: Vec<String> = {
         let mut slugs = Vec::new();
-        for entry in BLOG_DIR.find("**/*.md").unwrap() {
-            if let Some(file) = entry.as_file() {
-                let path = file.path().to_str()
-                    .unwrap()
-                    .strip_suffix(".md")
-                    .unwrap()
-                    .replace('\\', "/");
-                slugs.push(path.to_string());
-            }
+        for entry in BLOG_DIR.files() {
+            let path = entry
+                .path()
+                .to_str()
+                .unwrap()
+                .strip_suffix(".md")
+                .unwrap()
+                .replace('\\', "/");
+            slugs.push(path.to_string());
         }
         slugs.sort();
         slugs
@@ -32,34 +32,46 @@ pub fn BlogPost(slug: String) -> Element {
         .and_then(|file| file.contents_utf8())
         .unwrap_or("Blog post not found");
 
-    let current_index = SLUGS.iter().position(|s| s == &slug).unwrap_or(0);
-    let prev_slug = current_index.checked_sub(1).and_then(|i| SLUGS.get(i));
-    let next_slug = SLUGS.get(current_index + 1);
+    let current_index = crate::views::blog::SLUGS
+        .iter()
+        .position(|s| s == &slug)
+        .unwrap_or(0);
+    let prev_slug = current_index
+        .checked_sub(1)
+        .and_then(|i| crate::views::blog::SLUGS.get(i));
+    let next_slug = crate::views::blog::SLUGS.get(current_index + 1);
+    let class = use_signal(|| String::from("content"));
 
     rsx! {
         link { rel: "stylesheet", href: BLOG_CSS }
         div { id: "blog-container",
-            Markdown { content: markdown_content }
-            div { class: "blog-navigation",
-                if let Some(prev) = prev_slug {
-                    rsx! {
-                        Link {
-                            to: Route::BlogPost { slug: prev.clone() },
-                            class: "blog-nav-button",
-                            "← {prev}"
-                        }
-                    }
-                }
-                if let Some(next) = next_slug {
-                    rsx! {
-                        Link {
-                            to: Route::BlogPost { slug: next.clone() },
-                            class: "blog-nav-button",
-                            "{next} →"
-                        }
-                    }
-                }
+            Markdown {
+                content: markdown_content,
             }
+        }
+    }
+}
+#[derive(Props, Clone, PartialEq)]
+pub struct MarkdownProps {
+    #[props(default)]
+    id: Signal<String>,
+    #[props(default)]
+    class: Signal<String>,
+
+    content: ReadOnlySignal<String>,
+}
+pub fn Markdown(props: MarkdownProps) -> Element {
+    let content = &*props.content.read();
+    let parser = Parser::new(content);
+
+    let mut html_buf = String::new();
+    pulldown_cmark::html::push_html(&mut html_buf, parser);
+
+    rsx! {
+        div {
+            id: "{&*props.id.read()}",
+            class: "{&*props.class.read()}",
+            dangerous_inner_html: "{html_buf}"
         }
     }
 }
