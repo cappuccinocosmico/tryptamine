@@ -58,30 +58,34 @@ pub fn BlogPost(slug: String) -> Element {
             crossorigin: "anonymous"
         }
         button {
-            onclick : async move |event | {
-                document::eval(r#"
-                    console.log("another test");
-                    console.log("trying to render math\");
-                    try {
-                        document.querySelectorAll('.language-math').forEach(element => {
-                            const tex = element.textContent;
-                            const isInline = element.classList.contains('math-inline');
-                            
-                            katex.render(tex, element, {
-                                throwOnError: false,
-                                displayMode: !isInline,
-                                macros: {
-                                    "\\R_E": "\\text{R}_\\text{E}",
-                                    "\\D_M": "\\text{D}_\\text{M}"
-                                }
+            onclick: move |_| {
+                spawn(async move {
+                    let result = document::eval(r#"
+                        console.log("Starting math rendering");
+                        try {
+                            if (typeof katex === 'undefined') {
+                                throw new Error('KaTeX is not loaded yet');
+                            }
+                            document.querySelectorAll('.language-math').forEach(element => {
+                                const tex = element.textContent;
+                                const isInline = element.classList.contains('math-inline');
+                                
+                                katex.render(tex, element, {
+                                    throwOnError: false,
+                                    displayMode: !isInline,
+                                });
                             });
-                        });
-                    } catch (err) {
-                       console.log(err);
+                            console.log("Math rendering completed");
+                        } catch (err) {
+                            console.error("Math rendering error:", err);
+                        }"#).await;
+
+                    if let Err(e) = result {
+                        println!("Failed to execute math rendering: {:?}", e);
                     }
-                    console.log("finished rendeing math");"#).await.unwrap_or("".into());
+                });
             },
-            "This is a test"
+            "Render Math"
         }
         Markdown {
             content: markdown_content,
