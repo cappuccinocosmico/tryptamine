@@ -42,6 +42,42 @@ pub fn BlogPost(slug: String) -> Element {
     //     .and_then(|i| crate::views::blog::SLUGS.get(i));
     // let next_slug = crate::views::blog::SLUGS.get(current_index + 1);
     let class = use_signal(|| String::from("content"));
+    let mut hasRendered = use_signal(|| false);
+
+    let render_math = async || -> Result<(), ()> {
+        // if hasRendered() {
+        //     return Ok(());
+        // }
+        let result = document::eval(
+            r#"
+                        console.log("Starting math rendering");
+                        try {
+                            if (typeof katex === 'undefined') {
+                                throw new Error('KaTeX is not loaded yet');
+                            }
+                            document.querySelectorAll('.language-math').forEach(element => {
+                                const tex = element.textContent;
+                                const isInline = element.classList.contains('math-inline');
+                                
+                                katex.render(tex, element, {
+                                    throwOnError: false,
+                                    displayMode: !isInline,
+                                });
+                            });
+                            console.log("Math rendering completed");
+                        } catch (err) {
+                            console.error("Math rendering error:", err);
+                        }"#,
+        )
+        .await;
+
+        if let Err(e) = result {
+            println!("Failed to execute math rendering: {:?}", e);
+        } else {
+            // hasRendered.set(true);
+        };
+        Ok(())
+    };
 
     rsx! {
         link { rel: "stylesheet", href: BLOG_CSS }
@@ -60,29 +96,7 @@ pub fn BlogPost(slug: String) -> Element {
         button {
             onclick: move |_| {
                 spawn(async move {
-                    let result = document::eval(r#"
-                        console.log("Starting math rendering");
-                        try {
-                            if (typeof katex === 'undefined') {
-                                throw new Error('KaTeX is not loaded yet');
-                            }
-                            document.querySelectorAll('.language-math').forEach(element => {
-                                const tex = element.textContent;
-                                const isInline = element.classList.contains('math-inline');
-                                
-                                katex.render(tex, element, {
-                                    throwOnError: false,
-                                    displayMode: !isInline,
-                                });
-                            });
-                            console.log("Math rendering completed");
-                        } catch (err) {
-                            console.error("Math rendering error:", err);
-                        }"#).await;
-
-                    if let Err(e) = result {
-                        println!("Failed to execute math rendering: {:?}", e);
-                    }
+                    render_math().await;
                 });
             },
             "Render Math"
@@ -90,12 +104,6 @@ pub fn BlogPost(slug: String) -> Element {
         Markdown {
             content: markdown_content,
         }
-        // // script {
-        // //     dangerous_inner_html: "document.addEventListener('DOMContentLoaded', function() {renderMathInElement(document.body);});",
-        // // }
-        // script {
-        //     text: "document.addEventListener('DOMContentLoaded',renderMathInElement(document.body));",
-        // }
     }
 }
 

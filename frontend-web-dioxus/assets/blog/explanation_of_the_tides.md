@@ -6,20 +6,31 @@ Given that $R_E$ is the radius of the earth
 
 they calculated the distance to the moon by observing that a lunar eclipse takes 3.5 hours, to traverse the shadow of the earth during an eclipse. Given that a lunar month is 28 days,
 
-$$\frac{D_M}{R_E} \approx \frac{28 \text{days}}{3.5 \text{hours}}$$
+$$
+\frac{D_M}{R_E} \approx \frac{28 \text{days}}{3.5 \text{hours}}
+$$
 
 Giving you
 
-$$D_M \approx 61 \cdot R_E$$
+$$
+D_M \approx 61 \cdot R_E
+$$
 
 And you can use the fact that moonrises and moonsets take 2 minutes to know that
 
-$$\frac{2*R_M}{2*\pi*D_M} =  \frac{2 \text{minutes}}{24 \text{hours}}$$
+$$
+\frac{2*R_M}{2*\pi*D_M} =  \frac{2 \text{ minutes}}{24 \text{ hours}}
+$$
 
-$$R_M \approx 0.26 *R_E $$
+$$
+R_M \approx 0.26 *R_E 
+$$
 
 From here measuring the distance to the sun is much harder considering that the distance is so large:
-$$D_S =23241 $$
+
+$$
+D_S =23241
+$$
 
 I thought I would start off with newton's law of gravitation
 
