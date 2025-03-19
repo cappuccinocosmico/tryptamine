@@ -57,18 +57,41 @@ pub fn BlogPost(slug: String) -> Element {
             integrity: "sha384-CAltQiu9myJj3FAllEacN6FT+rOyXo+hFZKGuR2p4HB8JvJlyUHm31eLfL4eEiJL",
             crossorigin: "anonymous"
         }
-        script {
-            defer: true,
-            src: "https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js",
-            integrity: "sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh",
-            crossorigin: "anonymous"
-        }
-        script {
-            dangerous_inner_html: "document.addEventListener('DOMContentLoaded', function() {renderMathInElement(document.body);});",
+        button {
+            onclick : async move |event | {
+                document::eval(r#"
+                    console.log("another test");
+                    console.log("trying to render math\");
+                    try {
+                        document.querySelectorAll('.language-math').forEach(element => {
+                            const tex = element.textContent;
+                            const isInline = element.classList.contains('math-inline');
+                            
+                            katex.render(tex, element, {
+                                throwOnError: false,
+                                displayMode: !isInline,
+                                macros: {
+                                    "\\R_E": "\\text{R}_\\text{E}",
+                                    "\\D_M": "\\text{D}_\\text{M}"
+                                }
+                            });
+                        });
+                    } catch (err) {
+                       console.log(err);
+                    }
+                    console.log("finished rendeing math");"#).await.unwrap_or("".into());
+            },
+            "This is a test"
         }
         Markdown {
             content: markdown_content,
         }
+        // // script {
+        // //     dangerous_inner_html: "document.addEventListener('DOMContentLoaded', function() {renderMathInElement(document.body);});",
+        // // }
+        // script {
+        //     text: "document.addEventListener('DOMContentLoaded',renderMathInElement(document.body));",
+        // }
     }
 }
 
@@ -84,8 +107,8 @@ fn render_markdown(markdown: &str) -> String {
         &markdown::Options {
             parse: markdown::ParseOptions {
                 constructs: markdown::Constructs {
-                    // math_flow: true,
-                    // math_text: true,
+                    math_flow: true,
+                    math_text: true,
                     mdx_esm: true,
                     mdx_expression_flow: true,
                     mdx_expression_text: true,
