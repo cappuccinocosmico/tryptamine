@@ -7,7 +7,7 @@ backend-rust/static/
 backend-rust/.dioxus/
 backend-rust/styles/main.css
 
-backend-rust/target
+**/target
 
 **/*.rs.bk
 
