@@ -1,9 +1,11 @@
+use num_complex::Complex;
+
 fn eitau_real(x: &f32) -> Complex<f32> {
     let z = x * std::f32::consts::TAU;
     Complex::new(z.cos(), z.sin())
 }
 
-fn slow_fourier_transform(sequence: &[Complex<f32>]) -> Vec<Complex<f32>> {
+pub fn slow_fourier_transform(sequence: &[Complex<f32>]) -> Vec<Complex<f32>> {
     let mut res: Vec<Complex<f32>> = Vec::new();
     for i in 0..sequence.len() {
         let mut sum = Complex::new(0.0, 0.0);
