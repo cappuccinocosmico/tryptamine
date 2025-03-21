@@ -1,4 +1,4 @@
-use crate::colors::gradients;
+use crate::math::colors::{generate_rainbow_gradient, generate_warm_reds};
 use num_complex::Complex;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
@@ -90,7 +90,7 @@ fn generate_basins_conditional(basins: &[JuliaBasin]) -> impl Fn(Complex<f32>) -
     }
 }
 
-fn generate_julia_image(
+pub fn generate_julia_image(
     imgx: u32,
     imgy: u32,
     seed_value: Complex<f32>,
@@ -104,8 +104,8 @@ fn generate_julia_image(
     // Move render_iterations outside the loop
     let color_size: usize = 10;
     let color_schemes = [
-        gradients::generate_rainbow_gradient(color_size),
-        gradients::generate_warm_reds(color_size),
+        generate_rainbow_gradient(color_size),
+        generate_warm_reds(color_size),
     ];
     let render_iterations = |iterator: u32, basin: usize| -> [u8; 3] {
         if iterator == 300 {

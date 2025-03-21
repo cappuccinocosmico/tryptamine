@@ -141,7 +141,7 @@ fn inverse_primecount_estimator_upper(x: &f64) -> f64 {
 // results under that threshold are identical with a huge witness set. Same for {2,3} being valid
 // for <1,373,653.
 pub fn small_is_prime<N: SmallNatural>(n: &N) -> bool {
-    miller_rabin_primality(&n.to_big_uint(), &WitnessSet::Only23.gen())
+    miller_rabin_primality(&n.to_big_uint(), &WitnessSet::Only23.generate_witness())
 }
 
 // This enum should store values of type <const N: usize>[u32; N]. But I dont know how to do that.
@@ -154,8 +154,10 @@ pub enum WitnessSet {
     Only2761,
     Random(usize),
 }
+
+pub const witness_default = [2, 3];
 impl WitnessSet {
-    fn gen(&self) -> Vec<u32> {
+    pub fn generate_witness(&self) -> Vec<u32> {
         match self {
             WitnessSet::Only2 => vec![2],
             WitnessSet::Only23 => vec![2, 3],
