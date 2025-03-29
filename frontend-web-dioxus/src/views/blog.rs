@@ -93,19 +93,22 @@ pub fn BlogPost(slug: String) -> Element {
             integrity: "sha384-CAltQiu9myJj3FAllEacN6FT+rOyXo+hFZKGuR2p4HB8JvJlyUHm31eLfL4eEiJL",
             crossorigin: "anonymous"
         }
-        button {
-            class: "btn btn-primary hover:scale-105 transition-transform",
-            onclick: move |_| {
-                spawn(async move {
-                    render_math().await;
-                });
-            },
-            "Render Math"
-        }
-        article {
-            class: "prose",
-            Markdown {
-                content: markdown_content,
+        div {
+            class: "flex flex-col justify-center content-center",
+            article {
+                class: "prose",
+                button {
+                    class: "btn btn-primary hover:scale-105 transition-transform",
+                    onclick: move |_| {
+                        spawn(async move {
+                            render_math().await;
+                        });
+                    },
+                    "Render Math"
+                }
+                Markdown {
+                    content: markdown_content,
+                }
             }
         }
     }
