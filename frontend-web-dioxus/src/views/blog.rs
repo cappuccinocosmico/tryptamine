@@ -94,6 +94,7 @@ pub fn BlogPost(slug: String) -> Element {
             crossorigin: "anonymous"
         }
         button {
+            class: "btn btn-primary hover:scale-105 transition-transform",
             onclick: move |_| {
                 spawn(async move {
                     render_math().await;
@@ -101,8 +102,11 @@ pub fn BlogPost(slug: String) -> Element {
             },
             "Render Math"
         }
-        Markdown {
-            content: markdown_content,
+        article {
+            class: "prose",
+            Markdown {
+                content: markdown_content,
+            }
         }
     }
 }
