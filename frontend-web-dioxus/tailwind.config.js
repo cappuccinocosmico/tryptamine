@@ -3,7 +3,21 @@ module.exports = {
   mode: "all",
   content: ["./src/**/*.{rs,html,css}", "./dist/**/*.html"],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
+    },
   },
-  plugins: [],
+  plugins: [require("daisyui")],
+  daisyui: {
+    themes: ["light", "dark", "cyberpunk"],
+    darkTheme: "dark",
+    base: true,
+    styled: true,
+    utils: true,
+    prefix: "",
+    logs: false,
+    themeRoot: ":root",
+  },
 };
