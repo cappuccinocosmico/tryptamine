@@ -1,3 +1,4 @@
+mod categories;
 mod math;
 use clap::Parser;
 use math::miller_rabin_primality;
