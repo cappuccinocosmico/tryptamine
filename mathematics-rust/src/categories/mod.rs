@@ -34,7 +34,7 @@ pub trait Sum<A, B> {
     fn from_candidate<S: CandidateSum<A, B>>(sum: Self) -> S;
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Either<A, B> {
     Left(A),
     Right(B),

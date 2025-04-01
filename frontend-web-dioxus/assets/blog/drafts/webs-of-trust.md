@@ -6,8 +6,6 @@ date: 2025-03-03
 author: Nicole Venner
 ---
 # What is a Movement Specific Risk?
-
-
 1. Its really hard to model threats that a specific individual or organisation might face from an oppressive state power.
 
 2. Since its such a hard problem, most of the research has gone into solving the problem for organisation types that are rather simple. For example:
@@ -31,21 +29,36 @@ Mass movements (including unions, protests, and NVDA groups) inherit almost all 
 - A **Movement Specific Risk** is a risk that is unique to a movements that these simpler orgs dont have to worry about.
 
 
-# Examples of MSR's and How Often They are Exploited
+Almost all existing projects in this space (Qubes, Tails, Tor, Monero, etc...) are focused on the first category, and typically are worried about mitigating two kinds of risk.
 
+- **Publicly Known Risks**: Are intentional security holes law enforcement intentionally leave open to extract information they can use to prosecute people. Common examples include 
+  - Cell providers providing LE with triangulation data for a specific device, or giving over info on all phones at a specific location at a specific time.
+  - Google/Microsoft turning unencrpyted cloud data over info to LE w/ a warrant.
+  - LE buying personal information from companies
+
+- ***0-day Risks**: 
+  - Vulnerabilities in v8/spidermonkey that allow you to break out of a javascript sandbox and destroy tor's annonomity.
+  - XZ compression attack by Jia Tan 
+  - Stuxnet 
+
+
+# What do attacks on movements look like? 
 The main difference between these simpler orgs and movements, is that because movements need to interact with the broader community and grow. As such they need to have an open structure to incorperate these new members into the group, and closing up the group to make it less open is always going to make the movement less effective.
 
-
 There are lots of kinds of movement specific risk, but a few common types are:
-
-
 1. **Infiltration Risk**: Standard law enforcement officers pretend to be activists to get inside the movement.
 
-2. **Messaging Risk**: Since movements need to communicate with the outside world. 
+2. **Turncoat Risk**: When activists get in trouble with law enforcement they can take a plea to betray the movement. This often looks like passing along information, or vouching for undercover LE to bring them into the movement.
+
+2. **Messaging Risk**: Movements often need to put out information publicly as part of their operations. 
+
+However pretty much all attacks on activist orgs historically have been executed using movement specific risks 
 
 
 
-# Security Must always be a Probabalistic Game 
+
+# Defending against MSR's Is Fundamentally Probabalistic.
+As opposed to 
 
 
 
