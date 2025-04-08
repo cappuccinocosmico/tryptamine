@@ -7,7 +7,11 @@ const ESTES_UNKNOWN_IMG: Asset = asset!("/assets/images/estes_unknown.jpg");
 const GREEN_MOUNTAIN_IMG: Asset = asset!("/assets/images/green_mountain.jpg");
 const HANGING_LAKE_IMG: Asset = asset!("/assets/images/hanging_lake.jpg");
 const SOUTH_PARK_UNKNOWN_IMG: Asset = asset!("/assets/images/south_park_unknown.jpg");
-const UNKNOWN_1_IMG: Asset = asset!("/assets/images/unknown_1.jpg");
+const UNKNOWN_1_IMG: Asset = asset!("/assets/images/unknown_co_1.jpg");
+const UNKNOWN_2_IMG: Asset = asset!("/assets/images/unknown_co_2.jpg");
+const GRAND_CANYON_IMG: Asset = asset!("/assets/images/grand_canyon.jpeg");
+const BLACK_CANYON_IMG: Asset = asset!("/assets/images/black_canyon.jpg");
+const MOUNT_HOOD_IMG: Asset = asset!("/assets/images/mount_hood.webp");
 
 fn pick_random_mountain_image(seed: usize) -> Asset {
     let images = [
@@ -18,21 +22,24 @@ fn pick_random_mountain_image(seed: usize) -> Asset {
         HANGING_LAKE_IMG,
         SOUTH_PARK_UNKNOWN_IMG,
         UNKNOWN_1_IMG,
+        UNKNOWN_2_IMG,
+        GRAND_CANYON_IMG,
+        BLACK_CANYON_IMG,
+        MOUNT_HOOD_IMG,
     ];
 
-    let index = psuedorandom(seed) % 7;
+    let index = psuedorandom(seed) % images.len();
     images[index]
 }
 
 fn psuedorandom(seed: usize) -> usize {
     const ROUNDS: usize = 3;
-    const MODULUS: usize = 2_usize.pow(16) - 1;
-    const A: usize = 81;
+    const A: usize = 23;
     const C: usize = 139;
 
     let mut value = seed;
     for _ in 0..ROUNDS {
-        value = (A * value + C) % MODULUS;
+        value = value.wrapping_mul(A).wrapping_add(C);
     }
     value
 }
@@ -93,7 +100,7 @@ pub fn BlogIndex() -> Element {
                             figure { class: "px-4 pt-4",
                                 img {
                                     class: "rounded-xl h-48 w-full object-cover",
-                                    src: pick_random_mountain_image(hash_seed(&slug)),
+                                    src: pick_random_mountain_image(hash_seed(slug)),
                                     alt: "Blog post thumbnail"
                                 }
                             }
