@@ -94,18 +94,19 @@ pub fn BlogPost(slug: String) -> Element {
             crossorigin: "anonymous"
         }
         div {
-            class: "flex flex-col justify-center content-center",
+            class: "flex flex-col justify-center items-center",
+
+            button {
+                class: "btn btn-primary hover:scale-105 transition-transform",
+                onclick: move |_| {
+                    spawn(async move {
+                        render_math().await;
+                    });
+                },
+                "Render Math"
+            }
             article {
                 class: "prose",
-                button {
-                    class: "btn btn-primary hover:scale-105 transition-transform",
-                    onclick: move |_| {
-                        spawn(async move {
-                            render_math().await;
-                        });
-                    },
-                    "Render Math"
-                }
                 Markdown {
                     content: markdown_content,
                 }
