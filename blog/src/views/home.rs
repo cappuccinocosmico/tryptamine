@@ -9,7 +9,7 @@ const HANGING_LAKE_IMG: Asset = asset!("/assets/images/hanging_lake.jpg");
 const SOUTH_PARK_UNKNOWN_IMG: Asset = asset!("/assets/images/south_park_unknown.jpg");
 const UNKNOWN_1_IMG: Asset = asset!("/assets/images/unknown_1.jpg");
 
-fn pick_random_mountain_image(seed: u32) -> Asset {
+fn pick_random_mountain_image(seed: usize) -> Asset {
     let images = [
         MAROON_BELLS_IMG,
         ECHO_LAKE_IMG,
@@ -20,15 +20,28 @@ fn pick_random_mountain_image(seed: u32) -> Asset {
         UNKNOWN_1_IMG,
     ];
 
-    let index = (seed % 7) as usize;
+    let index = psuedorandom(seed) % 7;
     images[index]
 }
 
-fn hash_seed(phrase: &str) -> u32 {
+fn psuedorandom(seed: usize) -> usize {
+    const ROUNDS: usize = 3;
+    const MODULUS: usize = 2_usize.pow(16) - 1;
+    const A: usize = 81;
+    const C: usize = 139;
+
+    let mut value = seed;
+    for _ in 0..ROUNDS {
+        value = (A * value + C) % MODULUS;
+    }
+    value
+}
+
+fn hash_seed(phrase: &str) -> usize {
     use std::hash::{Hash, Hasher};
     let mut hasher = std::collections::hash_map::DefaultHasher::new();
     phrase.hash(&mut hasher);
-    hasher.finish() as u32
+    hasher.finish() as usize
 }
 #[component]
 pub fn BlogIndex() -> Element {
