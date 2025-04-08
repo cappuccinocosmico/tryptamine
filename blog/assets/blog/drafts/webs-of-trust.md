@@ -52,9 +52,7 @@ There are lots of kinds of movement specific risk, but a few common types are:
 
 2. **Messaging Risk**: Movements often need to put out information publicly as part of their operations. 
 
-However pretty much all attacks on activist orgs historically have been executed using movement specific risks 
-
-
+However pretty much all attacks on activist orgs historically have been executed using movement specific risks, and to the extent said attacks use inherited risks, almost all risks are publicly known ahead of time.
 
 
 # Defending against MSR's Is Fundamentally Probabalistic.
