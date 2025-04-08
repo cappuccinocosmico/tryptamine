@@ -22,10 +22,10 @@ Its possible to decompose the math of how quantum systems work into multiple lay
 <!-- https://q.uiver.app/#q=WzAsNCxbMCwzLCJcXHRleHR7UXVhbnR1bSBNZWNoYW5pY3N9Il0sWzAsMiwiXFx0ZXh0e1F1YW50dW0gRWxlY3Ryb2R5bmFtaWNzfSJdLFswLDEsIlxcdGV4dHtRdWFudHVtIENocm9tb2R5bmFtaWNzfSJdLFswLDAsIlxcdGV4dHtTdGFuZGFyZCBNb2RlbCBvZiBQYXJ0aWNsZSBQaHlzaWNzfSJdLFsxLDJdLFsyLDNdLFswLDFdXQ== -->
 <iframe class="quiver-embed" src="https://q.uiver.app/#q=WzAsNCxbMCwzLCJcXHRleHR7UXVhbnR1bSBNZWNoYW5pY3N9Il0sWzAsMiwiXFx0ZXh0e1F1YW50dW0gRWxlY3Ryb2R5bmFtaWNzfSJdLFswLDEsIlxcdGV4dHtRdWFudHVtIENocm9tb2R5bmFtaWNzfSJdLFswLDAsIlxcdGV4dHtTdGFuZGFyZCBNb2RlbCBvZiBQYXJ0aWNsZSBQaHlzaWNzfSJdLFsxLDJdLFsyLDNdLFswLDFdXQ==&embed" width="590" height="560" style="border-radius: 8px; border: none;"></iframe>
 
-and all of the philosophical implications generally exist in the base layer, which doesnt involve any fields, particles, forces or any other interactions. All it discusses is "states". So we can make the simplifying assumption that all our states are built from combinations of arbitrary states labeled $| 0 > $ and $| 1 >$. What exactly the underlying states are is immaterial, all that matters for our purposes is that under a classical view they are mutually exclusive. They could be 
-- $| 0 >$ could be a photon thats vertically polarized and $| 1 >$ could be that same photon horizontally polarized
-- $| 0 >$ could be a hydrogen atom in the ground state, and $| 1 >$ could be that same atom in the first excited state.
-- $| 0 >$ could be an electron that has spin aligned with an external magnetic field, and $| 1 >$ could be the same election pointing opposite the field.
+and all of the philosophical implications generally exist in the base layer, which doesnt involve any fields, particles, forces or any other interactions. All it discusses is "states". So we can make the simplifying assumption that all our states are built from combinations of arbitrary states labeled $| 0 \rangle$ and $| 1 \rangle$. What exactly the underlying states are is immaterial, all that matters for our purposes is that under a classical view they are mutually exclusive. They could be 
+- $| 0 \rangle$ could be a photon thats vertically polarized and $| 1 \rangle$ could be that same photon horizontally polarized
+- $| 0 \rangle$ could be a hydrogen atom in the ground state, and $| 1 \rangle$ could be that same atom in the first excited state.
+- $| 0 \rangle$ could be an electron that has spin aligned with an external magnetic field, and $| 1 \rangle$ could be the same election pointing opposite the field.
 
 In fact all the setups we talk about have been experimentally validated width all three of these examples.
 
