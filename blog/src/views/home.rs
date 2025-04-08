@@ -1,6 +1,35 @@
 use crate::Route;
 use dioxus::prelude::*;
 
+const MAROON_BELLS_IMG: Asset = asset!("/assets/images/maroon_bells.jpg");
+const ECHO_LAKE_IMG: Asset = asset!("/assets/images/echo_lake.jpg");
+const ESTES_UNKNOWN_IMG: Asset = asset!("/assets/images/estes_unknown.jpg");
+const GREEN_MOUNTAIN_IMG: Asset = asset!("/assets/images/green_mountain.jpg");
+const HANGING_LAKE_IMG: Asset = asset!("/assets/images/hanging_lake.jpg");
+const SOUTH_PARK_UNKNOWN_IMG: Asset = asset!("/assets/images/south_park_unknown.jpg");
+const UNKNOWN_1_IMG: Asset = asset!("/assets/images/unknown_1.jpg");
+
+fn pick_random_mountain_image(seed: u32) -> Asset {
+    let images = [
+        MAROON_BELLS_IMG,
+        ECHO_LAKE_IMG,
+        ESTES_UNKNOWN_IMG,
+        GREEN_MOUNTAIN_IMG,
+        HANGING_LAKE_IMG,
+        SOUTH_PARK_UNKNOWN_IMG,
+        UNKNOWN_1_IMG,
+    ];
+
+    let index = (seed % 7) as usize;
+    images[index]
+}
+
+fn hash_seed(phrase: &str) -> u32 {
+    use std::hash::{Hash, Hasher};
+    let mut hasher = std::collections::hash_map::DefaultHasher::new();
+    phrase.hash(&mut hasher);
+    hasher.finish() as u32
+}
 #[component]
 pub fn BlogIndex() -> Element {
     fn display_slug(slug: &str) -> String {
@@ -51,7 +80,7 @@ pub fn BlogIndex() -> Element {
                             figure { class: "px-4 pt-4",
                                 img {
                                     class: "rounded-xl h-48 w-full object-cover",
-                                    src: "https://picsum.photos/400/300",
+                                    src: pick_random_mountain_image(hash_seed(&slug)),
                                     alt: "Blog post thumbnail"
                                 }
                             }

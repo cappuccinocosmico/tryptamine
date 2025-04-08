@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use components::Navbar;
-use views::{BlogPost,  Home};
+use views::{BlogPost, Home};
 
 mod components;
 mod views;
