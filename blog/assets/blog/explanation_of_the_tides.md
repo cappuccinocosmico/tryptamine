@@ -55,4 +55,18 @@ $$\mathcal{R}\frac{alpha^2}{2} \frac{m}{s^2}$$
 
 (dubious math over)
 
-So consider
+So consider we have a body of radius $R$ orbiting a distance $D$ away from a body of mass $M$. How could we calculate the tidal force on the front and behind the planet.
+
+So the front component of the planet is experiencing an acceleration of $\frac{M}{(R-D}^2)$ where the other componet is experiencing a force of $\frac{M}{(R+D}^2)$
+
+So solving for the difference in force $X$ gives us 
+
+$$
+\begin{align}
+X &= \frac{M}{(R-D)^2} - \frac{M}{(R+D)^2} \\
+X(R-D)^2(R+D)^2  &= M \left( (R+D)^2 - (R-D)^2 \right) \\
+X(R^2-D^2)^2 &= M \left( (R^2+2RD+D^2) - (R^2-2RD+D^2) \right) \\
+X(R^2-D^2) &= M \left( 4RD \right) \\
+X &= \frac{4MRD}{(R^2-D^2)^2}
+\end{align}
+$$
