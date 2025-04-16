@@ -1,5 +1,5 @@
 use crate::Route;
-use comrak;
+use comrak::{self, html::render_math};
 use dioxus::prelude::*;
 use include_dir::{include_dir, Dir};
 use lazy_static::lazy_static;
@@ -44,40 +44,45 @@ pub fn BlogPost(slug: String) -> Element {
     let class = use_signal(|| String::from("content"));
     let mut hasRendered = use_signal(|| false);
 
-    let render_math = async || -> Result<(), ()> {
-        // if hasRendered() {
-        //     return Ok(());
-        // }
-        let result = document::eval(
-            r#"
-                        console.log("Starting math rendering");
-                        try {
-                            if (typeof katex === 'undefined') {
-                                throw new Error('KaTeX is not loaded yet');
-                            }
-                            document.querySelectorAll('.language-math').forEach(element => {
-                                const tex = element.textContent;
-                                const isInline = element.classList.contains('math-inline');
-                                
-                                katex.render(tex, element, {
-                                    throwOnError: false,
-                                    displayMode: !isInline,
-                                });
-                            });
-                            console.log("Math rendering completed");
-                        } catch (err) {
-                            console.error("Math rendering error:", err);
-                        }"#,
-        )
-        .await;
+    use_effect(|| {
+        let render_math = async || -> Result<(), ()> {
+            // if hasRendered() {
+            //     return Ok(());
+            // }
+            let result = document::eval(
+                r#"
+                console.log("Starting math rendering");
+                try {
+                    if (typeof katex === 'undefined') {
+                        throw new Error('KaTeX is not loaded yet');
+                    }
+                    document.querySelectorAll('.language-math').forEach(element => {
+                        const tex = element.textContent;
+                        const isInline = element.classList.contains('math-inline');
+                        
+                        katex.render(tex, element, {
+                            throwOnError: false,
+                            displayMode: !isInline,
+                        });
+                    });
+                    console.log("Math rendering completed");
+                } catch (err) {
+                    console.error("Math rendering error:", err);
+                }"#,
+            )
+            .await;
 
-        if let Err(e) = result {
-            println!("Failed to execute math rendering: {:?}", e);
-        } else {
-            // hasRendered.set(true);
+            if let Err(e) = result {
+                println!("Failed to execute math rendering: {:?}", e);
+            } else {
+                // hasRendered.set(true);
+            };
+            Ok(())
         };
-        Ok(())
-    };
+        spawn(async move {
+            render_math().await;
+        });
+    });
 
     rsx! {
         link { rel: "stylesheet", href: BLOG_CSS }
@@ -96,15 +101,15 @@ pub fn BlogPost(slug: String) -> Element {
         div {
             class: "flex flex-col justify-center items-center",
 
-            button {
-                class: "btn btn-primary hover:scale-105 transition-transform",
-                onclick: move |_| {
-                    spawn(async move {
-                        render_math().await;
-                    });
-                },
-                "Render Math"
-            }
+            // button {
+            //     class: "btn btn-primary hover:scale-105 transition-transform",
+            //     onclick: move |_| {
+            //         spawn(async move {
+            //             render_math().await;
+            //         });
+            //     },
+            //     "Render Math"
+            // }
             article {
                 class: "prose",
                 Markdown {
