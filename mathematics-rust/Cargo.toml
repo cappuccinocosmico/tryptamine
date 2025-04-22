@@ -7,6 +7,7 @@ edition = "2024"
 clap = { version = "4.5.32", features = ["derive"] }
 const_for = "0.1.5"
 image = "0.25.5"
+konst = "0.3.16"
 num-bigint = "0.4.6"
 num-complex = "0.4.6"
 palette = "0.7.6"
