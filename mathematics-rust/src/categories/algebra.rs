@@ -58,20 +58,24 @@ macro_rules! define_cyclic_group {
 define_cyclic_group!(Z2, 2);
 
 const fn modpow(base: Vuint, exp: Vuint, modulus: Vuint) -> Vuint {
-    let mut result = 1;
-    let mut exponent = exp;
-    while exponent > 0 {
-        if exponent % 2 == 1 {
-            result = (result * base) % modulus;
+    let mut collecter = 1;
+    let mut squarer = base;
+    for_range!(i in 0..128-exp.leading_zeros() => {
+        if (exp >> i & 1) == 1 {
+            collecter = (squarer * collecter) % modulus
         }
-        result = (result * result) % modulus;
-        exponent /= 2;
+        squarer = (squarer * squarer) % modulus;
     }
-    result
+    );
+    return collecter;
 }
 
 const _: () = assert!(modpow(3, 2, 9) == 0);
 const _: () = assert!(modpow(3, 0, 9) == 1);
+const _: () = assert!(modpow(3, 43, 43) == 3);
+const _: () = assert!(modpow(3, 7, 7) == 3);
+const _: () = assert!((3 as u128).pow(43) % 43 == 3);
+
 const fn const_is_prime(p: Vuint) -> bool {
     if p == 2 {
         return true;
