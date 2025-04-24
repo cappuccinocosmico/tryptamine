@@ -60,7 +60,8 @@ define_cyclic_group!(Z2, 2);
 const fn modpow(base: Vuint, exp: Vuint, modulus: Vuint) -> Vuint {
     let mut collecter = 1;
     let mut squarer = base;
-    for_range!(i in 0..128-exp.leading_zeros() => {
+    let bits = 8 * size_of::<Vuint>() as u32;
+    for_range!(i in 0..bits-exp.leading_zeros() => {
         if (exp >> i & 1) == 1 {
             collecter = (squarer * collecter) % modulus
         }
@@ -68,6 +69,19 @@ const fn modpow(base: Vuint, exp: Vuint, modulus: Vuint) -> Vuint {
     }
     );
     return collecter;
+}
+
+fn exp<G: Group>(base: G, exp: &Vuint) -> G {
+    let mut collector = G::identity();
+    let mut squarer = base;
+    let bits = 8 * size_of::<Vuint>() as u32;
+    for i in 0..bits - exp.leading_zeros() {
+        if (exp >> i & 1) == 1 {
+            collector = collector.mul(&squarer)
+        }
+        squarer = squarer.mul(&squarer)
+    }
+    return collector;
 }
 
 const _: () = assert!(modpow(3, 2, 9) == 0);
