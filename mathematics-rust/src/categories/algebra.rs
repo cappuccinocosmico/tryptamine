@@ -228,3 +228,29 @@ macro_rules! define_prime_field {
 }
 
 define_prime_field!(F3, 3); // Creates GF(3) finite field
+
+// Define a trait for elliptic curve parameters
+trait EllipticCurveParams {
+    type F: Field;
+    const A: Self::F;
+    const B: Self::F;
+}
+
+// Elliptic curve point struct parameterized by the curve parameters
+#[derive(Debug, PartialEq)]
+struct EllipticCurve<P: EllipticCurveParams> {
+    x: P::F,
+    y: P::F,
+}
+
+impl<P: EllipticCurveParams + PartialEq> Group for EllipticCurve<P> {
+    fn mul(&self, other: &Self) -> Self {
+        todo!()
+    }
+    fn identity() -> Self {
+        todo!()
+    }
+    fn inverse(&self) -> Self {
+        todo!()
+    }
+}
