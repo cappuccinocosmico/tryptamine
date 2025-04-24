@@ -1,62 +1,5 @@
 use konst::for_range;
-
 type Vuint = u128;
-
-trait Group: PartialEq {
-    fn inverse(&self) -> Self;
-    fn identity() -> Self;
-    fn mul(&self, other: &Self) -> Self;
-}
-
-trait Finite {
-    fn listall() -> Vec<Self>
-    where
-        Self: Sized;
-}
-
-type DirectProduct<A: Group, B: Group> = (A, B);
-
-impl<A: Group, B: Group> Group for DirectProduct<A, B> {
-    fn identity() -> Self {
-        (A::identity(), B::identity())
-    }
-    fn inverse(&self) -> Self {
-        (self.0.inverse(), self.1.inverse())
-    }
-    fn mul(&self, other: &Self) -> Self {
-        (self.0.mul(&other.0), self.1.mul(&other.1))
-    }
-}
-
-macro_rules! define_cyclic_group {
-    ($name:ident, $n:expr) => {
-        #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-        struct $name(Vuint);
-
-        impl Group for $name {
-            fn identity() -> Self {
-                $name(0)
-            }
-
-            fn inverse(&self) -> Self {
-                $name(($n - self.0) % $n)
-            }
-
-            fn mul(&self, other: &Self) -> Self {
-                $name((self.0 + other.0) % $n)
-            }
-        }
-
-        impl Finite for $name {
-            fn listall() -> Vec<Self> {
-                (0..$n).map($name).collect()
-            }
-        }
-    };
-}
-
-define_cyclic_group!(Z2, 2);
-
 const fn modpow(base: Vuint, exp: Vuint, modulus: Vuint) -> Vuint {
     let mut collecter = 1;
     let mut squarer = base;
@@ -69,19 +12,6 @@ const fn modpow(base: Vuint, exp: Vuint, modulus: Vuint) -> Vuint {
     }
     );
     return collecter;
-}
-
-fn exp<G: Group>(base: G, exp: &Vuint) -> G {
-    let mut collector = G::identity();
-    let mut squarer = base;
-    let bits = 8 * size_of::<Vuint>() as u32;
-    for i in 0..bits - exp.leading_zeros() {
-        if (exp >> i & 1) == 1 {
-            collector = collector.mul(&squarer)
-        }
-        squarer = squarer.mul(&squarer)
-    }
-    return collector;
 }
 
 const _: () = assert!(modpow(3, 2, 9) == 0);
@@ -182,6 +112,75 @@ const fn const_is_prime(p: Vuint) -> bool {
 // const _: () = assert!(!const_is_prime(48), "48 isn't prime");
 // const _: () = assert!(!const_is_prime(49), "49 isn't prime");
 // const _: () = assert!(!const_is_prime(50), "50 isn't prime");
+
+trait Group: PartialEq {
+    fn inverse(&self) -> Self;
+    fn identity() -> Self;
+    fn mul(&self, other: &Self) -> Self;
+}
+
+trait Finite {
+    fn listall() -> Vec<Self>
+    where
+        Self: Sized;
+}
+
+type DirectProduct<A: Group, B: Group> = (A, B);
+
+impl<A: Group, B: Group> Group for DirectProduct<A, B> {
+    fn identity() -> Self {
+        (A::identity(), B::identity())
+    }
+    fn inverse(&self) -> Self {
+        (self.0.inverse(), self.1.inverse())
+    }
+    fn mul(&self, other: &Self) -> Self {
+        (self.0.mul(&other.0), self.1.mul(&other.1))
+    }
+}
+
+macro_rules! define_cyclic_group {
+    ($name:ident, $n:expr) => {
+        #[derive(Clone, Copy, PartialEq, Eq, Debug)]
+        struct $name(Vuint);
+
+        impl Group for $name {
+            fn identity() -> Self {
+                $name(0)
+            }
+
+            fn inverse(&self) -> Self {
+                $name(($n - self.0) % $n)
+            }
+
+            fn mul(&self, other: &Self) -> Self {
+                $name((self.0 + other.0) % $n)
+            }
+        }
+
+        impl Finite for $name {
+            fn listall() -> Vec<Self> {
+                (0..$n).map($name).collect()
+            }
+        }
+    };
+}
+
+define_cyclic_group!(Z2, 2);
+
+fn exp<G: Group>(base: G, exp: &Vuint) -> G {
+    let mut collector = G::identity();
+    let mut squarer = base;
+    let bits = 8 * size_of::<Vuint>() as u32;
+    for i in 0..bits - exp.leading_zeros() {
+        if (exp >> i & 1) == 1 {
+            collector = collector.mul(&squarer)
+        }
+        squarer = squarer.mul(&squarer)
+    }
+    return collector;
+}
+
 trait Field: PartialEq {
     fn zero() -> Self;
     fn one() -> Self;
