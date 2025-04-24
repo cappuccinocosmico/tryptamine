@@ -113,7 +113,7 @@ const fn const_is_prime(p: Vuint) -> bool {
 // const _: () = assert!(!const_is_prime(49), "49 isn't prime");
 // const _: () = assert!(!const_is_prime(50), "50 isn't prime");
 
-trait Group: PartialEq {
+trait Group: PartialEq + Clone {
     fn inverse(&self) -> Self;
     fn identity() -> Self;
     fn mul(&self, other: &Self) -> Self;
@@ -181,7 +181,7 @@ fn exp<G: Group>(base: G, exp: &Vuint) -> G {
     return collector;
 }
 
-trait Field: PartialEq {
+trait Field: PartialEq + Clone {
     fn zero() -> Self;
     fn one() -> Self;
     fn add(&self, other: &Self) -> Self;
@@ -243,27 +243,46 @@ macro_rules! define_prime_field {
 define_prime_field!(F3, 3); // Creates GF(3) finite field
 
 // Define a trait for elliptic curve parameters
-trait EllipticCurveParams {
+trait EllipticCurveParams: Clone {
     type F: Field;
     const A: Self::F;
     const B: Self::F;
 }
 
 // Elliptic curve point struct parameterized by the curve parameters
-#[derive(Debug, PartialEq)]
-struct EllipticCurve<P: EllipticCurveParams> {
-    x: P::F,
-    y: P::F,
+// y^2 = x^3 + ax+b
+#[derive(Debug, PartialEq, Clone)]
+enum EllipticCurve<P: EllipticCurveParams> {
+    Finite { x: P::F, y: P::F },
+    Infinity,
 }
 
+// Given 2 curves, x and y, there is a line between them
+
+impl<P: EllipticCurveParams> EllipticCurve<P> {
+    fn valid_point(x: P::F, y: P::F) -> Option<Self> {
+        let is_on_curve = y.mul(&y) == x.mul(&x.mul(&x)).add(&x.mul(P::A));
+        match 
+        return Self::Finite { x: x, y: y };
+    }
+}
 impl<P: EllipticCurveParams + PartialEq> Group for EllipticCurve<P> {
     fn mul(&self, other: &Self) -> Self {
         todo!()
     }
     fn identity() -> Self {
-        todo!()
+        EllipticCurve::Infinity
     }
+    // Apparently the inverse of a thing is just the point flipped across the x axis
     fn inverse(&self) -> Self {
-        todo!()
+        match self {
+            Self::Infinity => return Self::Infinity,
+            Self::Finite { x, y } => {
+                return Self::Finite {
+                    x: x.clone(),
+                    y: y.add_inv(),
+                };
+            }
+        }
     }
 }
