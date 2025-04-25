@@ -190,6 +190,12 @@ trait Field: PartialEq + Clone {
     fn mul_inv(&self) -> Option<Self>
     where
         Self: Sized;
+    fn sub(&self, other: &Self) -> Self {
+        self.add(&other.add_inv())
+    }
+    fn div(&self, other: &Self) -> Option<Self> {
+        Some(self.mul(&other.mul_inv()?))
+    }
 }
 
 macro_rules! define_prime_field {
@@ -261,14 +267,50 @@ enum EllipticCurve<P: EllipticCurveParams> {
 
 impl<P: EllipticCurveParams> EllipticCurve<P> {
     fn valid_point(x: P::F, y: P::F) -> Option<Self> {
-        let is_on_curve = y.mul(&y) == x.mul(&x.mul(&x)).add(&x.mul(P::A));
-        match 
-        return Self::Finite { x: x, y: y };
+        let is_on_curve = y.mul(&y) == x.mul(&x.mul(&x)).add(&x.mul(&P::A)).add(&P::B);
+        match is_on_curve {
+            true => return Some(Self::Finite { x, y }),
+            false => return None,
+        }
     }
 }
+
+// Actually you have 4 cases.
+// Infinity * Infinity = Infinity
+// and
+// Finite * Infinity = Finite, and vice versa via the
+// So you have 2 points P and S, consisting of px and yy, and sx and sy.
+//
+// Then the slope of the line connecting the two points is going to be
+//  S  = px - sx / py-sy
+//  if the mul inverse of py-sy then the two points must have the same x value, meaning you should
+//  return the point at infinity.
+//  so the line between the 2 points is y = S*x+d (d the y intercept shouldnt matter)
+//
+//  So we want to find solutions in x by solving
+//  (S*x+d)^2 = x^3 + A*x+B
+//
+//  S^2 * x^2 + 2*S*x*d+d^2 + d^2 - x^3 - A*x - B = 0
+//
+//  However, this is a third degree polynomial
+//
 impl<P: EllipticCurveParams + PartialEq> Group for EllipticCurve<P> {
     fn mul(&self, other: &Self) -> Self {
-        todo!()
+        match (self, other) {
+            (Self::Infinity, _) => other.clone(),
+            (_, Self::Infinity) => self.clone(),
+            (Self::Finite { x: px, y: py }, Self::Finite { x: sx, y: sy }) => {
+                let slope_test = py.sub(sy).mul_inv();
+                if let None = slope_test {
+                    return Self::Infinity;
+                };
+                // Check if yp isnt zero 
+                let s = q
+                let rx = slope.mul(&slope).sub();
+                let ry = slope.mul(&slope);
+                Self::Finite { x: rx, y: ry }
+            }
+        }
     }
     fn identity() -> Self {
         EllipticCurve::Infinity
