@@ -1,5 +1,6 @@
 mod categories;
 mod math;
+mod physics;
 use clap::Parser;
 use math::miller_rabin_primality;
 
