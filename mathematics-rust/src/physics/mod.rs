@@ -2,17 +2,27 @@ extern crate uom;
 
 use uom::si::area::square_meter;
 use uom::si::f64::{Area, Length, Ratio};
-use uom::si::length::{centimeter, planck_length};
+use uom::si::length::{centimeter, meter};
 use uom::si::ratio::ratio;
 
 fn entropy_of_black_hole_in_cm(cm_of_black_hole: f64) {
     // Physical constants
     let pi = std::f64::consts::PI;
-    let lp = Length::new::<planck_length>(cm_of_black_hole); // Planck length
+    // Calculate Planck length using √(ℏG/c³)
+    // let G = uom::si::f64::COULOMB_CONSTANT; // Gravitational constant (m³·kg⁻¹·s⁻²)
+    // let ħ = uom::si::f64::PLANCK_CONSTANT; // Reduced Planck constant (J·s)
+    // let c = uom::si::f64::SPEED_OF_LIGHT; // Speed of light (m/s)
+
+    // let lp = (G * ħ / c.powi(3))
+    //     .sqrt()
+    //     .expect("Physics constants should lead to valid Planck length");
+    //
+    let planklength_meters = 1.1616 * 10_f64.powf(-35_f64);
+    let lp = Length::new::<meter>(planklength_meters);
     let ln2 = std::f64::consts::LN_2;
 
     // Black hole parameters
-    let radius = Length::new::<centimeter>(0.5); // 0.5 cm
+    let radius = Length::new::<centimeter>(cm_of_black_hole);
 
     // Area of event horizon: 4 * π * r^2
     let area = 4.0 * pi * radius * radius;
