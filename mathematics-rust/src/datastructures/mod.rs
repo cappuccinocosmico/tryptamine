@@ -8,6 +8,7 @@ struct BinaryNode<T> {
     left: BinaryLeaf<T>,
     right: BinaryLeaf<T>,
 }
+
 type BinaryLeaf<T> = Option<Box<BinaryNode<T>>>;
 
 fn new_leaf<T: PartialOrd>(val: T) -> BinaryLeaf<T> {
@@ -19,23 +20,42 @@ fn new_leaf<T: PartialOrd>(val: T) -> BinaryLeaf<T> {
     }));
 }
 
-fn rotate_left<T>(parent_leaf: &mut BinaryLeaf<T>, is_left: bool) -> Result<(), String> {
+fn rotate_node<T>(parent_leaf: &mut BinaryLeaf<T>, is_left_rotation: bool) -> Result<(), String> {
+    if is_left_rotation {
+        let (mut stolen_parent, mut stolen_child) = match parent_leaf {
+            None => return Err("Parent Node is Empty".to_string()),
+            Some(parent) => {
+                if parent.right.is_none() {
+                    return Err("Child Right Node is empty".to_string());
+                };
+                let stolen_child = parent.right.take().unwrap();
+                let stolen_parent = parent_leaf.take().unwrap();
+                (stolen_parent, stolen_child)
+            }
+        };
+        let transfer_child = stolen_child.left.take();
+        stolen_parent.right = transfer_child;
+        stolen_child.left = Some(stolen_parent);
+        *parent_leaf = Some(stolen_child);
+        return Ok(());
+    }
+    // Right Rotation Code
     let (mut stolen_parent, mut stolen_child) = match parent_leaf {
         None => return Err("Parent Node is Empty".to_string()),
         Some(parent) => {
-            if parent.right.is_none() {
-                return Err("Child Right Node is empty".to_string());
+            if parent.left.is_none() {
+                return Err("Child Left Node is empty".to_string());
             };
-            let stolen_child = parent.right.take().unwrap();
+            let stolen_child = parent.left.take().unwrap();
             let stolen_parent = parent_leaf.take().unwrap();
             (stolen_parent, stolen_child)
         }
     };
-    let transfer_child = stolen_child.left.take();
-    stolen_parent.right = transfer_child;
+    let transfer_child = stolen_child.right.take();
+    stolen_parent.left = transfer_child;
     stolen_child.right = Some(stolen_parent);
     *parent_leaf = Some(stolen_child);
-    Ok(())
+    return Ok(());
 }
 
 impl<T: PartialOrd + Clone> BinaryTree<T> {
