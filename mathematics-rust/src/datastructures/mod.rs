@@ -19,6 +19,25 @@ fn new_leaf<T: PartialOrd>(val: T) -> BinaryLeaf<T> {
     }));
 }
 
+fn rotate_left<T>(parent_leaf: &mut BinaryLeaf<T>, is_left: bool) -> Result<(), String> {
+    let (mut stolen_parent, mut stolen_child) = match parent_leaf {
+        None => return Err("Parent Node is Empty".to_string()),
+        Some(parent) => {
+            if parent.right.is_none() {
+                return Err("Child Right Node is empty".to_string());
+            };
+            let stolen_child = parent.right.take().unwrap();
+            let stolen_parent = parent_leaf.take().unwrap();
+            (stolen_parent, stolen_child)
+        }
+    };
+    let transfer_child = stolen_child.left.take();
+    stolen_parent.right = transfer_child;
+    stolen_child.right = Some(stolen_parent);
+    *parent_leaf = Some(stolen_child);
+    Ok(())
+}
+
 impl<T: PartialOrd + Clone> BinaryTree<T> {
     fn new() -> Self {
         BinaryTree { head: None }
