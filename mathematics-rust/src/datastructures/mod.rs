@@ -10,6 +10,15 @@ struct BinaryTreeNode<T> {
 }
 type BinaryLeaf<T> = Option<Box<BinaryTreeNode<T>>>;
 
+fn new_leaf<T: PartialOrd>(val: T) -> BinaryLeaf<T> {
+    return Some(Box::new(BinaryTreeNode {
+        is_red: false,
+        data: val,
+        left: None,
+        right: None,
+    }));
+}
+
 impl<T: PartialOrd> BinaryTree<T> {
     fn new() -> Self {
         BinaryTree { head: None }
@@ -17,12 +26,7 @@ impl<T: PartialOrd> BinaryTree<T> {
     fn insert(&mut self, insert: T) {
         match &mut self.head {
             None => {
-                self.head = Some(Box::new(BinaryTreeNode {
-                    is_red: false,
-                    data: insert,
-                    left: None,
-                    right: None,
-                }));
+                self.head = new_leaf(insert);
                 return;
             }
             Some(val) => {
@@ -36,12 +40,7 @@ impl<T: PartialOrd> BinaryTree<T> {
             if head.data < insert {
                 match &mut head.left {
                     None => {
-                        head.left = Some(Box::new(BinaryTreeNode {
-                            is_red: false,
-                            data: insert,
-                            left: None,
-                            right: None,
-                        }));
+                        head.left = new_leaf(insert);
                         return;
                     }
                     Some(val) => {
@@ -51,12 +50,7 @@ impl<T: PartialOrd> BinaryTree<T> {
             }
             match &mut head.right {
                 None => {
-                    head.left = Some(Box::new(BinaryTreeNode {
-                        is_red: false,
-                        data: insert,
-                        left: None,
-                        right: None,
-                    }));
+                    head.right = new_leaf(insert);
                     return;
                 }
                 Some(val) => {
