@@ -1,4 +1,5 @@
 mod categories;
+mod datastructures;
 mod math;
 mod physics;
 use clap::Parser;
