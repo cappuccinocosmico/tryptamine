@@ -22,6 +22,7 @@ fn new_leaf<T: PartialOrd>(val: T) -> BinaryLeaf<T> {
 
 fn rotate_node<T>(parent_leaf: &mut BinaryLeaf<T>, is_left_rotation: bool) -> Result<(), String> {
     if is_left_rotation {
+        // Left Rotation Code
         let (mut stolen_parent, mut stolen_child) = match parent_leaf {
             None => return Err("Parent Node is Empty".to_string()),
             Some(parent) => {

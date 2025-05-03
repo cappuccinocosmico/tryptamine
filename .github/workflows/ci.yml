@@ -1,0 +1,43 @@
+name: CI & Push Container
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/blog:${{ github.sha }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - run: cargo install dioxus-cli --locked
+
+      - name: Build static site
+        working-directory: ./blog
+        run: dioxus build --release --target web -o dist
+
+      - uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v4
+        with:
+          context: ./blog
+          file: ./blog/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE }}
+
+      - run: echo "IMAGE=${{ env.IMAGE }}" >> $GITHUB_OUTPUT

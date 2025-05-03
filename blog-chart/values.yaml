@@ -1,0 +1,29 @@
+replicaCount: 2
+
+image:
+  repository: ghcr.io/your-org/blog
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: blog.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: blog-tls
+      hosts:
+        - blog.example.com
+
+certManager:
+  createClusterIssuer: false
+  clusterIssuerName: letsencrypt-prod
+  email: you@example.com
+  staging: false
