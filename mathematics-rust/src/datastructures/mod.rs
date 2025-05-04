@@ -117,3 +117,58 @@ impl<T: PartialOrd + Clone> BinaryTree<T> {
         }
     }
 }
+
+// Test module for BinaryTree
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_empty_fetch() {
+        let tree: BinaryTree<i32> = BinaryTree::new();
+        // Fetching from empty tree returns None
+        assert_eq!(tree.fetch(0), None);
+    }
+
+    #[test]
+    fn test_single_insertion() {
+        let mut tree = BinaryTree::new();
+        tree.insert(42);
+        assert_eq!(tree.fetch(42), Some(42));
+        // Nonexistent element still returns None
+        assert_eq!(tree.fetch(7), None);
+    }
+
+    #[test]
+    fn test_multiple_insertions_ordered() {
+        let mut tree = BinaryTree::new();
+        for i in 1..11 {
+            tree.insert(i);
+        }
+        // All inserted elements should be found
+        for i in 1..11 {
+            assert_eq!(tree.fetch(i), Some(i));
+        }
+        // Out of range values not inserted
+        assert_eq!(tree.fetch(0), None);
+        assert_eq!(tree.fetch(11), None);
+    }
+
+    #[test]
+    fn test_multiple_insertions_random() {
+        let mut tree = BinaryTree::new();
+        let values = vec![5, 3, 8, 1, 4, 7, 9];
+        for &v in &values {
+            tree.insert(v);
+        }
+        // All inserted elements should be found
+        for &v in &values {
+            assert_eq!(tree.fetch(v), Some(v));
+        }
+        // Test duplicates: inserting again shouldn't break fetch
+        tree.insert(3);
+        tree.insert(8);
+        assert_eq!(tree.fetch(3), Some(3));
+        assert_eq!(tree.fetch(8), Some(8));
+    }
+}
