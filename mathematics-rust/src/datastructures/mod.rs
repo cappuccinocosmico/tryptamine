@@ -11,9 +11,9 @@ struct BinaryNode<T> {
 
 type BinaryLeaf<T> = Option<Box<BinaryNode<T>>>;
 
-fn new_leaf<T: PartialOrd>(val: T) -> BinaryLeaf<T> {
+fn new_leaf<T: PartialOrd>(val: T, is_red: bool) -> BinaryLeaf<T> {
     return Some(Box::new(BinaryNode {
-        is_red: false,
+        is_red,
         data: val,
         left: None,
         right: None,
@@ -66,7 +66,7 @@ impl<T: PartialOrd + Clone> BinaryTree<T> {
     fn insert(&mut self, insert: T) {
         match &mut self.head {
             None => {
-                self.head = new_leaf(insert);
+                self.head = new_leaf(insert, false);
                 return;
             }
             Some(val) => {
@@ -80,7 +80,7 @@ impl<T: PartialOrd + Clone> BinaryTree<T> {
             if head.data < insert {
                 match &mut head.left {
                     None => {
-                        head.left = new_leaf(insert);
+                        head.left = new_leaf(insert, true);
                         return;
                     }
                     Some(val) => {
@@ -90,7 +90,7 @@ impl<T: PartialOrd + Clone> BinaryTree<T> {
             }
             match &mut head.right {
                 None => {
-                    head.right = new_leaf(insert);
+                    head.right = new_leaf(insert, true);
                     return;
                 }
                 Some(val) => {
