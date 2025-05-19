@@ -57,3 +57,55 @@ impl<A, B> Sum<A, B> for Either<A, B> {
         }
     }
 }
+enum Void {}
+
+fn explosion<T>(v: Void) -> T {
+    let test_result: Result<T, Void> = Err(v);
+    let Ok(val) = test_result;
+    val
+}
+
+static STATIC_EVIDENCE: &'static &'static () = &&();
+
+fn extend_lifetime<'a, 'b, T>(val: &'b T) -> &'a T {
+    fn translate_lifetime<'a, 'b, T>(_: &'a &'b (), val: &'b T) -> &'a T {
+        val
+    }
+    let test_lambda: for<'x> fn(_, &'x T) -> &'a T = translate_lifetime;
+    test_lambda(STATIC_EVIDENCE, val)
+}
+
+fn extend_lifetime_mut<'a, 'b, T>(val: &'b mut T) -> &'a mut T {
+    fn translate_lifetime<'a, 'b, T>(_: &'a &'b (), val: &'b mut T) -> &'a mut T {
+        val
+    }
+    let test_lambda: for<'x> fn(_, &'x mut T) -> &'a mut T = translate_lifetime;
+    test_lambda(STATIC_EVIDENCE, val)
+}
+
+fn make_void_without_panic() -> Void {
+    enum Test {
+        Enhabited(Option<u8>),
+        Void(Option<(Void, u8)>),
+    }
+    let mut test_val = Test::Void(None);
+    let test = &mut test_val;
+    let Test::Void(ref_to_empty) = test else {
+        unreachable!("The value was declared as a void case when initialized")
+    };
+    println!("Successfully completed all declarations.");
+    let ref_to_empty_extended = extend_lifetime_mut(ref_to_empty);
+    println!("illegally extended reference");
+    *test = Test::Enhabited(Some(0));
+    println!("set value to enhabited value");
+    let optional_empty = ref_to_empty_extended.take();
+    println!("got optional void value");
+    let empty = optional_empty.expect("This should always succeed since we illegally set the value of the enum as being enhabited.");
+    println!("got void value tuple");
+    empty.0
+}
+
+// fn main() {
+//     let void = make_void_without_panic();
+//     println!("Successfully made void!")
+// }
