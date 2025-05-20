@@ -6,4 +6,6 @@ This kubernetes cluster should
 - host it on a url an.mycor.io
 - deal with automatically getting and refreshing https certificates from letsencrypt.
 
-I have had a bunch of issues with kubernetes in the past and trying to get it to work. Could you also make it possible to use the helm chart locally, and try to test that everything works (aside from the fact that fetching the certificates might fail). Could you throw up everything into an architecture document under prompts/helm-ideas.md
+I have had a bunch of issues with kubernetes in the past and trying to get it to work. Could you also make it possible to use the helm chart locally using minikube, and try to test that everything works (aside from the fact that fetching the certificates might fail). Could you throw up everything into an architecture document under prompts/helm-ideas.md
+
+For starters dont actually write anything just focus on the layout and architecture.
