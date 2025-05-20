@@ -37,5 +37,5 @@ tolerations: []
 affinity: {}
 
 certManager:
-  email: "you@example.com"
+  email: "n@mycor.io"
   clusterIssuerName: "letsencrypt-prod"
