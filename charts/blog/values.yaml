@@ -1,0 +1,41 @@
+# Default values for blog chart
+replicaCount: 2
+
+image:
+  repository: "fractalhuman1/tryptamine-blog"
+  tag: "latest"
+  pullPolicy: "IfNotPresent"
+
+service:
+  type: "ClusterIP"
+  port: 80
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: "an.mycor.io"
+      paths:
+        - "/"
+  tls:
+    - secretName: "blog-tls"
+      hosts:
+        - "an.mycor.io"
+
+resources:
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+  requests:
+    cpu: "250m"
+    memory: "256Mi"
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+certManager:
+  email: "you@example.com"
+  clusterIssuerName: "letsencrypt-prod"

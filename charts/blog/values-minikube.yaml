@@ -1,0 +1,25 @@
+# Values override for Minikube development
+replicaCount: 1
+
+image:
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 80
+  nodePort: 30080
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+  hosts:
+    - host: "127.0.0.1.nip.io"
+      paths:
+        - "/"
+  tls: []
+
+# Use self-signed issuer or skip TLS for minikube
+auth:
+  enabled: false
+
