@@ -1,23 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "blog.fullname" . }}
+  name: actionable-neighborhoods
   labels:
-    {{- include "blog.labels" . | nindent 4 }}
+    app: actionable-neighborhoods
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "blog.name" . }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      app: actionable-neighborhoods
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "blog.name" . }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
+        app: actionable-neighborhoods
     spec:
       containers:
-        - name: {{ include "blog.name" . }}
+        - name: actionable-neighborhoods
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
