@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: actionable-neighborhoods-ingress
+  name: {{ include "blog.fullname" . }}-ingress
   labels:
     {{- include "blog.labels" . | nindent 4 }}
   annotations:
@@ -18,7 +18,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: "Actionable Neighborhoods"
+                name: {{ include "blog.fullname" $. }}
                 port:
                   number: {{ $.Values.service.port }}
           {{- end }}
