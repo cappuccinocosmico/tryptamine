@@ -5,9 +5,9 @@ ENV RUSTC_WRAPPER=sccache SCCACHE_DIR=/sccache
 
 FROM base AS planner
 WORKDIR /app
-COPY src/ .
-COPY Cargo.toml .
-COPY Cargo.lock .
+COPY src/ ./src
+COPY Cargo.toml ./Cargo.toml
+COPY Cargo.lock ./Cargo.lock
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
   --mount=type=cache,target=$SCCACHE_DIR,sharing=locked \
   cargo chef prepare --recipe-path recipe.json
