@@ -3,7 +3,7 @@
 [web.app]
 
 # HTML title tag content
-title = "frontend-web-dioxus"
+title = "actionable-neighborhoods"
 
 # include `assets` in web platform
 [web.resource]

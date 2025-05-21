@@ -16,13 +16,13 @@ ingress:
     kubernetes.io/ingress.class: "nginx"
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
   hosts:
-    - host: "an.mycor.io"
+    - host: "n.kessler.xyz"
       paths:
         - "/"
   tls:
     - secretName: "blog-tls"
       hosts:
-        - "an.mycor.io"
+        - "n.kessler.xyz"
 
 resources:
   limits:

@@ -1,5 +1,5 @@
 [package]
-name = "frontend-web-dioxus"
+name = "actionable-neighborhoods"
 version = "0.1.0"
 authors = ["Nicole Venner <nvenner@protonmail.ch>"]
 edition = "2021"

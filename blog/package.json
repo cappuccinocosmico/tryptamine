@@ -1,5 +1,5 @@
 {
-  "name": "frontend-web-dioxus",
+  "name": "actionable-neighborhoods",
   "version": "1.0.0",
   "description": "Your new jumpstart project includes basic organization with an organized `assets` folder and a `components` folder.  If you chose to develop with the router feature, you will also have a `views` folder.",
   "main": "tailwind.config.js",

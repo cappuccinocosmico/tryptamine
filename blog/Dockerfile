@@ -27,5 +27,5 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
 FROM debian:bookworm-slim AS runtime
 RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-COPY --from=builder /app/target/release/fugu /usr/local/bin
-# ENTRYPOINT ["/usr/local/bin/fugu"]
+COPY --from=builder /app/target/release/actionable-neighborhoods /usr/local/bin/app-executable
+ENTRYPOINT ["/usr/local/bin/app-executable"]
