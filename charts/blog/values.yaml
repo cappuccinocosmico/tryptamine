@@ -3,7 +3,7 @@ replicaCount: 2
 
 image:
   repository: "fractalhuman1/tryptamine-blog"
-  tag: "latest"
+  tag: "7133e99ad3562666a7ac0a059aa52890f884add86ba8e60c064ea04ada3ba47c"
   pullPolicy: "IfNotPresent"
 
 service:
