@@ -294,20 +294,39 @@ impl<P: EllipticCurveParams> EllipticCurve<P> {
 //
 //  However, this is a third degree polynomial
 //
+fn mul_by_int<F: Field>(x: &F, mulint: u64) -> F {
+    if mulint == 0 {
+        return F::one();
+    }
+    let mut collector = x.clone();
+    for _ in 1..mulint - 1 {
+        collector = collector.add(&x);
+    }
+    return collector;
+}
+
 impl<P: EllipticCurveParams + PartialEq> Group for EllipticCurve<P> {
     fn mul(&self, other: &Self) -> Self {
         match (self, other) {
             (Self::Infinity, _) => other.clone(),
             (_, Self::Infinity) => self.clone(),
             (Self::Finite { x: px, y: py }, Self::Finite { x: sx, y: sy }) => {
-                let slope_test = py.sub(sy).mul_inv();
-                if let None = slope_test {
+                if px == sx {
+                    if py != sy {
+                        return Self::Infinity;
+                    };
+                    let Some(s) = mul_by_int(&px.mul(px), 3).div(&mul_by_int(py, 2)) else {
+                        return Self::Infinity;
+                    };
+                    return Self::Finite { x: s.clone(), y: s };
+                };
+                let Some(slope_denom) = py.sub(sy).mul_inv() else {
                     return Self::Infinity;
                 };
-                // Check if yp isnt zero 
-                let s = q
-                let rx = slope.mul(&slope).sub();
-                let ry = slope.mul(&slope);
+                // Check if yp isnt zero
+                let slope = (px.sub(sx)).mul(&slope_denom);
+                let rx = slope.mul(&slope).sub(&px.add(sx));
+                let ry = py.add(&slope.mul(&px.sub(py)));
                 Self::Finite { x: rx, y: ry }
             }
         }
