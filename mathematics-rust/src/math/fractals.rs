@@ -1,3 +1,4 @@
+use core::slice;
 use std::ops::{Add, Div, Mul, Sub};
 
 use crate::math::colors::{generate_rainbow_gradient, generate_warm_reds};
@@ -187,12 +188,7 @@ pub fn generate_julia_image(
     let mut buff: Vec<u8> = vec![0; buff_length];
     // I want to go ahead and split up this vec into an iterator that will throw out imgx*imgy mutable buffers of size 3, as well as an index that will denote what number the pixel is at. Then call iteratior_mutate on the tuple. If you could use par iters from rayon to speed this computation up that would also be really helpful.
     //
-    buff.par_chunks_exact_mut(3)
-        .enumerate()
-        .for_each(|(index, chunk)| {
-            let output_buf: &mut [u8; 3] = chunk.try_into().unwrap();
-            iteratior_mutate((index as u32, output_buf));
-        });
+    let scary_buff = split_vec_into_mutable_sized_chunks(&mut buff, 3);
     let duration = start.elapsed();
     println!("Initialization took: {:?}", duration);
 
@@ -239,29 +235,32 @@ fn split_vec_into_mutable_sized_chunks<T>(
     };
     let capacity = list.len() / size;
     let mut result = Vec::with_capacity(capacity);
-    for i in 0..capacity {
-        result[i] = (i as u32, &mut list[size * i..size * (i + 1) - 1])
+    let ptr = list.as_mut_ptr();
+    unsafe {
+        for i in 0..capacity {
+            let mut_refrence: &mut [T] = slice::from_raw_parts_mut(ptr.add(i * size), size - 1);
+            result.push((i as u32, mut_refrence))
+        }
     }
-
     Ok(result)
 }
 
-fn split_vec_into_immutable_sized_chunks<T: Default>(
-    list: &mut [T],
-    size: usize,
-) -> Result<Vec<(u32, &[T])>, String> {
-    if list.len() % size != 0 && size != 0 {
-        return Err("List of improper size".to_string());
-    };
-    let capacity = list.len() / size;
-    let mut result = Vec::with_capacity(capacity);
-    for i in 0..capacity {
-        result[i] = (i as u32, &list[size * i..size * (i + 1) - 1])
-    }
-    list[1] = T::default();
-
-    Ok(result)
-}
+// fn split_vec_into_immutable_sized_chunks<T: Default>(
+//     list: &mut [T],
+//     size: usize,
+// ) -> Result<Vec<(u32, &[T])>, String> {
+//     if list.len() % size != 0 && size != 0 {
+//         return Err("List of improper size".to_string());
+//     };
+//     let capacity = list.len() / size;
+//     let mut result = Vec::with_capacity(capacity);
+//     for i in 0..capacity {
+//         result[i] = (i as u32, &list[size * i..size * (i + 1) - 1])
+//     }
+//     list[1] = T::default();
+//
+//     Ok(result)
+// }
 
 pub enum ImageType {
     Jpeg,
