@@ -6,7 +6,7 @@ use image::Rgb;
 use num_complex::Complex;
 use num_traits::{Num, Zero};
 use palette::encoding::gamma::Number;
-use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
 use smallvec::{SmallVec, smallvec};
 
 use super::colors::{CustomRgb, RgbColorScheme};
@@ -26,11 +26,12 @@ struct FatouBasins {
     finite_basins: SmallVec<[FiniteFatouBasin; SMALL_SIZE]>,
 }
 
-trait ComplexFatouFractal {
+trait ComplexFatouFractal: Copy + Sync {
     fn generate_fatou_basins(&self) -> FatouBasins;
     fn iterate_mut(&self, collector: &mut Compl);
 }
 
+#[derive(Debug, Clone, Copy)]
 struct RegularJuliaSet {
     c: Compl,
 }
@@ -130,8 +131,8 @@ fn render_iterations(
         scheme[iterator as usize % scheme.len()]
     }
 }
-pub fn generate_julia_image(
-    fractal: impl ComplexFatouFractal,
+pub fn generate_julia_image<F: ComplexFatouFractal + Copy + Sync>(
+    fractal: F,
     imgx: u32,
     imgy: u32,
 ) -> Result<image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, String> {
@@ -176,7 +177,7 @@ pub fn generate_julia_image(
         render_iterations(i, basin_id, &color_schemes)
     };
 
-    let iteratior_mutate = |(index, output_buf): (u32, &mut [u8; 3])| {
+    let iteratior_mutate = |(index, output_buf): (u32, &mut [u8])| {
         let color = iterator(index);
         output_buf[0] = color.red;
         output_buf[1] = color.green;
@@ -188,7 +189,11 @@ pub fn generate_julia_image(
     let mut buff: Vec<u8> = vec![0; buff_length];
     // I want to go ahead and split up this vec into an iterator that will throw out imgx*imgy mutable buffers of size 3, as well as an index that will denote what number the pixel is at. Then call iteratior_mutate on the tuple. If you could use par iters from rayon to speed this computation up that would also be really helpful.
     //
-    let scary_buff = split_vec_into_mutable_sized_chunks(&mut buff, 3);
+    let scary_buff = split_vec_into_mutable_sized_chunks(&mut buff, 3).unwrap();
+    scary_buff
+        .into_par_iter()
+        .enumerate()
+        .map(|(index, buff)| iteratior_mutate((index as u32, buff)));
     let duration = start.elapsed();
     println!("Initialization took: {:?}", duration);
 
@@ -228,18 +233,19 @@ pub fn generate_julia_image(
 
 fn split_vec_into_mutable_sized_chunks<T>(
     list: &mut [T],
-    size: usize,
-) -> Result<Vec<(u32, &mut [T])>, String> {
-    if list.len() % size != 0 && size != 0 {
+    chunk_size: usize,
+) -> Result<Vec<&mut [T]>, String> {
+    if list.len() % chunk_size != 0 && chunk_size != 0 {
         return Err("List of improper size".to_string());
     };
-    let capacity = list.len() / size;
+    let capacity = list.len() / chunk_size;
     let mut result = Vec::with_capacity(capacity);
     let ptr = list.as_mut_ptr();
     unsafe {
         for i in 0..capacity {
-            let mut_refrence: &mut [T] = slice::from_raw_parts_mut(ptr.add(i * size), size - 1);
-            result.push((i as u32, mut_refrence))
+            let mut_refrence: &mut [T] =
+                slice::from_raw_parts_mut(ptr.add(i * chunk_size), chunk_size - 1);
+            result.push(mut_refrence)
         }
     }
     Ok(result)
