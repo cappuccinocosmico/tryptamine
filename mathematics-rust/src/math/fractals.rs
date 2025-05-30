@@ -1,16 +1,68 @@
+use std::ops::{Add, Div, Mul, Sub};
+
 use crate::math::colors::{generate_rainbow_gradient, generate_warm_reds};
 use num_complex::Complex;
+use num_traits::{Num, Zero};
+use palette::encoding::gamma::Number;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
-#[derive(Debug)]
+type Real = f64;
+#[derive(Clone, Copy, Debug)]
 struct JuliaBasin {
-    basin: Option<Complex<f32>>,
+    basin: ComplexSph<f64>,
     neighborhood: f32,
 }
 
-fn generate_julia_basins(c: Complex<f32>) -> Vec<JuliaBasin> {
+#[derive(Clone, Copy, Debug)]
+pub enum ComplexSph<T> {
+    Infinity,
+    Number(Complex<T>),
+}
+
+impl<T: Num + Add + Clone> Add for ComplexSph<T> {
+    type Output = ComplexSph<T>;
+    fn add(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (Self::Number(sn), Self::Number(rhsn)) => Self::Number(sn + rhsn),
+            (_, _) => Self::Infinity,
+        }
+    }
+}
+
+impl<T: Num + Sub + Clone> Sub for ComplexSph<T> {
+    type Output = ComplexSph<T>;
+    fn sub(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (Self::Number(sn), Self::Number(rhsn)) => Self::Number(sn - rhsn),
+            (_, _) => Self::Infinity,
+        }
+    }
+}
+
+impl<T: Num + Mul + Clone + Zero> Mul for ComplexSph<T> {
+    type Output = ComplexSph<T>;
+    fn mul(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (Self::Number(sn), Self::Number(rhsn)) => Self::Number(sn * rhsn),
+            (_, _) => Self::Infinity,
+        }
+    }
+}
+
+impl<T: Num + Div + Clone + Zero> Div for ComplexSph<T> {
+    type Output = ComplexSph<T>;
+    fn div(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (Self::Number(sn), Self::Number(rhsn)) => Self::Number(sn / rhsn),
+            (Self::Number(_), Self::Infinity) => Self::Number(Complex::<T>::zero()),
+            (_, _) => Self::Infinity,
+        }
+    }
+}
+
+fn generate_julia_basins(c: Complex<Real>) -> Vec<JuliaBasin> {
     let mut basins = vec![JuliaBasin {
-        basin: None,
+        basin: ComplexSph::Infinity,
         neighborhood: 2.0,
     }];
     // x+ = x^2 + c
@@ -22,7 +74,7 @@ fn generate_julia_basins(c: Complex<f32>) -> Vec<JuliaBasin> {
     // x = 1/2 \pm sqrt(1/4 - c)
     let val1 = 1.0 / 2.0 + (1.0 / 4.0 - c).sqrt();
     let val2 = 1.0 / 2.0 - (1.0 / 4.0 - c).sqrt();
-    fn validate_basin(val: Complex<f32>, basins: &mut Vec<JuliaBasin>) {
+    fn validate_basin(val: Complex<Real>, basins: &mut Vec<JuliaBasin>) {
         println!("validating basin: {}", val);
         let valprime = 2.0 * val;
         println!(
@@ -33,7 +85,7 @@ fn generate_julia_basins(c: Complex<f32>) -> Vec<JuliaBasin> {
         let is_valid = valprime.norm() <= 1.0;
         if is_valid {
             basins.push(JuliaBasin {
-                basin: Some(val),
+                basin: ComplexSph::Number(val),
                 neighborhood: 0.001,
             });
         }

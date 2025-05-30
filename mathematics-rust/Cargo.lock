@@ -587,6 +587,7 @@ dependencies = [
  "konst",
  "num-bigint",
  "num-complex",
+ "num-traits",
  "palette",
  "rand 0.9.0",
  "rayon",
