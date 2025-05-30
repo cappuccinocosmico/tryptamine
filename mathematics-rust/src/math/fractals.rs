@@ -1,156 +1,144 @@
 use std::ops::{Add, Div, Mul, Sub};
 
 use crate::math::colors::{generate_rainbow_gradient, generate_warm_reds};
+use image::Rgb;
 use num_complex::Complex;
 use num_traits::{Num, Zero};
 use palette::encoding::gamma::Number;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use smallvec::{SmallVec, smallvec};
 
-type Real = f64;
+use super::colors::{CustomRgb, RgbColorScheme};
+
+type RealType = f64;
+type Compl = Complex<RealType>;
 #[derive(Clone, Copy, Debug)]
-struct JuliaBasin {
-    basin: ComplexSph<f64>,
-    neighborhood: f32,
+struct FiniteFatouBasin {
+    basin: Compl,
+    neighborhood_sqr: RealType,
 }
 
-#[derive(Clone, Copy, Debug)]
-pub enum ComplexSph<T> {
-    Infinity,
-    Number(Complex<T>),
+const SMALL_SIZE: usize = 5;
+#[derive(Clone, Debug)]
+struct FatouBasins {
+    infinte_basin_radius_sqr: Option<RealType>,
+    finite_basins: SmallVec<[FiniteFatouBasin; SMALL_SIZE]>,
 }
 
-impl<T: Num + Add + Clone> Add for ComplexSph<T> {
-    type Output = ComplexSph<T>;
-    fn add(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
-            (Self::Number(sn), Self::Number(rhsn)) => Self::Number(sn + rhsn),
-            (_, _) => Self::Infinity,
-        }
+trait ComplexFatouFractal {
+    fn generate_fatou_basins(&self) -> FatouBasins;
+    fn iterate_mut(&self, collector: &mut Compl);
+}
+
+struct RegularJuliaSet {
+    c: Compl,
+}
+
+impl ComplexFatouFractal for RegularJuliaSet {
+    fn iterate_mut(&self, collector: &mut Compl) {
+        *collector = *collector * *collector + self.c
     }
-}
 
-impl<T: Num + Sub + Clone> Sub for ComplexSph<T> {
-    type Output = ComplexSph<T>;
-    fn sub(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
-            (Self::Number(sn), Self::Number(rhsn)) => Self::Number(sn - rhsn),
-            (_, _) => Self::Infinity,
-        }
-    }
-}
-
-impl<T: Num + Mul + Clone + Zero> Mul for ComplexSph<T> {
-    type Output = ComplexSph<T>;
-    fn mul(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
-            (Self::Number(sn), Self::Number(rhsn)) => Self::Number(sn * rhsn),
-            (_, _) => Self::Infinity,
-        }
-    }
-}
-
-impl<T: Num + Div + Clone + Zero> Div for ComplexSph<T> {
-    type Output = ComplexSph<T>;
-    fn div(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
-            (Self::Number(sn), Self::Number(rhsn)) => Self::Number(sn / rhsn),
-            (Self::Number(_), Self::Infinity) => Self::Number(Complex::<T>::zero()),
-            (_, _) => Self::Infinity,
-        }
-    }
-}
-
-fn generate_julia_basins(c: Complex<Real>) -> Vec<JuliaBasin> {
-    let mut basins = vec![JuliaBasin {
-        basin: ComplexSph::Infinity,
-        neighborhood: 2.0,
-    }];
-    // x+ = x^2 + c
-    // 0 = x^2 -x + c
-    // 0 = (x^2-x+1/4)-1/4+c
-    // 0 = (x-1/2)^2-1/4+c
-    // 1/4 -c = (x-1/2)^2
-    // \pm sqrt(1/4-c) = x-1/2
-    // x = 1/2 \pm sqrt(1/4 - c)
-    let val1 = 1.0 / 2.0 + (1.0 / 4.0 - c).sqrt();
-    let val2 = 1.0 / 2.0 - (1.0 / 4.0 - c).sqrt();
-    fn validate_basin(val: Complex<Real>, basins: &mut Vec<JuliaBasin>) {
-        println!("validating basin: {}", val);
-        let valprime = 2.0 * val;
-        println!(
-            "basin has derivative: {}, with norm: {}",
-            valprime,
-            valprime.norm()
-        );
-        let is_valid = valprime.norm() <= 1.0;
-        if is_valid {
-            basins.push(JuliaBasin {
-                basin: ComplexSph::Number(val),
-                neighborhood: 0.001,
-            });
-        }
-    }
-    validate_basin(val1, &mut basins);
-    validate_basin(val2, &mut basins);
-    basins
-}
-fn get_basin_index(basins: &[JuliaBasin]) -> impl Fn(Complex<f32>) -> usize + '_ {
-    // Check escape condition first (most likely to be true in typical Julia sets)
-    move |z: Complex<f32>| {
-        if let Some((idx, escape_basin)) =
-            basins.iter().enumerate().find(|(_, b)| b.basin.is_none())
-        {
-            if z.norm_sqr() >= escape_basin.neighborhood {
-                return idx;
+    fn generate_fatou_basins(&self) -> FatouBasins {
+        let mut finite_basins = smallvec![];
+        // x+ = x^2 + c
+        // 0 = x^2 -x + c
+        // 0 = (x^2-x+1/4)-1/4+c
+        // 0 = (x-1/2)^2-1/4+c
+        // 1/4 -c = (x-1/2)^2
+        // \pm sqrt(1/4-c) = x-1/2
+        // x = 1/2 \pm sqrt(1/4 - c)
+        let val1 = 1.0 / 2.0 + (1.0 / 4.0 - self.c).sqrt();
+        let val2 = 1.0 / 2.0 - (1.0 / 4.0 - self.c).sqrt();
+        fn validate_basin(
+            val: Complex<RealType>,
+            basins: &mut SmallVec<[FiniteFatouBasin; SMALL_SIZE]>,
+        ) {
+            println!("validating basin: {}", val);
+            let valprime = 2.0 * val;
+            println!(
+                "basin has derivative: {}, with norm: {}",
+                valprime,
+                valprime.norm()
+            );
+            let is_valid = valprime.norm() <= 1.0;
+            if is_valid {
+                basins.push(FiniteFatouBasin {
+                    basin: val,
+                    neighborhood_sqr: 0.001,
+                });
             }
         }
-
-        // Then check all attraction basins
-        if let Some((idx, _)) = basins
-            .iter()
-            .enumerate()
-            .filter(|(_, b)| b.basin.is_some())
-            .find(|(_, basin)| {
-                let basin_val = basin.basin.unwrap();
-                (z - basin_val).norm_sqr() <= basin.neighborhood
-            })
-        {
-            return idx;
-        } else {
-            return 0;
+        validate_basin(val1, &mut finite_basins);
+        validate_basin(val2, &mut finite_basins);
+        FatouBasins {
+            infinte_basin_radius_sqr: Some(4.0),
+            finite_basins,
         }
     }
-
-    // Default basin if no conditions met
 }
 
-fn generate_basins_conditional(basins: &[JuliaBasin]) -> impl Fn(Complex<f32>) -> bool + '_ {
+enum BasinIndex {
+    Infinite,
+    Finite(usize),
+}
+impl From<BasinIndex> for usize {
+    fn from(value: BasinIndex) -> Self {
+        match value {
+            BasinIndex::Infinite => 0,
+            BasinIndex::Finite(val) => val + 1,
+        }
+    }
+}
+
+fn generate_basins_conditional(basins: &FatouBasins) -> impl Fn(Compl) -> Option<BasinIndex> {
     // Create a single closure that directly evaluates all conditions
-    move |z: Complex<f32>| {
+    move |z: Compl| {
         // Check escape condition first (most likely to be true in typical Julia sets)
-        if let Some(escape_basin) = basins.iter().find(|b| b.basin.is_none()) {
-            if z.norm_sqr() >= escape_basin.neighborhood {
-                return true;
-            }
-        }
+        if let Some(escape_radius) = basins.infinte_basin_radius_sqr {
+            if z.norm_sqr() >= escape_radius {
+                return Some(BasinIndex::Infinite);
+            };
+        };
 
         // Then check all attraction basins
-        basins.iter().filter(|b| b.basin.is_some()).any(|basin| {
-            let basin_val = basin.basin.unwrap();
-            (z - basin_val).norm_sqr() <= basin.neighborhood
-        })
+        for (i, basin) in basins.finite_basins.iter().enumerate() {
+            let basin_val = basin.basin;
+            if (z - basin_val).norm_sqr() <= basin.neighborhood_sqr {
+                return Some(BasinIndex::Finite(i));
+            }
+        }
+        return None;
     }
 }
 
+fn render_iterations(
+    iterator: u32,
+    basin: BasinIndex,
+    color_schemes: &[RgbColorScheme],
+) -> CustomRgb {
+    if iterator == 300 {
+        CustomRgb {
+            red: 0,
+            green: 0,
+            blue: 0,
+        }
+    } else {
+        let basin_usize: usize = basin.into();
+        let scheme = &color_schemes[basin_usize];
+        scheme[iterator as usize % scheme.len()]
+    }
+}
 pub fn generate_julia_image(
+    fractal: impl ComplexFatouFractal,
     imgx: u32,
     imgy: u32,
-    seed_value: Complex<f32>,
 ) -> Result<image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, String> {
     //! An example of generating julia fractals.
+    let start = std::time::Instant::now();
 
-    let scalex = 3.0 / imgx as f32;
-    let scaley = 3.0 / imgy as f32;
+    let scalex = 3.0 / imgx as RealType;
+    let scaley = 3.0 / imgy as RealType;
 
     // Create a new ImgBuf with width: imgx and height: imgy
     // Move render_iterations outside the loop
@@ -159,51 +147,51 @@ pub fn generate_julia_image(
         generate_rainbow_gradient(color_size),
         generate_warm_reds(color_size),
     ];
-    let render_iterations = |iterator: u32, basin: usize| -> [u8; 3] {
-        if iterator == 300 {
-            [0, 0, 0]
-        } else {
-            color_schemes[basin][iterator as usize % color_size]
-        }
-    };
-    let basins = generate_julia_basins(seed_value);
+    let basins = fractal.generate_fatou_basins();
     let basin_conditional = generate_basins_conditional(&basins);
-    let basin_index_extractor = get_basin_index(&basins);
 
-    let iterator = |index: u32| -> [u8; 3] {
+    let iterator = |index: u32| -> CustomRgb {
         let x = index % imgx;
         let y = index / imgx;
-        let cx = y as f32 * scalex - 1.5;
-        let cy = x as f32 * scaley - 1.5;
+        let cx = y as RealType * scalex - 1.5;
+        let cy = x as RealType * scaley - 1.5;
 
         let mut z = Complex::new(cx, cy);
 
         let mut i = 0;
 
         while i < 300 {
-            z = z * z + seed_value;
+            fractal.iterate_mut(&mut z);
             i += 1;
-            if basin_conditional(z) {
+            if basin_conditional(z).is_some() {
                 break;
             }
         }
-        let basin_id = basin_index_extractor(z);
+        let basin_id =
+            basin_conditional(z).expect("Just computed this previously and got a some variant");
         if i == 300 {
             println!("Pixel ({z}) ended iterator at no escape point");
         }
-        render_iterations(i, basin_id)
+        render_iterations(i, basin_id, &color_schemes)
+    };
+
+    let iteratior_mutate = |(index, output_buf): (u32, &mut [u8; 3])| {
+        let color = iterator(index);
+        output_buf[0] = color.red;
+        output_buf[1] = color.green;
+        output_buf[2] = color.blue;
     };
     println!("{basins:?}");
     // Create the image buffer with parallel iterator
-    let start = std::time::Instant::now();
-    let buff_pixels: Vec<[u8; 3]> = (0..imgx * imgy).into_par_iter().map(iterator).collect();
+    let buff_length = (imgx * imgy * 3) as usize; // Since there are 3 colors and stuff.
+    let buff: Vec<u8> = vec![0; buff_length];
+    // I want to go ahead and split up this vec into an iterator that will throw out imgx*imgy mutable buffers of size 3, as well as an index that will denote what number the pixel is at. Then call iteratior_mutate on the tuple. If you could use par iters to speed this computation up that would also be really helpful.
     let duration = start.elapsed();
-    println!("Fractal Mathematics took: {:?}", duration);
+    println!("Initialization took: {:?}", duration);
 
     let start = std::time::Instant::now();
-    let buff: Vec<u8> = buff_pixels.iter().flat_map(|x| x.iter()).copied().collect();
     let duration = start.elapsed();
-    println!("Buffer flattening took: {:?}", duration);
+    println!("Fractal Mathematics took: {:?}", duration);
 
     // Calculate expected buffer size
     let expected_size = (imgx * imgy * 3) as usize;
@@ -221,7 +209,7 @@ pub fn generate_julia_image(
 
     let start = std::time::Instant::now();
     let img_option = image::ImageBuffer::from_vec(imgx, imgy, buff);
-    let img: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> = match img_option {
+    let img: image::ImageBuffer<Rgb<u8>, Vec<u8>> = match img_option {
         Some(img) => img,
         None => {
             return Err(format!(
@@ -269,7 +257,10 @@ fn image_buffer_to_jpeg_bytes(buffer: image::ImageBuffer<image::Rgb<u8>, Vec<u8>
 }
 pub fn test_image(resolution: u32, image_type: ImageType) -> Result<Vec<u8>, String> {
     let start = std::time::Instant::now();
-    let img = generate_julia_image(resolution, resolution, Complex::new(-0.3, 0.4))?;
+    let fractal = RegularJuliaSet {
+        c: Complex::new(-0.3, 0.4),
+    };
+    let img = generate_julia_image(fractal, resolution, resolution)?;
     match image_type {
         ImageType::Webp => {
             let start_webp = std::time::Instant::now();
@@ -288,6 +279,53 @@ pub fn test_image(resolution: u32, image_type: ImageType) -> Result<Vec<u8>, Str
             let duration = start.elapsed();
             println!("Total Image generation took: {:?}", duration);
             Ok(png)
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub enum ComplexSph<T> {
+    Infinity,
+    Number(Complex<T>),
+}
+
+impl<T: Num + Add + Clone> Add for ComplexSph<T> {
+    type Output = ComplexSph<T>;
+    fn add(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (Self::Number(sn), Self::Number(rhsn)) => Self::Number(sn + rhsn),
+            (_, _) => Self::Infinity,
+        }
+    }
+}
+
+impl<T: Num + Sub + Clone> Sub for ComplexSph<T> {
+    type Output = ComplexSph<T>;
+    fn sub(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (Self::Number(sn), Self::Number(rhsn)) => Self::Number(sn - rhsn),
+            (_, _) => Self::Infinity,
+        }
+    }
+}
+
+impl<T: Num + Mul + Clone + Zero> Mul for ComplexSph<T> {
+    type Output = ComplexSph<T>;
+    fn mul(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (Self::Number(sn), Self::Number(rhsn)) => Self::Number(sn * rhsn),
+            (_, _) => Self::Infinity,
+        }
+    }
+}
+
+impl<T: Num + Div + Clone + Zero> Div for ComplexSph<T> {
+    type Output = ComplexSph<T>;
+    fn div(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (Self::Number(sn), Self::Number(rhsn)) => Self::Number(sn / rhsn),
+            (Self::Number(_), Self::Infinity) => Self::Number(Complex::<T>::zero()),
+            (_, _) => Self::Infinity,
         }
     }
 }
