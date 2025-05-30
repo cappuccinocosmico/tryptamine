@@ -246,7 +246,7 @@ fn split_vec_into_mutable_sized_chunks<T>(
     Ok(result)
 }
 
-fn split_vec_into_immutable_sized_chunks<T>(
+fn split_vec_into_immutable_sized_chunks<T: Default>(
     list: &mut [T],
     size: usize,
 ) -> Result<Vec<(u32, &[T])>, String> {
@@ -258,6 +258,7 @@ fn split_vec_into_immutable_sized_chunks<T>(
     for i in 0..capacity {
         result[i] = (i as u32, &list[size * i..size * (i + 1) - 1])
     }
+    list[1] = T::default();
 
     Ok(result)
 }
