@@ -33,13 +33,28 @@ pub trait ComplexFatouFractal: Copy + Sync {
 
 #[derive(Debug, Clone, Copy)]
 pub struct RegularJuliaSet {
-    c: Compl,
+    pub c: Compl,
+}
+
+impl Default for RegularJuliaSet {
+    fn default() -> Self {
+        Self {
+            c: Complex::new(0.2, 0.3),
+        }
+    }
 }
 #[derive(Debug, Clone, Copy)]
 pub struct SinJuliaSet {
-    c: Compl,
+    pub c: Compl,
 }
 
+impl Default for SinJuliaSet {
+    fn default() -> Self {
+        Self {
+            c: Complex::new(0.2, 0.3),
+        }
+    }
+}
 impl ComplexFatouFractal for RegularJuliaSet {
     fn iterate_mut(&self, collector: &mut Compl) {
         *collector = *collector * *collector + self.c

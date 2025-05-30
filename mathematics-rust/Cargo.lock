@@ -578,24 +578,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mathematics-rust"
-version = "0.1.0"
-dependencies = [
- "clap",
- "const_for",
- "image",
- "konst",
- "num-bigint",
- "num-complex",
- "num-traits",
- "palette",
- "rand 0.9.0",
- "rayon",
- "smallvec",
- "uom",
-]
-
-[[package]]
 name = "maybe-rayon"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1175,6 +1157,24 @@ dependencies = [
  "serde_spanned",
  "toml_datetime",
  "winnow",
+]
+
+[[package]]
+name = "tryptamine-math"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "const_for",
+ "image",
+ "konst",
+ "num-bigint",
+ "num-complex",
+ "num-traits",
+ "palette",
+ "rand 0.9.0",
+ "rayon",
+ "smallvec",
+ "uom",
 ]
 
 [[package]]
