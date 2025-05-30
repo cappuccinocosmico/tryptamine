@@ -21,18 +21,22 @@ struct FiniteFatouBasin {
 
 const SMALL_SIZE: usize = 5;
 #[derive(Clone, Debug)]
-struct FatouBasins {
+pub struct FatouBasins {
     infinte_basin_radius_sqr: Option<RealType>,
     finite_basins: SmallVec<[FiniteFatouBasin; SMALL_SIZE]>,
 }
 
-trait ComplexFatouFractal: Copy + Sync {
+pub trait ComplexFatouFractal: Copy + Sync {
     fn generate_fatou_basins(&self) -> FatouBasins;
     fn iterate_mut(&self, collector: &mut Compl);
 }
 
 #[derive(Debug, Clone, Copy)]
-struct RegularJuliaSet {
+pub struct RegularJuliaSet {
+    c: Compl,
+}
+#[derive(Debug, Clone, Copy)]
+pub struct SinJuliaSet {
     c: Compl,
 }
 
@@ -79,6 +83,19 @@ impl ComplexFatouFractal for RegularJuliaSet {
         }
     }
 }
+impl ComplexFatouFractal for SinJuliaSet {
+    fn iterate_mut(&self, collector: &mut Compl) {
+        *collector = (*collector).sin() + self.c
+    }
+
+    fn generate_fatou_basins(&self) -> FatouBasins {
+        FatouBasins {
+            infinte_basin_radius_sqr: Some(8.0),
+            // TODO: Write code to generate interior basins
+            finite_basins: smallvec![],
+        }
+    }
+}
 
 enum BasinIndex {
     Infinite,
@@ -110,7 +127,7 @@ fn generate_basins_conditional(basins: &FatouBasins) -> impl Fn(Compl) -> Option
                 return Some(BasinIndex::Finite(i));
             }
         }
-        return None;
+        None
     }
 }
 
@@ -131,7 +148,7 @@ fn render_iterations(
         scheme[iterator as usize % scheme.len()]
     }
 }
-pub fn generate_julia_image<F: ComplexFatouFractal + Copy + Sync>(
+pub fn generate_julia_image<F: ComplexFatouFractal>(
     fractal: F,
     imgx: u32,
     imgy: u32,
@@ -190,7 +207,7 @@ pub fn generate_julia_image<F: ComplexFatouFractal + Copy + Sync>(
     // I want to go ahead and split up this vec into an iterator that will throw out imgx*imgy mutable buffers of size 3, as well as an index that will denote what number the pixel is at. Then call iteratior_mutate on the tuple. If you could use par iters from rayon to speed this computation up that would also be really helpful.
     //
     let scary_buff = split_vec_into_mutable_sized_chunks(&mut buff, 3).unwrap();
-    scary_buff
+    let _ = scary_buff
         .into_par_iter()
         .enumerate()
         .map(|(index, buff)| iteratior_mutate((index as u32, buff)));
@@ -251,23 +268,6 @@ fn split_vec_into_mutable_sized_chunks<T>(
     Ok(result)
 }
 
-// fn split_vec_into_immutable_sized_chunks<T: Default>(
-//     list: &mut [T],
-//     size: usize,
-// ) -> Result<Vec<(u32, &[T])>, String> {
-//     if list.len() % size != 0 && size != 0 {
-//         return Err("List of improper size".to_string());
-//     };
-//     let capacity = list.len() / size;
-//     let mut result = Vec::with_capacity(capacity);
-//     for i in 0..capacity {
-//         result[i] = (i as u32, &list[size * i..size * (i + 1) - 1])
-//     }
-//     list[1] = T::default();
-//
-//     Ok(result)
-// }
-
 pub enum ImageType {
     Jpeg,
     Webp,
@@ -301,12 +301,13 @@ fn image_buffer_to_jpeg_bytes(buffer: image::ImageBuffer<image::Rgb<u8>, Vec<u8>
         .expect("Failed to encode image as Jpeg");
     bytes
 }
-pub fn test_image(resolution: u32, image_type: ImageType) -> Result<Vec<u8>, String> {
+pub fn test_image<F: ComplexFatouFractal>(
+    resolution: u32,
+    image_type: ImageType,
+    fractal_config: F,
+) -> Result<Vec<u8>, String> {
     let start = std::time::Instant::now();
-    let fractal = RegularJuliaSet {
-        c: Complex::new(-0.3, 0.4),
-    };
-    let img = generate_julia_image(fractal, resolution, resolution)?;
+    let img = generate_julia_image(fractal_config, resolution, resolution)?;
     match image_type {
         ImageType::Webp => {
             let start_webp = std::time::Instant::now();
@@ -325,53 +326,6 @@ pub fn test_image(resolution: u32, image_type: ImageType) -> Result<Vec<u8>, Str
             let duration = start.elapsed();
             println!("Total Image generation took: {:?}", duration);
             Ok(png)
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug)]
-pub enum ComplexSph<T> {
-    Infinity,
-    Number(Complex<T>),
-}
-
-impl<T: Num + Add + Clone> Add for ComplexSph<T> {
-    type Output = ComplexSph<T>;
-    fn add(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
-            (Self::Number(sn), Self::Number(rhsn)) => Self::Number(sn + rhsn),
-            (_, _) => Self::Infinity,
-        }
-    }
-}
-
-impl<T: Num + Sub + Clone> Sub for ComplexSph<T> {
-    type Output = ComplexSph<T>;
-    fn sub(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
-            (Self::Number(sn), Self::Number(rhsn)) => Self::Number(sn - rhsn),
-            (_, _) => Self::Infinity,
-        }
-    }
-}
-
-impl<T: Num + Mul + Clone + Zero> Mul for ComplexSph<T> {
-    type Output = ComplexSph<T>;
-    fn mul(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
-            (Self::Number(sn), Self::Number(rhsn)) => Self::Number(sn * rhsn),
-            (_, _) => Self::Infinity,
-        }
-    }
-}
-
-impl<T: Num + Div + Clone + Zero> Div for ComplexSph<T> {
-    type Output = ComplexSph<T>;
-    fn div(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
-            (Self::Number(sn), Self::Number(rhsn)) => Self::Number(sn / rhsn),
-            (Self::Number(_), Self::Infinity) => Self::Number(Complex::<T>::zero()),
-            (_, _) => Self::Infinity,
         }
     }
 }
