@@ -31,7 +31,7 @@ fn entropy_of_black_hole_in_cm(cm_of_black_hole: f64) {
         / (Time::new::<second>(1.0) * Mass::new::<kilogram>(1.0));
     let plank_area = (hbar * G) / (c * c * c);
     // println!("Test quantity equal to plank area: {}", plank_area);
-    let plank_length = plank_area.sqrt();
+    // let plank_length = plank_area.sqrt();
 
     let ln2 = std::f64::consts::LN_2;
 
