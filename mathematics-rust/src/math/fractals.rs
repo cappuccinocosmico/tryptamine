@@ -3,6 +3,7 @@ use core::slice;
 use crate::math::colors::{generate_ocean_blues, generate_rainbow_gradient};
 use image::Rgb;
 use num_complex::Complex;
+use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
 use smallvec::{SmallVec, smallvec};
 
 use super::colors::{CustomRgb, RgbColorScheme};
@@ -221,7 +222,7 @@ impl Default for ImageSchema {
 impl ImageSchema {
     fn index_to_val(&self, index: u32) -> Compl {
         let pixel_distance =
-            2.0 * self.scale / ((self.resolution_x + self.resolution_y) as RealType);
+            2.0 / ((self.resolution_x + self.resolution_y) as RealType * self.scale);
         let top_corner = Complex::new(
             self.center_cord.re - (pixel_distance * (self.resolution_x as RealType)) / 2.0,
             self.center_cord.im + (pixel_distance * (self.resolution_y as RealType)) / 2.0,
@@ -290,7 +291,7 @@ pub fn generate_raw_image_buffer<F: ComplexFatouFractal>(
     println!("Initialization took: {:?}", duration);
     let start = std::time::Instant::now();
     let _result: Vec<()> = scary_buffs_list
-        .into_iter()
+        .into_par_iter()
         .enumerate()
         .map(|(index, buff)| iteratior_mutate((index as u32, buff)))
         .collect();
