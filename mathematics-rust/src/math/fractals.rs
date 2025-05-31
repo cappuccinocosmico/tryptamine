@@ -1,12 +1,8 @@
 use core::slice;
-use std::ops::{Add, Div, Mul, Sub};
 
-use crate::math::colors::{generate_rainbow_gradient, generate_warm_reds};
+use crate::math::colors::{generate_ocean_blues, generate_rainbow_gradient};
 use image::Rgb;
 use num_complex::Complex;
-use num_traits::{Num, Zero};
-use palette::encoding::gamma::Number;
-use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
 use smallvec::{SmallVec, smallvec};
 
 use super::colors::{CustomRgb, RgbColorScheme};
@@ -26,37 +22,43 @@ pub struct FatouBasins {
     finite_basins: SmallVec<[FiniteFatouBasin; SMALL_SIZE]>,
 }
 
+const DEFAULT_MAX_ITERATIONS: u32 = 300;
 pub trait ComplexFatouFractal: Copy + Sync {
     fn generate_fatou_basins(&self) -> FatouBasins;
-    fn iterate_mut(&self, collector: &mut Compl);
+    fn iterate_mut(&self, collector: &mut Compl, original: &Compl);
+    fn get_iterations(&self) -> u32;
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct RegularJuliaSet {
     pub c: Compl,
+    pub iterations: u32,
 }
 
 impl Default for RegularJuliaSet {
     fn default() -> Self {
         Self {
             c: Complex::new(0.2, 0.3),
+            iterations: DEFAULT_MAX_ITERATIONS,
         }
     }
 }
 #[derive(Debug, Clone, Copy)]
 pub struct SinJuliaSet {
     pub c: Compl,
+    pub iterations: u32,
 }
 
 impl Default for SinJuliaSet {
     fn default() -> Self {
         Self {
             c: Complex::new(0.2, 0.3),
+            iterations: DEFAULT_MAX_ITERATIONS,
         }
     }
 }
 impl ComplexFatouFractal for RegularJuliaSet {
-    fn iterate_mut(&self, collector: &mut Compl) {
+    fn iterate_mut(&self, collector: &mut Compl, _: &Compl) {
         *collector = *collector * *collector + self.c
     }
 
@@ -97,10 +99,13 @@ impl ComplexFatouFractal for RegularJuliaSet {
             finite_basins,
         }
     }
+    fn get_iterations(&self) -> u32 {
+        self.iterations
+    }
 }
 impl ComplexFatouFractal for SinJuliaSet {
-    fn iterate_mut(&self, collector: &mut Compl) {
-        *collector = (*collector).sin() + self.c
+    fn iterate_mut(&self, collector: &mut Compl, _: &Compl) {
+        *collector = (*collector).sin() * self.c
     }
 
     fn generate_fatou_basins(&self) -> FatouBasins {
@@ -109,6 +114,37 @@ impl ComplexFatouFractal for SinJuliaSet {
             // TODO: Write code to generate interior basins
             finite_basins: smallvec![],
         }
+    }
+    fn get_iterations(&self) -> u32 {
+        self.iterations
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct MandelbrotSet {
+    pub iterations: u32,
+}
+impl Default for MandelbrotSet {
+    fn default() -> Self {
+        MandelbrotSet {
+            iterations: DEFAULT_MAX_ITERATIONS,
+        }
+    }
+}
+
+impl ComplexFatouFractal for MandelbrotSet {
+    fn iterate_mut(&self, collector: &mut Compl, original: &Compl) {
+        *collector = *collector * *collector + original;
+    }
+    fn generate_fatou_basins(&self) -> FatouBasins {
+        FatouBasins {
+            infinte_basin_radius_sqr: Some(8.0),
+            // TODO: Write code to generate interior basins
+            finite_basins: smallvec![],
+        }
+    }
+    fn get_iterations(&self) -> u32 {
+        self.iterations
     }
 }
 
@@ -148,22 +184,22 @@ fn generate_basins_conditional(basins: &FatouBasins) -> impl Fn(Compl) -> Option
 
 fn render_iterations(
     iterator: u32,
-    basin: BasinIndex,
+    optional_basin: Option<BasinIndex>,
     color_schemes: &[RgbColorScheme],
 ) -> CustomRgb {
-    if iterator == 300 {
-        CustomRgb {
+    let Some(basin) = optional_basin else {
+        return CustomRgb {
             red: 0,
             green: 0,
             blue: 0,
-        }
-    } else {
-        let basin_usize: usize = basin.into();
-        let scheme = &color_schemes[basin_usize];
-        scheme[iterator as usize % scheme.len()]
-    }
+        };
+    };
+    let basin_usize: usize = basin.into();
+    let scheme = &color_schemes[basin_usize];
+    scheme[iterator as usize % scheme.len()]
 }
-pub fn generate_julia_image<F: ComplexFatouFractal>(
+
+pub fn generate_raw_image_buffer<F: ComplexFatouFractal>(
     fractal: F,
     imgx: u32,
     imgy: u32,
@@ -179,7 +215,7 @@ pub fn generate_julia_image<F: ComplexFatouFractal>(
     let color_size: usize = 10;
     let color_schemes = [
         generate_rainbow_gradient(color_size),
-        generate_warm_reds(color_size),
+        generate_ocean_blues(color_size),
     ];
     let basins = fractal.generate_fatou_basins();
     let basin_conditional = generate_basins_conditional(&basins);
@@ -190,23 +226,24 @@ pub fn generate_julia_image<F: ComplexFatouFractal>(
         let cx = y as RealType * scalex - 1.5;
         let cy = x as RealType * scaley - 1.5;
 
-        let mut z = Complex::new(cx, cy);
+        let original = Complex::new(cx, cy);
+
+        // Complex implements copy if the underlying elements implement it, otherwise this would require a .clone()
+        let mut z = original;
 
         let mut i = 0;
 
-        while i < 300 {
-            fractal.iterate_mut(&mut z);
+        let max_iter = fractal.get_iterations();
+
+        while i < max_iter {
+            fractal.iterate_mut(&mut z, &original);
             i += 1;
-            if basin_conditional(z).is_some() {
-                break;
-            }
+            let cond = basin_conditional(z);
+            if cond.is_some() {
+                return render_iterations(i, cond, &color_schemes);
+            };
         }
-        let basin_id =
-            basin_conditional(z).expect("Just computed this previously and got a some variant");
-        if i == 300 {
-            println!("Pixel ({z}) ended iterator at no escape point");
-        }
-        render_iterations(i, basin_id, &color_schemes)
+        render_iterations(max_iter, None, &color_schemes)
     };
 
     let iteratior_mutate = |(index, output_buf): (u32, &mut [u8])| {
@@ -221,15 +258,16 @@ pub fn generate_julia_image<F: ComplexFatouFractal>(
     let mut buff: Vec<u8> = vec![0; buff_length];
     // I want to go ahead and split up this vec into an iterator that will throw out imgx*imgy mutable buffers of size 3, as well as an index that will denote what number the pixel is at. Then call iteratior_mutate on the tuple. If you could use par iters from rayon to speed this computation up that would also be really helpful.
     //
-    let scary_buff = split_vec_into_mutable_sized_chunks(&mut buff, 3).unwrap();
-    let _ = scary_buff
-        .into_par_iter()
-        .enumerate()
-        .map(|(index, buff)| iteratior_mutate((index as u32, buff)));
+    let scary_buffs_list = split_vec_into_mutable_sized_chunks(&mut buff, 3).unwrap();
     let duration = start.elapsed();
     println!("Initialization took: {:?}", duration);
-
     let start = std::time::Instant::now();
+    let _result: Vec<()> = scary_buffs_list
+        .into_iter()
+        .enumerate()
+        .map(|(index, buff)| iteratior_mutate((index as u32, buff)))
+        .collect();
+
     let duration = start.elapsed();
     println!("Fractal Mathematics took: {:?}", duration);
 
@@ -276,7 +314,7 @@ fn split_vec_into_mutable_sized_chunks<T>(
     unsafe {
         for i in 0..capacity {
             let mut_refrence: &mut [T] =
-                slice::from_raw_parts_mut(ptr.add(i * chunk_size), chunk_size - 1);
+                slice::from_raw_parts_mut(ptr.add(i * chunk_size), chunk_size);
             result.push(mut_refrence)
         }
     }
@@ -316,13 +354,13 @@ fn image_buffer_to_jpeg_bytes(buffer: image::ImageBuffer<image::Rgb<u8>, Vec<u8>
         .expect("Failed to encode image as Jpeg");
     bytes
 }
-pub fn test_image<F: ComplexFatouFractal>(
+pub fn generate_image_bytes<F: ComplexFatouFractal>(
     resolution: u32,
     image_type: ImageType,
     fractal_config: F,
 ) -> Result<Vec<u8>, String> {
     let start = std::time::Instant::now();
-    let img = generate_julia_image(fractal_config, resolution, resolution)?;
+    let img = generate_raw_image_buffer(fractal_config, resolution, resolution)?;
     match image_type {
         ImageType::Webp => {
             let start_webp = std::time::Instant::now();

@@ -1,13 +1,16 @@
 use clap::{Parser, Subcommand, ValueEnum};
-use std::path::PathBuf;
 use std::fs;
+use std::path::PathBuf;
 
 mod categories;
 mod datastructures;
 mod math;
 mod physics;
 
-use math::fractals::{test_image, RegularJuliaSet, SinJuliaSet, ImageType as FractalImageType};
+use math::fractals::{
+    ImageType as FractalImageType, MandelbrotSet, RegularJuliaSet, SinJuliaSet,
+    generate_image_bytes,
+};
 
 /// CLI for generating mathematical constructs
 #[derive(Parser, Debug)]
@@ -41,6 +44,7 @@ enum Commands {
 enum FractalKind {
     Julia,
     SinJulia,
+    Mandelbrot,
 }
 
 /// Supported output image types
@@ -54,7 +58,12 @@ fn main() {
     let cli = Cli::parse();
 
     match &cli.command {
-        Commands::Fractal { fractal, resolution, image_type, output } => {
+        Commands::Fractal {
+            fractal,
+            resolution,
+            image_type,
+            output,
+        } => {
             // Map output image type
             let img_type = match image_type {
                 OutputImageType::Jpeg => FractalImageType::Jpeg,
@@ -73,10 +82,20 @@ fn main() {
             };
 
             // Generate the image bytes
-            println!("Generating {:?} fractal: resolution={} type={:?} -> {}", fractal, resolution, image_type, out_path);
+            println!(
+                "Generating {:?} fractal: resolution={} type={:?} -> {}",
+                fractal, resolution, image_type, out_path
+            );
             let result = match fractal {
-                FractalKind::Julia => test_image(*resolution, img_type, RegularJuliaSet::default()),
-                FractalKind::SinJulia => test_image(*resolution, img_type, SinJuliaSet::default()),
+                FractalKind::Julia => {
+                    generate_image_bytes(*resolution, img_type, RegularJuliaSet::default())
+                }
+                FractalKind::SinJulia => {
+                    generate_image_bytes(*resolution, img_type, SinJuliaSet::default())
+                }
+                FractalKind::Mandelbrot => {
+                    generate_image_bytes(*resolution, img_type, MandelbrotSet::default())
+                }
             };
             match result {
                 Ok(bytes) => {
