@@ -199,16 +199,51 @@ fn render_iterations(
     scheme[iterator as usize % scheme.len()]
 }
 
+#[derive(Debug)]
+struct ImageSchema {
+    resolution_x: u32,
+    resolution_y: u32,
+    center_cord: Compl,
+    scale: RealType,
+}
+
+impl Default for ImageSchema {
+    fn default() -> Self {
+        ImageSchema {
+            resolution_x: 2000,
+            resolution_y: 1000,
+            center_cord: Complex::new(0.0, 0.0),
+            scale: 2.0,
+        }
+    }
+}
+
+impl ImageSchema {
+    fn index_to_val(&self, index: u32) -> Compl {
+        let pixel_distance =
+            2.0 * self.scale / ((self.resolution_x + self.resolution_y) as RealType);
+        let top_corner = Complex::new(
+            self.center_cord.re - (pixel_distance * (self.resolution_x as RealType)) / 2.0,
+            self.center_cord.im + (pixel_distance * (self.resolution_y as RealType)) / 2.0,
+        );
+        let x = index % self.resolution_x;
+        let y = index / self.resolution_x;
+        let re = x as RealType * pixel_distance + top_corner.re;
+        let im = y as RealType * pixel_distance - top_corner.im;
+
+        Complex::new(re, im)
+    }
+    fn get_resolution(&self) -> u32 {
+        self.resolution_x * self.resolution_y
+    }
+}
+
 pub fn generate_raw_image_buffer<F: ComplexFatouFractal>(
-    fractal: F,
-    imgx: u32,
-    imgy: u32,
+    fractal: &F,
+    image_info: &ImageSchema,
 ) -> Result<image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, String> {
     //! An example of generating julia fractals.
     let start = std::time::Instant::now();
-
-    let scalex = 3.0 / imgx as RealType;
-    let scaley = 3.0 / imgy as RealType;
 
     // Create a new ImgBuf with width: imgx and height: imgy
     // Move render_iterations outside the loop
@@ -221,14 +256,8 @@ pub fn generate_raw_image_buffer<F: ComplexFatouFractal>(
     let basin_conditional = generate_basins_conditional(&basins);
 
     let iterator = |index: u32| -> CustomRgb {
-        let x = index % imgx;
-        let y = index / imgx;
-        let cx = y as RealType * scalex - 1.5;
-        let cy = x as RealType * scaley - 1.5;
-
-        let original = Complex::new(cx, cy);
-
         // Complex implements copy if the underlying elements implement it, otherwise this would require a .clone()
+        let original = image_info.index_to_val(index);
         let mut z = original;
 
         let mut i = 0;
@@ -254,10 +283,8 @@ pub fn generate_raw_image_buffer<F: ComplexFatouFractal>(
     };
     println!("{basins:?}");
     // Create the image buffer with parallel iterator
-    let buff_length = (imgx * imgy * 3) as usize; // Since there are 3 colors and stuff.
+    let buff_length = (image_info.get_resolution() * 3) as usize; // Since there are 3 colors and stuff.
     let mut buff: Vec<u8> = vec![0; buff_length];
-    // I want to go ahead and split up this vec into an iterator that will throw out imgx*imgy mutable buffers of size 3, as well as an index that will denote what number the pixel is at. Then call iteratior_mutate on the tuple. If you could use par iters from rayon to speed this computation up that would also be really helpful.
-    //
     let scary_buffs_list = split_vec_into_mutable_sized_chunks(&mut buff, 3).unwrap();
     let duration = start.elapsed();
     println!("Initialization took: {:?}", duration);
@@ -272,28 +299,14 @@ pub fn generate_raw_image_buffer<F: ComplexFatouFractal>(
     println!("Fractal Mathematics took: {:?}", duration);
 
     // Calculate expected buffer size
-    let expected_size = (imgx * imgy * 3) as usize;
-
-    // Validate buffer size
-    if buff.len() != expected_size {
-        return Err(format!(
-            "Buffer size mismatch. Expected {} bytes ({}x{}x3), got {} bytes",
-            expected_size,
-            imgx,
-            imgy,
-            buff.len()
-        ));
-    }
 
     let start = std::time::Instant::now();
-    let img_option = image::ImageBuffer::from_vec(imgx, imgy, buff);
+    let img_option =
+        image::ImageBuffer::from_vec(image_info.resolution_x, image_info.resolution_y, buff);
     let img: image::ImageBuffer<Rgb<u8>, Vec<u8>> = match img_option {
         Some(img) => img,
         None => {
-            return Err(format!(
-                "Failed to create image buffer with dimensions {}x{}",
-                imgx, imgy
-            ));
+            return Err(format!("Failed to create image buffer"));
         }
     };
     let duration = start.elapsed();
@@ -360,7 +373,12 @@ pub fn generate_image_bytes<F: ComplexFatouFractal>(
     fractal_config: F,
 ) -> Result<Vec<u8>, String> {
     let start = std::time::Instant::now();
-    let img = generate_raw_image_buffer(fractal_config, resolution, resolution)?;
+    let image_info = ImageSchema {
+        resolution_x: 2 * resolution,
+        resolution_y: resolution,
+        ..ImageSchema::default()
+    };
+    let img = generate_raw_image_buffer(&fractal_config, &image_info)?;
     match image_type {
         ImageType::Webp => {
             let start_webp = std::time::Instant::now();
