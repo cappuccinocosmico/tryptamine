@@ -3,6 +3,7 @@ use core::slice;
 use crate::math::colors::{generate_ocean_blues, generate_rainbow_gradient};
 use image::Rgb;
 use num_complex::Complex;
+use num_traits::real::Real;
 use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
 use smallvec::{SmallVec, smallvec};
 
@@ -37,20 +38,6 @@ pub struct RegularJuliaSet {
 }
 
 impl Default for RegularJuliaSet {
-    fn default() -> Self {
-        Self {
-            c: Complex::new(0.2, 0.3),
-            iterations: DEFAULT_MAX_ITERATIONS,
-        }
-    }
-}
-#[derive(Debug, Clone, Copy)]
-pub struct SinJuliaSet {
-    pub c: Compl,
-    pub iterations: u32,
-}
-
-impl Default for SinJuliaSet {
     fn default() -> Self {
         Self {
             c: Complex::new(0.2, 0.3),
@@ -104,6 +91,20 @@ impl ComplexFatouFractal for RegularJuliaSet {
         self.iterations
     }
 }
+#[derive(Debug, Clone, Copy)]
+pub struct SinJuliaSet {
+    pub c: Compl,
+    pub iterations: u32,
+}
+
+impl Default for SinJuliaSet {
+    fn default() -> Self {
+        Self {
+            c: Complex::new(1.0, 0.1),
+            iterations: DEFAULT_MAX_ITERATIONS,
+        }
+    }
+}
 impl ComplexFatouFractal for SinJuliaSet {
     fn iterate_mut(&self, collector: &mut Compl, _: &Compl) {
         *collector = (*collector).sin() * self.c
@@ -111,7 +112,7 @@ impl ComplexFatouFractal for SinJuliaSet {
 
     fn generate_fatou_basins(&self) -> FatouBasins {
         FatouBasins {
-            infinte_basin_radius_sqr: Some(8.0),
+            infinte_basin_radius_sqr: Some(64.0),
             // TODO: Write code to generate interior basins
             finite_basins: smallvec![],
         }
@@ -201,11 +202,11 @@ fn render_iterations(
 }
 
 #[derive(Debug)]
-struct ImageSchema {
-    resolution_x: u32,
-    resolution_y: u32,
-    center_cord: Compl,
-    scale: RealType,
+pub struct ImageSchema {
+    pub resolution_x: u32,
+    pub resolution_y: u32,
+    pub center_cord: Compl,
+    pub window_diagonal: RealType,
 }
 
 impl Default for ImageSchema {
@@ -214,19 +215,20 @@ impl Default for ImageSchema {
             resolution_x: 2000,
             resolution_y: 1000,
             center_cord: Complex::new(0.0, 0.0),
-            scale: 2.0,
+            window_diagonal: 0.5,
         }
     }
 }
 
 impl ImageSchema {
     fn index_to_val(&self, index: u32) -> Compl {
-        let pixel_distance =
-            2.0 / ((self.resolution_x + self.resolution_y) as RealType * self.scale);
+        let pixel_distance = self.window_diagonal
+            / ((self.resolution_x.pow(2) + self.resolution_y.pow(2)) as RealType).sqrt();
         let top_corner = Complex::new(
-            self.center_cord.re - (pixel_distance * (self.resolution_x as RealType)) / 2.0,
-            self.center_cord.im + (pixel_distance * (self.resolution_y as RealType)) / 2.0,
+            self.center_cord.re - (pixel_distance * (self.resolution_x as RealType) / 2.0),
+            self.center_cord.im + (pixel_distance * (self.resolution_y as RealType) / 2.0),
         );
+        // let top_corner = Complex::new(self.center_cord.re, self.center_cord.im);
         let x = index % self.resolution_x;
         let y = index / self.resolution_x;
         let re = x as RealType * pixel_distance + top_corner.re;
@@ -242,7 +244,7 @@ impl ImageSchema {
 pub fn generate_raw_image_buffer<F: ComplexFatouFractal>(
     fractal: &F,
     image_info: &ImageSchema,
-) -> Result<image::ImageBuffer<image::Rgb<u8>, Vec<u8>>, String> {
+) -> Vec<u8> {
     //! An example of generating julia fractals.
     let start = std::time::Instant::now();
 
@@ -299,20 +301,7 @@ pub fn generate_raw_image_buffer<F: ComplexFatouFractal>(
     let duration = start.elapsed();
     println!("Fractal Mathematics took: {:?}", duration);
 
-    // Calculate expected buffer size
-
-    let start = std::time::Instant::now();
-    let img_option =
-        image::ImageBuffer::from_vec(image_info.resolution_x, image_info.resolution_y, buff);
-    let img: image::ImageBuffer<Rgb<u8>, Vec<u8>> = match img_option {
-        Some(img) => img,
-        None => {
-            return Err(format!("Failed to create image buffer"));
-        }
-    };
-    let duration = start.elapsed();
-    println!("Image buffer creation took: {:?}", duration);
-    Ok(img)
+    buff
 }
 
 fn split_vec_into_mutable_sized_chunks<T>(
@@ -339,6 +328,51 @@ pub enum ImageType {
     Jpeg,
     Webp,
 }
+pub fn generate_image_bytes<F: ComplexFatouFractal>(
+    resolution: u32,
+    image_type: ImageType,
+    fractal_config: F,
+) -> Result<Vec<u8>, String> {
+    let start = std::time::Instant::now();
+    let image_info = ImageSchema {
+        resolution_x: 2 * resolution,
+        resolution_y: resolution,
+        ..ImageSchema::default()
+    };
+    let buff = generate_raw_image_buffer(&fractal_config, &image_info);
+
+    let img: image::ImageBuffer<Rgb<u8>, Vec<u8>> = match image::ImageBuffer::from_vec(
+        image_info.resolution_x,
+        image_info.resolution_y,
+        buff,
+    ) {
+        Some(img) => img,
+        None => {
+            return Err(format!("Failed to create image buffer"));
+        }
+    };
+    match image_type {
+        ImageType::Webp => {
+            let start_webp = std::time::Instant::now();
+            let webp: Vec<u8> = image_buffer_to_webp_bytes(img);
+            let duration_webp = start_webp.elapsed();
+            println!("WebP encoding took: {:?}", duration_webp);
+            let duration = start.elapsed();
+            println!("Total Image generation took: {:?}", duration);
+            Ok(webp)
+        }
+        ImageType::Jpeg => {
+            let start_png = std::time::Instant::now();
+            let png: Vec<u8> = image_buffer_to_jpeg_bytes(img);
+            let duration_png = start_png.elapsed();
+            println!("Jpeg encoding took: {:?}", duration_png);
+            let duration = start.elapsed();
+            println!("Total Image generation took: {:?}", duration);
+            Ok(png)
+        }
+    }
+}
+
 pub fn str_image_extension(image_type_str: &str) -> Option<ImageType> {
     match image_type_str {
         "jpeg" => Some(ImageType::Jpeg),
@@ -367,37 +401,4 @@ fn image_buffer_to_jpeg_bytes(buffer: image::ImageBuffer<image::Rgb<u8>, Vec<u8>
         )
         .expect("Failed to encode image as Jpeg");
     bytes
-}
-pub fn generate_image_bytes<F: ComplexFatouFractal>(
-    resolution: u32,
-    image_type: ImageType,
-    fractal_config: F,
-) -> Result<Vec<u8>, String> {
-    let start = std::time::Instant::now();
-    let image_info = ImageSchema {
-        resolution_x: 2 * resolution,
-        resolution_y: resolution,
-        ..ImageSchema::default()
-    };
-    let img = generate_raw_image_buffer(&fractal_config, &image_info)?;
-    match image_type {
-        ImageType::Webp => {
-            let start_webp = std::time::Instant::now();
-            let webp: Vec<u8> = image_buffer_to_webp_bytes(img);
-            let duration_webp = start_webp.elapsed();
-            println!("WebP encoding took: {:?}", duration_webp);
-            let duration = start.elapsed();
-            println!("Total Image generation took: {:?}", duration);
-            Ok(webp)
-        }
-        ImageType::Jpeg => {
-            let start_png = std::time::Instant::now();
-            let png: Vec<u8> = image_buffer_to_jpeg_bytes(img);
-            let duration_png = start_png.elapsed();
-            println!("Jpeg encoding took: {:?}", duration_png);
-            let duration = start.elapsed();
-            println!("Total Image generation took: {:?}", duration);
-            Ok(png)
-        }
-    }
 }
