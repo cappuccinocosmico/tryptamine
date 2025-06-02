@@ -178,7 +178,7 @@ fn generate_basins_conditional(basins: &FatouBasins) -> impl Fn(Compl) -> Option
             let basin_val = basin.basin;
             if (z - basin_val).norm_sqr() <= basin.neighborhood_sqr {
                 return Some(BasinIndex::Finite(i));
-            }
+            };
         }
         None
     }
