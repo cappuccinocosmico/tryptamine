@@ -5,6 +5,7 @@ use std::path::PathBuf;
 mod categories;
 mod datastructures;
 mod math;
+mod misc;
 mod physics;
 
 use math::fractals::{
