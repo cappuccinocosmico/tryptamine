@@ -9,7 +9,6 @@ macro_rules! dedupe {
             const SORTED_LIST: [SortType; ORIG_LEN] = quicksort($x);
             const DEDUPE_LEN: usize = sorted_deduped_len(&SORTED_LIST);
             const DEDUPED: [SortType; DEDUPE_LEN] = sorted_deduped(&SORTED_LIST);
-            const DEDUPED_REF: &[SortType] = &DEDUPED;
             &DEDUPED
         }
     };
