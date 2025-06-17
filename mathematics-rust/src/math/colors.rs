@@ -1,4 +1,5 @@
 use palette::{IntoColor, Oklch, Srgb, num::Round};
+use uom::si::luminance;
 fn srgb_to_rgbvals(srgb: Srgb<f32>) -> CustomRgb {
     CustomRgb {
         red: (srgb.red * 256.0).floor() as u8,
@@ -81,12 +82,25 @@ fn generate_generic_gradient<C: TrypColor>(
     array
 }
 
-pub fn generate_rainbow_gradient(size: usize) -> Vec<CustomRgb> {
+pub fn generate_rainbow_gradient_constant_chroma(size: usize) -> Vec<CustomRgb> {
     generate_generic_gradient(size, |i| {
         Oklch::new(0.7, 0.16, ((i + 4) * (360 / size) % 360) as f32)
     })
 }
 
+pub fn generate_rainbow_gradient(size: usize) -> Vec<CustomRgb> {
+    generate_generic_gradient(size, |i| {
+        let hue = ((i + 4) * (360 / size) % 360) as f32;
+        // Increase luminance for blue hues (~220 to 260 degrees), decrease for others
+        // let luminance = if (220.0..=260.0).contains(&hue) {
+        //     0.6 // higher luminance for blue colors
+        // } else {
+        //     0.8 // lower luminance for non-blue colors
+        // };
+        let luminance = 0.7;
+        Oklch::new(luminance, 0.2, hue)
+    })
+}
 // oklch(70.17% 0.322 328.36)
 pub fn generate_lerp_gradient(size: usize, color_points: &[impl TrypColor]) -> Vec<CustomRgb> {
     let num_colors = color_points.len();
@@ -138,9 +152,9 @@ pub fn generate_circular_forest_greens(size: usize) -> Vec<CustomRgb> {
     let colors = [
         oklch!(0.45, 0.1, 160), // dark green
         oklch!(0.5, 0.1, 140),  // medium green
-        oklch!(0.6, 0.1, 120),  // bright green
-        oklch!(0.75, 0.1, 100), // light green
-        oklch!(0.6, 0.1, 120),  // bright green
+        oklch!(0.65, 0.1, 120), // bright green
+        oklch!(0.8, 0.1, 90),   // light green
+        oklch!(0.65, 0.1, 120), // bright green
         oklch!(0.5, 0.1, 140),  // medium green
     ];
     generate_lerp_gradient(size, &colors)
@@ -151,9 +165,9 @@ pub fn generate_circular_purple_dream(size: usize) -> Vec<CustomRgb> {
         oklch!(0.5, 0.25, 290), // deep purple
         oklch!(0.6, 0.21, 275), // violet
         oklch!(0.7, 0.15, 260), // lavender
-        oklch!(0.6, 0.16, 250), // soft violet
-        oklch!(0.5, 0.25, 265), // muted purple
-        oklch!(0.5, 0.25, 280), // deep purple
+        oklch!(0.6, 0.15, 245), // soft violet
+        oklch!(0.7, 0.15, 260), // lavender
+        oklch!(0.6, 0.21, 275), // violet
     ];
     generate_lerp_gradient(size, &colors)
 }
