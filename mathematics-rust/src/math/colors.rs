@@ -7,24 +7,76 @@ fn srgb_to_rgbvals(srgb: Srgb<f32>) -> CustomRgb {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct CustomRgb {
     pub red: u8,
     pub green: u8,
     pub blue: u8,
 }
 
+pub trait TrypColor {
+    fn lerp(&self, other: &Self, val: f32) -> Self;
+    fn to_rgb(&self) -> CustomRgb;
+}
+
+impl TrypColor for CustomRgb {
+    fn to_rgb(&self) -> CustomRgb {
+        *self
+    }
+    fn lerp(&self, other: &Self, val: f32) -> Self {
+        // Perform linear interpolation on each color channel with rounding
+        let red = (self.red as f32 + val * (other.red as f32 - self.red as f32)).round() as u8;
+        let green =
+            (self.green as f32 + val * (other.green as f32 - self.green as f32)).round() as u8;
+        let blue = (self.blue as f32 + val * (other.blue as f32 - self.blue as f32)).round() as u8;
+
+        CustomRgb { red, green, blue }
+    }
+}
+impl TrypColor for Oklch {
+    fn lerp(&self, other: &Self, val: f32) -> Self {
+        // Calculate shortest angular difference for hue interpolation
+        let h1 = self.hue.into_positive_degrees();
+        let h2 = other.hue.into_positive_degrees();
+        let delta = h2 - h1;
+
+        // Wrap delta to the range [-180, 180] to find shortest path
+        let shortest_delta = if delta.abs() > 180.0 {
+            if delta > 0.0 {
+                delta - 360.0
+            } else {
+                delta + 360.0
+            }
+        } else {
+            delta
+        };
+
+        fn lerp(a: f32, b: f32, c: f32) -> f32 {
+            a * (1.0 - c) + b * c
+        }
+
+        Oklch::new(
+            lerp(self.l, other.l, val),
+            lerp(self.chroma, other.chroma, val),
+            (h1 + shortest_delta * val).rem_euclid(360.0),
+        )
+    }
+    fn to_rgb(&self) -> CustomRgb {
+        let srgb_color_float: Srgb<f32> = (*self).into_color();
+        let im_rgb = srgb_to_rgbvals(srgb_color_float);
+        return im_rgb;
+    }
+}
+
 pub type RgbColorScheme = Vec<CustomRgb>;
-fn generate_generic_gradient(
+fn generate_generic_gradient<C: TrypColor>(
     size: usize,
-    color_generator: impl Fn(usize) -> Oklch,
+    color_generator: impl Fn(usize) -> C,
 ) -> RgbColorScheme {
     let mut array = Vec::new();
     for i in 0..size {
-        let oklch_color = color_generator(i);
-        let srgb_color_float: Srgb<f32> = oklch_color.into_color();
-        let im_rgb = srgb_to_rgbvals(srgb_color_float);
-        array.push(im_rgb);
+        let output = color_generator(i).to_rgb();
+        array.push(output);
     }
     array
 }
@@ -35,42 +87,74 @@ pub fn generate_rainbow_gradient(size: usize) -> Vec<CustomRgb> {
     })
 }
 
-pub fn generate_warm_reds(size: usize) -> Vec<CustomRgb> {
-    generate_generic_gradient(size, |i| {
-        Oklch::new(
-            0.8 - ((i + 4) as f32 * 0.03) % size as f32,
-            0.2,
-            20.0 + (i as f32 * 10.0) % (10.0 * size as f32),
-        )
-    })
+// oklch(70.17% 0.322 328.36)
+pub fn generate_lerp_gradient(size: usize, color_points: &[impl TrypColor]) -> Vec<CustomRgb> {
+    let num_colors = color_points.len();
+    if num_colors == 0 {
+        return vec![CustomRgb::default(); size];
+    }
+    let colors_iterator = (0..size).map(|i| {
+        let bottom_color_index = ((i as f32 / size as f32) * num_colors as f32).floor() as usize;
+        let lerp_val = ((i as f32 / size as f32) * num_colors as f32).fract();
+        let bottom_color = &color_points[bottom_color_index];
+        let upper_color = &color_points[(bottom_color_index + 1) % num_colors];
+        let intermediate = bottom_color.lerp(upper_color, lerp_val);
+        intermediate.to_rgb()
+    });
+    colors_iterator.collect()
+}
+// oklch(40.7 0.1 297)
+// oklch!(.407, 0.1, 297)
+
+macro_rules! oklch {
+    ($l:expr, $c:expr, $h:expr) => {
+        Oklch::new($l as f32, $c as f32, $h as f32)
+    };
+}
+pub fn generate_circular_ocean_blues(size: usize) -> Vec<CustomRgb> {
+    // Generate a smooth ocean blue gradient using multiple lerp points
+    let colors = [
+        oklch!(0.45, 0.25, 210), // deep blue
+        oklch!(0.6, 0.22, 200),  // medium blue
+        oklch!(0.75, 0.18, 185), // lighter blue
+        oklch!(0.85, 0.12, 170), // pale blue
+        oklch!(0.75, 0.18, 185), // lighter blue
+        oklch!(0.6, 0.22, 200),  // medium blue
+    ];
+    generate_lerp_gradient(size, &colors)
+}
+pub fn generate_circular_sunset_orange(size: usize) -> Vec<CustomRgb> {
+    let colors = [
+        oklch!(0.7, 0.2, 30),   // warm orange
+        oklch!(0.6, 0.2, 20),   // soft orange
+        oklch!(0.55, 0.15, 10), // light peach
+        oklch!(0.5, 0.13, 5),   // pale peach
+        oklch!(0.6, 0.2, 20),   // soft orange
+        oklch!(0.7, 0.2, 30),   // warm orange
+    ];
+    generate_lerp_gradient(size, &colors)
 }
 
-pub fn generate_forest_greens(size: usize) -> Vec<CustomRgb> {
-    generate_generic_gradient(size, |i| {
-        Oklch::new(
-            0.55 + (i as f32 * 0.03),
-            0.15,
-            140.0 + (i as f32 * 10.0) % 40.0,
-        )
-    })
+pub fn generate_circular_forest_greens(size: usize) -> Vec<CustomRgb> {
+    let colors = [
+        oklch!(0.4, 0.25, 130), // dark green
+        oklch!(0.5, 0.3, 110),  // medium green
+        oklch!(0.6, 0.25, 90),  // bright green
+        oklch!(0.7, 0.2, 80),   // light green
+        oklch!(0.6, 0.25, 90),  // bright green
+        oklch!(0.5, 0.3, 110),  // medium green
+    ];
+    generate_lerp_gradient(size, &colors)
 }
 
-pub fn generate_royal_violets(size: usize) -> Vec<CustomRgb> {
-    generate_generic_gradient(size, |i| {
-        Oklch::new(
-            0.6,
-            0.18 + (i as f32 * 0.01),
-            280.0 + (i as f32 * 15.0) % 40.0,
-        )
-    })
-}
-
-pub fn generate_ocean_blues(size: usize) -> Vec<CustomRgb> {
-    generate_generic_gradient(size, |i| {
-        Oklch::new(
-            0.7 - (i as f32 * 0.02),
-            0.12 + (i as f32 * 0.01),
-            220.0 + (i as f32 * 20.0) % 40.0,
-        )
-    })
+pub fn generate_circular_purple_dream(size: usize) -> Vec<CustomRgb> {
+    let colors = [
+        oklch!(0.5, 0.25, 280), // deep purple
+        oklch!(0.6, 0.25, 270), // violet
+        oklch!(0.7, 0.25, 260), // lavender
+        oklch!(0.6, 0.25, 250), // soft violet
+        oklch!(0.5, 0.2, 260),  // muted purple
+        oklch!(0.5, 0.2, 270),  // deep purple
+    ];
+    generate_lerp_gradient(size, &colors)
 }

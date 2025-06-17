@@ -1,6 +1,6 @@
 use core::slice;
 
-use crate::math::colors::{generate_ocean_blues, generate_rainbow_gradient};
+use crate::math::colors::{generate_circular_ocean_blues, generate_rainbow_gradient};
 use image::Rgb;
 use num_complex::Complex;
 use num_traits::real::Real;
@@ -253,7 +253,7 @@ pub fn generate_raw_image_buffer<F: ComplexFatouFractal>(
     let color_size: usize = 10;
     let color_schemes = [
         generate_rainbow_gradient(color_size),
-        generate_ocean_blues(color_size),
+        generate_circular_ocean_blues(color_size),
     ];
     let basins = fractal.generate_fatou_basins();
     let basin_conditional = generate_basins_conditional(&basins);
