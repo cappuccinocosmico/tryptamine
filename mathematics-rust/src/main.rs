@@ -8,10 +8,9 @@ mod math;
 mod misc;
 mod physics;
 
-use math::fractals::{
-    ImageType as FractalImageType, MandelbrotSet, RegularJuliaSet, SinJuliaSet,
-    generate_image_bytes,
-};
+use math::fractal_logic::{ImageType as FractalImageType, generate_image_bytes};
+
+use crate::math::fractal_definitions::{MandelbrotSet, RegularJuliaSet, SinJuliaSet};
 
 /// CLI for generating mathematical constructs
 #[derive(Parser, Debug)]
