@@ -114,47 +114,46 @@ macro_rules! oklch {
 pub fn generate_circular_ocean_blues(size: usize) -> Vec<CustomRgb> {
     // Generate a smooth ocean blue gradient using multiple lerp points
     let colors = [
-        oklch!(0.45, 0.25, 210), // deep blue
-        oklch!(0.6, 0.22, 200),  // medium blue
-        oklch!(0.75, 0.18, 185), // lighter blue
+        oklch!(0.5, 0.09, 220),  // deep blue
+        oklch!(0.6, 0.10, 200),  // medium blue
+        oklch!(0.75, 0.13, 185), // lighter blue
         oklch!(0.85, 0.12, 170), // pale blue
-        oklch!(0.75, 0.18, 185), // lighter blue
-        oklch!(0.6, 0.22, 200),  // medium blue
+        oklch!(0.75, 0.13, 185), // lighter blue
+        oklch!(0.6, 0.10, 200),  // medium blue
     ];
     generate_lerp_gradient(size, &colors)
 }
 pub fn generate_circular_sunset_orange(size: usize) -> Vec<CustomRgb> {
     let colors = [
-        oklch!(0.7, 0.2, 30),   // warm orange
+        oklch!(0.7, 0.19, 30),  // warm orange
         oklch!(0.6, 0.2, 20),   // soft orange
         oklch!(0.55, 0.15, 10), // light peach
         oklch!(0.5, 0.13, 5),   // pale peach
         oklch!(0.6, 0.2, 20),   // soft orange
-        oklch!(0.7, 0.2, 30),   // warm orange
     ];
     generate_lerp_gradient(size, &colors)
 }
 
 pub fn generate_circular_forest_greens(size: usize) -> Vec<CustomRgb> {
     let colors = [
-        oklch!(0.4, 0.25, 130), // dark green
-        oklch!(0.5, 0.3, 110),  // medium green
-        oklch!(0.6, 0.25, 90),  // bright green
-        oklch!(0.7, 0.2, 80),   // light green
-        oklch!(0.6, 0.25, 90),  // bright green
-        oklch!(0.5, 0.3, 110),  // medium green
+        oklch!(0.45, 0.1, 160), // dark green
+        oklch!(0.5, 0.1, 140),  // medium green
+        oklch!(0.6, 0.1, 120),  // bright green
+        oklch!(0.75, 0.1, 100), // light green
+        oklch!(0.6, 0.1, 120),  // bright green
+        oklch!(0.5, 0.1, 140),  // medium green
     ];
     generate_lerp_gradient(size, &colors)
 }
 
 pub fn generate_circular_purple_dream(size: usize) -> Vec<CustomRgb> {
     let colors = [
+        oklch!(0.5, 0.25, 290), // deep purple
+        oklch!(0.6, 0.21, 275), // violet
+        oklch!(0.7, 0.15, 260), // lavender
+        oklch!(0.6, 0.16, 250), // soft violet
+        oklch!(0.5, 0.25, 265), // muted purple
         oklch!(0.5, 0.25, 280), // deep purple
-        oklch!(0.6, 0.25, 270), // violet
-        oklch!(0.7, 0.25, 260), // lavender
-        oklch!(0.6, 0.25, 250), // soft violet
-        oklch!(0.5, 0.2, 260),  // muted purple
-        oklch!(0.5, 0.2, 270),  // deep purple
     ];
     generate_lerp_gradient(size, &colors)
 }

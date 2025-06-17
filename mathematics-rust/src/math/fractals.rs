@@ -1,6 +1,9 @@
 use core::slice;
 
-use crate::math::colors::{generate_circular_ocean_blues, generate_rainbow_gradient};
+use crate::math::colors::{
+    generate_circular_forest_greens, generate_circular_ocean_blues, generate_circular_purple_dream,
+    generate_circular_sunset_orange, generate_rainbow_gradient,
+};
 use image::Rgb;
 use num_complex::Complex;
 use num_traits::real::Real;
@@ -40,7 +43,9 @@ pub struct RegularJuliaSet {
 impl Default for RegularJuliaSet {
     fn default() -> Self {
         Self {
-            c: Complex::new(0.2, 0.3),
+            // c: Complex::new(0.2, 0.3),
+            // c: Complex::new(-0.8, 0.155),
+            c: Complex::new(-1.0, 0.0),
             iterations: DEFAULT_MAX_ITERATIONS,
         }
     }
@@ -100,7 +105,7 @@ pub struct SinJuliaSet {
 impl Default for SinJuliaSet {
     fn default() -> Self {
         Self {
-            c: Complex::new(1.0, 0.1),
+            c: Complex::new(-0.7, 0.1),
             iterations: DEFAULT_MAX_ITERATIONS,
         }
     }
@@ -215,7 +220,7 @@ impl Default for ImageSchema {
             resolution_x: 2000,
             resolution_y: 1000,
             center_cord: Complex::new(0.0, 0.0),
-            window_diagonal: 0.5,
+            window_diagonal: 4.0,
         }
     }
 }
@@ -253,7 +258,8 @@ pub fn generate_raw_image_buffer<F: ComplexFatouFractal>(
     let color_size: usize = 10;
     let color_schemes = [
         generate_rainbow_gradient(color_size),
-        generate_circular_ocean_blues(color_size),
+        // generate_circular_ocean_blues(color_size),
+        generate_circular_purple_dream(color_size),
     ];
     let basins = fractal.generate_fatou_basins();
     let basin_conditional = generate_basins_conditional(&basins);
