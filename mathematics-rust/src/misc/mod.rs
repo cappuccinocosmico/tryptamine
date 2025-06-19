@@ -1,6 +1,19 @@
+use std::slice;
+
 use const_for::const_for;
 
 type SortType = u32;
+
+const fn raw_bytes<T>(val: &T) -> &[u8] {
+    let ptr_t = val as *const T;
+    let ptr_u8 = ptr_t as *const u8;
+    unsafe { slice::from_raw_parts(ptr_u8, size_of::<T>()) }
+}
+
+const _: () = assert!(raw_bytes(&32_u16)[0] == 32_u8);
+const _: () = assert!(raw_bytes(&32_u16)[1] == 0_u8);
+const _: () = assert!(raw_bytes(&0.0_f64)[0] == 0_u8);
+const _: () = assert!(raw_bytes(&()).is_empty());
 
 macro_rules! dedupe {
     ($x:ident) => {
