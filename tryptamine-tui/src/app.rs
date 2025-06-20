@@ -6,14 +6,20 @@ use ratatui::{
 
 /// Cache for fractal buffer
 use std::cell::RefCell;
-use tryptamine_core::math::fractal_definitions::MandelbrotSet;
+use tryptamine_core::math::fractal_definitions::{
+    Compl, ComplexFatouFractal, FractalConfig, MandelbrotSet, RegularJuliaSet, SinJuliaSet,
+};
+use tryptamine_core::math::fractal_logic::ImageSchema;
 
-#[derive(Debug, Default)]
-pub struct MandelbrotCache {
+/// Cache for fractal buffer and parameters
+#[derive(Debug)]
+pub struct FractalCache {
     pub res_x: u32,
     pub res_y: u32,
     pub pixel_ratio: f64,
-    pub mandelbrot: MandelbrotSet,
+    pub window_diagonal: f64,
+    pub center_cord: Compl,
+    pub fractal_type: FractalConfig,
     pub buffer: Vec<u8>,
 }
 
@@ -55,15 +61,18 @@ impl Default for App {
             fractal_cache: RefCell::new(MandelbrotCache::default()),
             running: true,
             counter: 0,
+            window_diagonal: schema.window_diagonal,
+            center_re: schema.center_cord.re,
+            center_im: schema.center_cord.im,
+            fractal_type: 0,
             events: EventHandler::new(),
         }
     }
 }
 
 impl App {
-    /// Create a new App
     pub fn new() -> Self {
-        Self::default()
+        App::default()
     }
 
     /// Main loop

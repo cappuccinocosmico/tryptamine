@@ -7,10 +7,12 @@ use ratatui::{
 };
 
 use crate::app::App;
+use tryptamine_core::math::fractal_definitions::{
+    Compl, MandelbrotSet, RegularJuliaSet, SinJuliaSet,
+};
 use tryptamine_core::math::fractal_logic::{ImageSchema, generate_raw_image_buffer};
 
 impl Widget for &App {
-    /// Renders the user interface widgets.
     fn render(self, area: Rect, buf: &mut Buffer) {
         // Top-level block with border and title
         let block = Block::default()
@@ -101,7 +103,7 @@ impl Widget for &App {
         let res_y = h as u32;
         let pixel_ratio = 2.0; // TODO: Set this to the font ratio height/width
 
-        // Check and update cache
+        // Check if we need to update buffer
         let mut cache = self.fractal_cache.borrow_mut();
         let needs_update = cache.res_x != res_x
             || cache.res_y != res_y
