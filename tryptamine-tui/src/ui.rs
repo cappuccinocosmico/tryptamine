@@ -1,13 +1,13 @@
 use ratatui::{
     buffer::Buffer,
-    layout::{Alignment, Rect, Layout, Direction, Constraint},
+    layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Stylize},
     widgets::{Block, BorderType, Paragraph, Widget},
 };
 
 use crate::app::App;
-use tryptamine_core::math::fractal_logic::{ImageSchema, generate_raw_image_buffer};
 use tryptamine_core::math::fractal_definitions::MandelbrotSet;
+use tryptamine_core::math::fractal_logic::{ImageSchema, generate_raw_image_buffer};
 
 impl Widget for &App {
     /// Renders the user interface widgets.
@@ -36,7 +36,7 @@ impl Widget for &App {
         // Layout: top for text, bottom for RGB swatch
         let chunks = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([Constraint::Min(4), Constraint::Length(3)])
+            .constraints([Constraint::Percentage(25), Constraint::Percentage(75)])
             .split(area);
 
         // Render the text
@@ -68,6 +68,5 @@ impl Widget for &App {
                     .set_symbol(" ");
             }
         }
-
     }
 }

@@ -1,15 +1,14 @@
 use core::slice;
 
 use crate::math::{
-    colors::{
-        generate_circular_purple_dream, generate_rainbow_gradient,
-    },
+    colors::{generate_circular_purple_dream, generate_rainbow_gradient},
     fractal_definitions::{Compl, ComplexFatouFractal, FatouBasins, RealType},
 };
 use image::Rgb;
 use num_complex::Complex;
 
 use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
+use tracing::debug;
 
 use super::colors::{CustomRgb, RgbColorScheme};
 
@@ -147,13 +146,13 @@ pub fn generate_raw_image_buffer<F: ComplexFatouFractal>(
         output_buf[1] = color.green;
         output_buf[2] = color.blue;
     };
-    println!("{basins:?}");
+    debug!("{basins:?}");
     // Create the image buffer with parallel iterator
     let buff_length = (image_info.get_resolution() * 3) as usize; // Since there are 3 colors and stuff.
     let mut buff: Vec<u8> = vec![0; buff_length];
     let scary_buffs_list = split_vec_into_mutable_sized_chunks(&mut buff, 3).unwrap();
     let duration = start.elapsed();
-    println!("Initialization took: {:?}", duration);
+    debug!("Initialization took: {duration:?}");
     let start = std::time::Instant::now();
     let _result: Vec<()> = scary_buffs_list
         .into_par_iter()
@@ -162,7 +161,7 @@ pub fn generate_raw_image_buffer<F: ComplexFatouFractal>(
         .collect();
 
     let duration = start.elapsed();
-    println!("Fractal Mathematics took: {:?}", duration);
+    debug!("Fractal Mathematics took: {duration:?}");
 
     buff
 }
@@ -219,18 +218,18 @@ pub fn generate_image_bytes<F: ComplexFatouFractal>(
             let start_webp = std::time::Instant::now();
             let webp: Vec<u8> = image_buffer_to_webp_bytes(img);
             let duration_webp = start_webp.elapsed();
-            println!("WebP encoding took: {:?}", duration_webp);
+            debug!("WebP encoding took: {:?}", duration_webp);
             let duration = start.elapsed();
-            println!("Total Image generation took: {:?}", duration);
+            debug!("Total Image generation took: {:?}", duration);
             Ok(webp)
         }
         ImageType::Jpeg => {
             let start_png = std::time::Instant::now();
             let png: Vec<u8> = image_buffer_to_jpeg_bytes(img);
             let duration_png = start_png.elapsed();
-            println!("Jpeg encoding took: {:?}", duration_png);
+            debug!("Jpeg encoding took: {:?}", duration_png);
             let duration = start.elapsed();
-            println!("Total Image generation took: {:?}", duration);
+            debug!("Total Image generation took: {:?}", duration);
             Ok(png)
         }
     }

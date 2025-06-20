@@ -1,5 +1,6 @@
 use num_complex::Complex;
 use smallvec::{SmallVec, smallvec};
+use tracing::debug;
 
 pub type RealType = f64;
 pub type Compl = Complex<RealType>;
@@ -59,9 +60,9 @@ impl ComplexFatouFractal for RegularJuliaSet {
             val: Complex<RealType>,
             basins: &mut SmallVec<[FiniteFatouBasin; SMALL_SIZE]>,
         ) {
-            println!("validating basin: {}", val);
+            debug!("validating basin: {}", val);
             let valprime = 2.0 * val;
-            println!(
+            debug!(
                 "basin has derivative: {}, with norm: {}",
                 valprime,
                 valprime.norm()
