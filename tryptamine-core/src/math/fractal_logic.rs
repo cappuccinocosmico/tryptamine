@@ -66,6 +66,7 @@ fn render_iterations(
 pub struct ImageSchema {
     pub resolution_x: u32,
     pub resolution_y: u32,
+    pub pixel_ratio: f64,
     pub center_cord: Compl,
     pub window_diagonal: RealType,
 }
@@ -75,6 +76,7 @@ impl Default for ImageSchema {
         ImageSchema {
             resolution_x: 2000,
             resolution_y: 1000,
+            pixel_ratio: 1.0,
             center_cord: Complex::new(0.0, 0.0),
             window_diagonal: 4.0,
         }
@@ -83,17 +85,20 @@ impl Default for ImageSchema {
 
 impl ImageSchema {
     fn index_to_val(&self, index: u32) -> Compl {
-        let pixel_distance = self.window_diagonal
-            / ((self.resolution_x.pow(2) + self.resolution_y.pow(2)) as RealType).sqrt();
+        let pixel_distance_x = self.window_diagonal
+            / ((self.resolution_x as f64).powi(2)
+                + (self.resolution_y as f64 * self.pixel_ratio).powi(2))
+            .sqrt();
         let top_corner = Complex::new(
-            self.center_cord.re - (pixel_distance * (self.resolution_x as RealType) / 2.0),
-            self.center_cord.im + (pixel_distance * (self.resolution_y as RealType) / 2.0),
+            self.center_cord.re - (pixel_distance_x * (self.resolution_x as RealType) / 2.0),
+            self.center_cord.im
+                + (pixel_distance_x * self.pixel_ratio * (self.resolution_y as RealType) / 2.0),
         );
         // let top_corner = Complex::new(self.center_cord.re, self.center_cord.im);
         let x = index % self.resolution_x;
         let y = index / self.resolution_x;
-        let re = x as RealType * pixel_distance + top_corner.re;
-        let im = y as RealType * pixel_distance - top_corner.im;
+        let re = x as RealType * pixel_distance_x + top_corner.re;
+        let im = y as RealType * pixel_distance_x * self.pixel_ratio - top_corner.im;
 
         Complex::new(re, im)
     }
