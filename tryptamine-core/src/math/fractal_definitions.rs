@@ -24,7 +24,7 @@ pub trait ComplexFatouFractal: Copy + Sync {
     fn get_iterations(&self) -> u32;
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct RegularJuliaSet {
     pub c: Compl,
     pub iterations: u32,
@@ -128,7 +128,7 @@ impl ComplexFatouFractal for RegularJuliaSet {
         self.iterations
     }
 }
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SinJuliaSet {
     pub c: Compl,
     pub iterations: u32,
@@ -165,7 +165,7 @@ impl ComplexFatouFractal for SinJuliaSet {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MandelbrotSet {
     pub iterations: u32,
 }
@@ -192,3 +192,43 @@ impl ComplexFatouFractal for MandelbrotSet {
         self.iterations
     }
 }
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum FractalConfig {
+    Mandelbrot(MandelbrotSet),
+    Julia(RegularJuliaSet),
+    SinJulia(SinJuliaSet),
+}
+impl Default for FractalConfig {
+    fn default() -> Self {
+        FractalConfig::Mandelbrot(MandelbrotSet::default())
+    }
+}
+
+impl ComplexFatouFractal for FractalConfig {
+    fn generate_fatou_basins(&self) -> FatouBasins {
+        match self {
+            FractalConfig::Mandelbrot(m) => m.generate_fatou_basins(),
+            FractalConfig::Julia(j) => j.generate_fatou_basins(),
+            FractalConfig::SinJulia(s) => s.generate_fatou_basins(),
+        }
+    }
+
+    fn iterate_mut(&self, collector: &mut Compl, original: &Compl) {
+        match self {
+            FractalConfig::Mandelbrot(m) => m.iterate_mut(collector, original),
+            FractalConfig::Julia(j) => j.iterate_mut(collector, original),
+            FractalConfig::SinJulia(s) => s.iterate_mut(collector, original),
+        }
+    }
+
+    fn get_iterations(&self) -> u32 {
+        match self {
+            FractalConfig::Mandelbrot(m) => m.get_iterations(),
+            FractalConfig::Julia(j) => j.get_iterations(),
+            FractalConfig::SinJulia(s) => s.get_iterations(),
+        }
+    }
+}
+
+// type FractalConfigV2 = Box<dyn ComplexFatouFractal>;
