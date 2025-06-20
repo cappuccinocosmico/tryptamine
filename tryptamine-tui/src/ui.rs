@@ -2,8 +2,8 @@ use ratatui::{
     buffer::Buffer,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Style},
-    text::Spans,
-    widgets::{Block, Borders, BorderType, Paragraph, Tabs, Widget},
+    text::Span,
+    widgets::{Block, BorderType, Borders, Paragraph, Tabs, Widget},
 };
 
 use crate::app::App;
@@ -62,32 +62,36 @@ impl Widget for &App {
             .split(body_chunks[0]);
 
         // Extract dynamic values from App
-        let diag = self.diagonal;
-        let real_min = self.real_min;
-        let real_max = self.real_max;
-        let imag_min = self.imag_min;
-        let imag_max = self.imag_max;
         let fractal_titles = &self.fractal_titles;
         let selected = self.fractal_index;
 
         // Diagonal length widget
-        let diag_para = Paragraph::new(format!("{:.2}", diag))
+        let diag_para = Paragraph::new(format!("{:.2}", self.diagonal))
             .block(Block::default().borders(Borders::ALL).title("Diagonal"));
         diag_para.render(control_chunks[0], buf);
 
         // Real range widget
-        let real_para = Paragraph::new(format!("{:.2} ➝ {:.2}", real_min, real_max))
-            .block(Block::default().borders(Borders::ALL).title("Real Range"));
+        let real_para = Paragraph::new(format!("{:.2}", self.real_center)).block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title("Real Center Value"),
+        );
         real_para.render(control_chunks[1], buf);
 
         // Imag range widget
-        let imag_para = Paragraph::new(format!("{:.2} ➝ {:.2}", imag_min, imag_max))
-            .block(Block::default().borders(Borders::ALL).title("Imag Range"));
+        let imag_para = Paragraph::new(format!("{:.2}", self.imag_center)).block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title("Imaginary Center Value"),
+        );
         imag_para.render(control_chunks[2], buf);
 
         // Fractal selection tabs
         let tabs = Tabs::new(
-            fractal_titles.iter().map(|t| Spans::from(*t)).collect(),
+            fractal_titles
+                .iter()
+                .map(|t| Span::from(*t))
+                .collect::<Vec<_>>(),
         )
         .block(Block::default().borders(Borders::ALL).title("Fractal"))
         .select(selected)
@@ -107,25 +111,23 @@ impl Widget for &App {
         let mut cache = self.fractal_cache.borrow_mut();
         let needs_update = cache.res_x != res_x
             || cache.res_y != res_y
-            || (cache.pixel_ratio - pixel_ratio).abs() > f64::EPSILON;
+            || cache.center_cord.re != self.real_center
+            || cache.center_cord.im != self.imag_center
+            || cache.window_diagonal != self.diagonal;
         if needs_update {
             cache.res_x = res_x;
             cache.res_y = res_y;
-            cache.pixel_ratio = pixel_ratio;
             // Build schema using values from App
             let schema = ImageSchema {
                 resolution_x: res_x,
                 resolution_y: res_y,
                 pixel_ratio,
-                diagonal: diag,
-                real_min,
-                real_max,
-                imag_min,
-                imag_max,
+                window_diagonal: self.diagonal,
+                center_cord: Compl::new(self.real_center, self.imag_center),
                 ..Default::default()
             };
             // Choose appropriate fractal source (placeholder uses Mandelbrot for all)
-            cache.buffer = generate_raw_image_buffer(&cache.mandelbrot, &schema);
+            cache.buffer = generate_raw_image_buffer(&cache.fractal_type, &schema);
         }
         let buffer = &cache.buffer;
 
