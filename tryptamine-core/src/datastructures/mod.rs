@@ -12,12 +12,12 @@ struct BinaryNode<T> {
 type BinaryLeaf<T> = Option<Box<BinaryNode<T>>>;
 
 fn new_leaf<T: PartialOrd>(val: T, is_red: bool) -> BinaryLeaf<T> {
-    return Some(Box::new(BinaryNode {
+    Some(Box::new(BinaryNode {
         is_red,
         data: val,
         left: None,
         right: None,
-    }));
+    }))
 }
 
 fn rotate_node<T>(parent_leaf: &mut BinaryLeaf<T>, is_left_rotation: bool) -> Result<(), String> {
@@ -56,7 +56,7 @@ fn rotate_node<T>(parent_leaf: &mut BinaryLeaf<T>, is_left_rotation: bool) -> Re
     stolen_parent.left = transfer_child;
     stolen_child.right = Some(stolen_parent);
     *parent_leaf = Some(stolen_child);
-    return Ok(());
+    Ok(())
 }
 
 impl<T: PartialOrd + Clone> BinaryTree<T> {
@@ -91,11 +91,8 @@ impl<T: PartialOrd + Clone> BinaryTree<T> {
             match &mut head.right {
                 None => {
                     head.right = new_leaf(insert, true);
-                    return;
                 }
-                Some(val) => {
-                    return recursive_insert(val.as_mut(), insert);
-                }
+                Some(val) => recursive_insert(val.as_mut(), insert),
             }
         }
     }
@@ -103,7 +100,7 @@ impl<T: PartialOrd + Clone> BinaryTree<T> {
         return fetch_recursive(&self.head, element);
         fn fetch_recursive<T: PartialOrd + Clone>(node: &BinaryLeaf<T>, element: T) -> Option<T> {
             match &node {
-                None => return None,
+                None => None,
                 Some(node) => {
                     if node.data == element {
                         return Some(node.data.clone());
@@ -111,7 +108,7 @@ impl<T: PartialOrd + Clone> BinaryTree<T> {
                     if node.data < element {
                         return fetch_recursive(&node.left, element);
                     };
-                    return fetch_recursive(&node.right, element);
+                    fetch_recursive(&node.right, element)
                 }
             }
         }

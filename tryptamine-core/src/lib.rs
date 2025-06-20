@@ -1,4 +1,4 @@
-#![allow(warnings)]
+#![allow(dead_code)]
 
 //! Library entry point for tryptamine-core
 //!
