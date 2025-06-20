@@ -6,7 +6,6 @@ use ratatui::{
 };
 
 use crate::app::App;
-use tryptamine_core::math::fractal_definitions::MandelbrotSet;
 use tryptamine_core::math::fractal_logic::{ImageSchema, generate_raw_image_buffer};
 
 impl Widget for &App {
@@ -46,16 +45,26 @@ impl Widget for &App {
         let swatch = chunks[1];
         let w = swatch.width;
         let h = swatch.height;
-
-        // Configure low-resolution image schema
-        let mut image_info = ImageSchema::default();
         let res_x = w as u32;
         let res_y = h as u32;
-        image_info.resolution_x = res_x;
-        image_info.resolution_y = res_y;
-        image_info.pixel_ratio = 2.0;
-        let mandelbrot = MandelbrotSet::default();
-        let buffer = generate_raw_image_buffer(&mandelbrot, &image_info);
+        let pixel_ratio = 2.0; // TODO: Set this to the font ratio height/width
+
+        // Check and update cache
+        let mut cache = self.fractal_cache.borrow_mut();
+        let needs_update = cache.res_x != res_x
+            || cache.res_y != res_y
+            || (cache.pixel_ratio - pixel_ratio).abs() > f64::EPSILON;
+        if needs_update {
+            cache.res_x = res_x;
+            cache.res_y = res_y;
+            cache.pixel_ratio = pixel_ratio;
+            let mut schema = ImageSchema::default();
+            schema.resolution_x = res_x;
+            schema.resolution_y = res_y;
+            schema.pixel_ratio = pixel_ratio;
+            cache.buffer = generate_raw_image_buffer(&cache.mandelbrot, &schema);
+        }
+        let buffer = &cache.buffer;
 
         for dy in 0..h {
             for dx in 0..w {

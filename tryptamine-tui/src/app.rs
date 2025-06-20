@@ -4,9 +4,24 @@ use ratatui::{
     crossterm::event::{KeyCode, KeyEvent, KeyModifiers},
 };
 
+/// Cache for Mandelbrot fractal buffer
+use std::cell::RefCell;
+use tryptamine_core::math::fractal_definitions::MandelbrotSet;
+
+#[derive(Debug, Default)]
+pub struct MandelbrotCache {
+    pub res_x: u32,
+    pub res_y: u32,
+    pub pixel_ratio: f64,
+    pub mandelbrot: MandelbrotSet,
+    pub buffer: Vec<u8>,
+}
+
 /// Application.
 #[derive(Debug)]
 pub struct App {
+    /// Cache for Mandelbrot fractal buffer
+    pub fractal_cache: RefCell<MandelbrotCache>,
     /// Is the application running?
     pub running: bool,
     /// Counter.
@@ -18,6 +33,7 @@ pub struct App {
 impl Default for App {
     fn default() -> Self {
         Self {
+            fractal_cache: RefCell::new(MandelbrotCache::default()),
             running: true,
             counter: 0,
             events: EventHandler::new(),
@@ -66,7 +82,6 @@ impl App {
             }
             KeyCode::Right => self.events.send(AppEvent::Increment),
             KeyCode::Left => self.events.send(AppEvent::Decrement),
-            // Other handlers you could add here.
             _ => {}
         }
         Ok(())
