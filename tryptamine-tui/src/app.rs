@@ -128,15 +128,15 @@ impl App {
             KeyCode::Char('s') => {
                 self.diagonal = (self.diagonal * 0.9).max(0.1);
             }
-            // Adjust real axis range
-            KeyCode::Char('r') => {
+            // Adjust real axis range with vim-like motions
+            KeyCode::Char('l') => {
                 self.real_center += 0.1 * self.diagonal;
             }
-            KeyCode::Char('f') => {
+            KeyCode::Char('h') => {
                 self.real_center -= 0.1 * self.diagonal;
             }
-            // Adjust imaginary axis range
-            KeyCode::Char('i') => {
+            // Adjust imaginary axis range with vim-like motions
+            KeyCode::Char('j') => {
                 self.imag_center += 0.1 * self.diagonal;
             }
             KeyCode::Char('k') => {
