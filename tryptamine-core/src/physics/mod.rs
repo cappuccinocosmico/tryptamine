@@ -11,7 +11,7 @@ use uom::si::{
 };
 fn entropy_of_black_hole_in_cm(cm_of_black_hole: f64) {
     // Physical constants
-    let pi = std::f64::consts::PI;
+    let _pi = std::f64::consts::PI;
     // Calculate Planck length using √(ℏG/c³)
     // let G = uom::si::f64::COULOMB_CONSTANT; // Gravitational constant (m³·kg⁻¹·s⁻²)
     // let ħ = uom::si::f64::PLANCK_CONSTANT; // Reduced Planck constant (J·s)
@@ -25,16 +25,14 @@ fn entropy_of_black_hole_in_cm(cm_of_black_hole: f64) {
     // let lp = Length::new::<meter>(planklength_meters);
     let hbar = Action::new::<reduced_planck_constant>(1.0);
     let c = Velocity::new::<natural_unit_of_velocity>(1.0);
-    let G = 6.67430 * 10.0_f64.powi(-11) * Volume::new::<cubic_meter>(1.0)
+    let g = 6.67430 * 10.0_f64.powi(-11) * Volume::new::<cubic_meter>(1.0)
         / (Time::new::<second>(1.0) * Mass::new::<kilogram>(1.0));
-    let plank_area = (hbar * G) / (c * c * c);
-    // println!("Test quantity equal to plank area: {}", plank_area);
-    // let plank_length = plank_area.sqrt();
+    let _plank_area = (hbar * g) / (c * c * c);
 
-    let ln2 = std::f64::consts::LN_2;
+    let _ln2 = std::f64::consts::LN_2;
 
     // Black hole parameters
-    let radius = Length::new::<centimeter>(cm_of_black_hole);
+    let _radius = Length::new::<centimeter>(cm_of_black_hole);
 
     // Area of event horizon: 4 * π * r^2
     // let area = 4.0 * pi * radius * radius;

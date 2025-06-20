@@ -100,9 +100,7 @@ fn make_void_without_panic() -> Void {
     println!("set value to enhabited value");
     let optional_empty = ref_to_empty_extended.take();
     println!("got optional void value");
-    let empty = optional_empty.expect("This should always succeed since we illegally set the value of the enum as being enhabited.");
-    println!("got void value tuple");
-    empty.0
+    return optional_empty.expect("This should always succeed since we illegally set the value of the enum as being enhabited.").0;
 }
 
 // fn main() {

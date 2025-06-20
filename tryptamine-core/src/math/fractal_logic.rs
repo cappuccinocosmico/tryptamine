@@ -8,7 +8,7 @@ use crate::math::{
 };
 use image::Rgb;
 use num_complex::Complex;
-use num_traits::real::Real;
+
 use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
 
 use super::colors::{CustomRgb, RgbColorScheme};

@@ -1,4 +1,4 @@
-use palette::{IntoColor, Oklch, Srgb, num::Round};
+use palette::{IntoColor, Oklch, Srgb};
 fn srgb_to_rgbvals(srgb: Srgb<f32>) -> CustomRgb {
     CustomRgb {
         red: (srgb.red * 256.0).floor() as u8,
