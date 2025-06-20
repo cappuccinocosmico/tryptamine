@@ -1,4 +1,5 @@
 use num_complex::Complex;
+use rand::{random, random_range};
 use smallvec::{SmallVec, smallvec};
 use tracing::debug;
 
@@ -10,11 +11,10 @@ pub struct FiniteFatouBasin {
     pub neighborhood_sqr: RealType,
 }
 
-const SMALL_SIZE: usize = 5;
 #[derive(Clone, Debug)]
 pub struct FatouBasins {
     pub infinte_basin_radius_sqr: Option<RealType>,
-    pub finite_basins: SmallVec<[FiniteFatouBasin; SMALL_SIZE]>,
+    pub finite_basins: Vec<FiniteFatouBasin>,
 }
 
 const DEFAULT_MAX_ITERATIONS: u32 = 300;
@@ -40,13 +40,58 @@ impl Default for RegularJuliaSet {
         }
     }
 }
+fn find_basins<T: ComplexFatouFractal>(config: T) -> Vec<Compl> {
+    const SEEDS: usize = 100;
+    const INSIDE_RANGE: f64 = 2.0;
+    let seeds: Vec<Compl> = (1..SEEDS)
+        .map(|_| {
+            let rand_real = random_range(-INSIDE_RANGE..INSIDE_RANGE);
+            let rand_im = random_range(-INSIDE_RANGE..INSIDE_RANGE);
+            Complex::new(rand_real, rand_im)
+        })
+        .collect();
+    find_basins_from_iterated_seeds(&seeds, config)
+}
+
+fn find_basins_from_iterated_seeds<T: ComplexFatouFractal>(
+    seeds: &[Compl],
+    config: T,
+) -> Vec<Compl> {
+    const DEFAULT_COMPUTED_ITERATIONS: usize = 2000;
+    const EPSILON: f64 = 0.01;
+    const INFINITE_SQR_BAILOUT: f64 = 16.0;
+    let mut basinvals = Vec::with_capacity(10);
+
+    for seed in seeds {
+        let mut is_own_basin: bool = true;
+        let mut coll = *seed;
+        for _ in 1..=DEFAULT_COMPUTED_ITERATIONS {
+            config.iterate_mut(&mut coll, seed);
+            for test in &basinvals {
+                let subval: Complex<f64> = test - coll;
+                let normsqr: f64 = subval.norm_sqr();
+                is_own_basin = is_own_basin && (normsqr < EPSILON);
+            }
+            is_own_basin = is_own_basin && coll.norm_sqr() < INFINITE_SQR_BAILOUT;
+            if is_own_basin {
+                break;
+            };
+        }
+        if is_own_basin {
+            basinvals.push(coll)
+        }
+    }
+
+    basinvals
+}
+
 impl ComplexFatouFractal for RegularJuliaSet {
     fn iterate_mut(&self, collector: &mut Compl, _: &Compl) {
         *collector = *collector * *collector + self.c
     }
 
     fn generate_fatou_basins(&self) -> FatouBasins {
-        let mut finite_basins = smallvec![];
+        let mut finite_basins = vec![];
         // x+ = x^2 + c
         // 0 = x^2 -x + c
         // 0 = (x^2-x+1/4)-1/4+c
@@ -56,10 +101,7 @@ impl ComplexFatouFractal for RegularJuliaSet {
         // x = 1/2 \pm sqrt(1/4 - c)
         let val1 = 1.0 / 2.0 + (1.0 / 4.0 - self.c).sqrt();
         let val2 = 1.0 / 2.0 - (1.0 / 4.0 - self.c).sqrt();
-        fn validate_basin(
-            val: Complex<RealType>,
-            basins: &mut SmallVec<[FiniteFatouBasin; SMALL_SIZE]>,
-        ) {
+        fn validate_basin(val: Complex<RealType>, basins: &mut Vec<FiniteFatouBasin>) {
             debug!("validating basin: {}", val);
             let valprime = 2.0 * val;
             debug!(
@@ -106,10 +148,16 @@ impl ComplexFatouFractal for SinJuliaSet {
     }
 
     fn generate_fatou_basins(&self) -> FatouBasins {
+        let raw_basins = find_basins(*self);
         FatouBasins {
             infinte_basin_radius_sqr: Some(64.0),
-            // TODO: Write code to generate interior basins
-            finite_basins: smallvec![],
+            finite_basins: raw_basins
+                .iter()
+                .map(|val| FiniteFatouBasin {
+                    basin: *val,
+                    neighborhood_sqr: 0.001,
+                })
+                .collect(),
         }
     }
     fn get_iterations(&self) -> u32 {
@@ -137,7 +185,7 @@ impl ComplexFatouFractal for MandelbrotSet {
         FatouBasins {
             infinte_basin_radius_sqr: Some(8.0),
             // TODO: Write code to generate interior basins
-            finite_basins: smallvec![],
+            finite_basins: vec![],
         }
     }
     fn get_iterations(&self) -> u32 {
