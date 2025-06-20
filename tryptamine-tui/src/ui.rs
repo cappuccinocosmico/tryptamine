@@ -6,6 +6,8 @@ use ratatui::{
 };
 
 use crate::app::App;
+use tryptamine_core::math::fractal_logic::{ImageSchema, generate_raw_image_buffer};
+use tryptamine_core::math::fractal_definitions::MandelbrotSet;
 
 impl Widget for &App {
     /// Renders the user interface widgets.
@@ -40,29 +42,32 @@ impl Widget for &App {
         // Render the text
         paragraph.render(chunks[0], buf);
 
-        // Render RGB swatch beneath the counter
+        // Render Mandelbrot fractal in low resolution
         let swatch = chunks[1];
-        let x0 = swatch.x;
-        let y0 = swatch.y;
         let w = swatch.width;
         let h = swatch.height;
-        let third = w / 3;
+
+        // Configure low-resolution image schema
+        let mut image_info = ImageSchema::default();
+        let res_x = w as u32;
+        let res_y = h as u32;
+        image_info.resolution_x = res_x;
+        image_info.resolution_y = res_y;
+        let mandelbrot = MandelbrotSet::default();
+        let buffer = generate_raw_image_buffer(&mandelbrot, &image_info);
 
         for dy in 0..h {
             for dx in 0..w {
-                // Determine color segment (R, G, or B) based on horizontal position
-                let color = if dx < third {
-                    Color::Rgb(self.counter, 0, 0)
-                } else if dx < third * 2 {
-                    Color::Rgb(0, self.counter, 0)
-                } else {
-                    Color::Rgb(0, 0, self.counter)
-                };
-
-                buf.get_mut(x0 + dx, y0 + dy)
-                    .set_bg(color)
+                // Compute buffer index for RGB triplet
+                let idx = (((dy as u32) * res_x + (dx as u32)) * 3) as usize;
+                let r = buffer[idx];
+                let g = buffer[idx + 1];
+                let b = buffer[idx + 2];
+                buf.get_mut(swatch.x + dx, swatch.y + dy)
+                    .set_bg(Color::Rgb(r, g, b))
                     .set_symbol(" ");
             }
         }
+
     }
 }
