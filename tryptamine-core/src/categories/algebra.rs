@@ -125,7 +125,7 @@ trait Finite {
         Self: Sized;
 }
 
-type DirectProduct<A: Group, B: Group> = (A, B);
+type DirectProduct<A, B> = (A, B);
 
 impl<A: Group, B: Group> Group for DirectProduct<A, B> {
     fn identity() -> Self {

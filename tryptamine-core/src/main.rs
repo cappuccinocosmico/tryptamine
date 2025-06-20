@@ -1,3 +1,5 @@
+#![allow(warnings)]
+
 use clap::{Parser, Subcommand, ValueEnum};
 use std::fs;
 use std::path::PathBuf;

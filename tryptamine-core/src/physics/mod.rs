@@ -1,12 +1,10 @@
 extern crate uom;
 
-use uom::si::ratio::ratio;
 use uom::si::velocity::natural_unit_of_velocity;
 use uom::si::{
     action::reduced_planck_constant,
-    area::square_meter,
     f64::{Action, Length, Mass, Time, Velocity, Volume},
-    length::{centimeter, meter},
+    length::centimeter,
     mass::kilogram,
     time::second,
     volume::cubic_meter,

@@ -1,5 +1,4 @@
 use palette::{IntoColor, Oklch, Srgb, num::Round};
-use uom::si::luminance;
 fn srgb_to_rgbvals(srgb: Srgb<f32>) -> CustomRgb {
     CustomRgb {
         red: (srgb.red * 256.0).floor() as u8,

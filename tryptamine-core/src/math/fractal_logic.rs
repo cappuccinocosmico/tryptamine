@@ -2,8 +2,7 @@ use core::slice;
 
 use crate::math::{
     colors::{
-        generate_circular_forest_greens, generate_circular_ocean_blues,
-        generate_circular_purple_dream, generate_circular_sunset_orange, generate_rainbow_gradient,
+        generate_circular_purple_dream, generate_rainbow_gradient,
     },
     fractal_definitions::{Compl, ComplexFatouFractal, FatouBasins, RealType},
 };
@@ -11,7 +10,6 @@ use image::Rgb;
 use num_complex::Complex;
 use num_traits::real::Real;
 use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
-use smallvec::{SmallVec, smallvec};
 
 use super::colors::{CustomRgb, RgbColorScheme};
 
