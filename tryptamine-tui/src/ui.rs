@@ -53,6 +53,7 @@ impl Widget for &App {
         let res_y = h as u32;
         image_info.resolution_x = res_x;
         image_info.resolution_y = res_y;
+        image_info.pixel_ratio = 2.0;
         let mandelbrot = MandelbrotSet::default();
         let buffer = generate_raw_image_buffer(&mandelbrot, &image_info);
 
