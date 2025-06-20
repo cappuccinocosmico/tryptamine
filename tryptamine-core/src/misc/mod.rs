@@ -4,15 +4,22 @@ use const_for::const_for;
 
 type SortType = u32;
 
-const fn raw_bytes<T>(val: &T) -> &[u8] {
+const fn raw_bytes<T: ?Sized>(val: &T) -> &[u8] {
     let ptr_t = val as *const T;
     let ptr_u8 = ptr_t as *const u8;
-    unsafe { slice::from_raw_parts(ptr_u8, size_of::<T>()) }
+    unsafe { slice::from_raw_parts(ptr_u8, size_of_val(val)) }
 }
+
+// const fn raw_bytes_sized<T>(val: &T) -> &[u8; size_of::<T>()] {
+//     let ptr_t = val as *const T;
+//     let ptr_u8 = ptr_t as *const [u8; size_of::<T>()];
+//     unsafe { ptr_u8.as_ref().unwrap() }
+// }
 
 const _: () = assert!(raw_bytes(&32_u16)[0] == 32_u8);
 const _: () = assert!(raw_bytes(&32_u16)[1] == 0_u8);
 const _: () = assert!(raw_bytes(&0.0_f64)[0] == 0_u8);
+const _: () = assert!(raw_bytes(&[0.0_f64] as &[f64])[0] == 0_u8);
 const _: () = assert!(raw_bytes(&()).is_empty());
 
 macro_rules! dedupe {
