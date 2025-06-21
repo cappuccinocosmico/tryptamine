@@ -58,7 +58,7 @@ fn render_iterations(
         };
     };
     let basin_usize: usize = basin.into();
-    let scheme = &color_schemes[basin_usize];
+    let scheme: &[CustomRgb] = &color_schemes[basin_usize % color_schemes.len()];
     scheme[iterator as usize % scheme.len()]
 }
 

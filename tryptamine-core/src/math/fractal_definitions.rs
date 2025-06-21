@@ -42,7 +42,7 @@ impl Default for RegularJuliaSet {
 }
 fn find_basins<T: ComplexFatouFractal>(config: T) -> Vec<Compl> {
     const SEEDS: usize = 100;
-    const INSIDE_RANGE: f64 = 2.0;
+    const INSIDE_RANGE: f64 = 256.0;
     let seeds: Vec<Compl> = (1..SEEDS)
         .map(|_| {
             let rand_real = random_range(-INSIDE_RANGE..INSIDE_RANGE);
@@ -150,12 +150,12 @@ impl ComplexFatouFractal for SinJuliaSet {
     fn generate_fatou_basins(&self) -> FatouBasins {
         let raw_basins = find_basins(*self);
         FatouBasins {
-            infinte_basin_radius_sqr: Some(64.0),
+            infinte_basin_radius_sqr: Some(256.0),
             finite_basins: raw_basins
                 .iter()
                 .map(|val| FiniteFatouBasin {
                     basin: *val,
-                    neighborhood_sqr: 0.001,
+                    neighborhood_sqr: 0.01,
                 })
                 .collect(),
         }
@@ -227,6 +227,24 @@ impl ComplexFatouFractal for FractalConfig {
             FractalConfig::Mandelbrot(m) => m.get_iterations(),
             FractalConfig::Julia(j) => j.get_iterations(),
             FractalConfig::SinJulia(s) => s.get_iterations(),
+        }
+    }
+}
+
+impl FractalConfig {
+    pub fn get_index(&self) -> u8 {
+        match self {
+            FractalConfig::Mandelbrot(_) => 0,
+            FractalConfig::Julia(_) => 1,
+            FractalConfig::SinJulia(_) => 2,
+        }
+    }
+    pub fn default_from_index(index: u8) -> Option<Self> {
+        match index {
+            0 => Some(FractalConfig::Mandelbrot(MandelbrotSet::default())),
+            1 => Some(FractalConfig::Julia(RegularJuliaSet::default())),
+            2 => Some(FractalConfig::SinJulia(SinJuliaSet::default())),
+            _ => None,
         }
     }
 }
