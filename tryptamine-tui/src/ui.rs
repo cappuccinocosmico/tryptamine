@@ -8,12 +8,13 @@ use ratatui::{
 
 use crate::app::App;
 use tryptamine_core::math::fractal_definitions::{
-    Compl, MandelbrotSet, RegularJuliaSet, SinJuliaSet,
+    Compl, FractalConfig, MandelbrotSet, RegularJuliaSet, SinJuliaSet,
 };
 use tryptamine_core::math::fractal_logic::{ImageSchema, generate_raw_image_buffer};
 
 impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
+        let mut cache = self.fractal_cache.borrow_mut();
         // Top-level block with border and title
         let block = Block::default()
             .borders(Borders::ALL)
@@ -34,8 +35,8 @@ impl Widget for &App {
             "This is a tui template.\n\
              Press `Esc`, `Ctrl-C` or `q` to quit.\n\
              Use keys to adjust settings (W/S: diagonal, R/F: real, I/K: imag, Tab: cycle fractal).\n\
-             Counter: {}",
-            self.counter
+             Times Rendered: {}",
+            cache.times_rendered
         );
         let header = Paragraph::new(header_text)
             .block(Block::default().borders(Borders::ALL).title("Info"))
@@ -108,15 +109,21 @@ impl Widget for &App {
         let pixel_ratio = 2.0; // TODO: Set this to the font ratio height/width
 
         // Check if we need to update buffer
-        let mut cache = self.fractal_cache.borrow_mut();
         let needs_update = cache.res_x != res_x
             || cache.res_y != res_y
-            || cache.center_cord.re != self.real_center
-            || cache.center_cord.im != self.imag_center
-            || cache.window_diagonal != self.diagonal;
+            || cache.fractal_type.get_index() as usize != self.fractal_index
+            || (cache.center_cord.re - self.real_center).abs() > f64::EPSILON
+            || (cache.center_cord.im - self.imag_center).abs() > f64::EPSILON
+            || (cache.window_diagonal - self.diagonal).abs() > f64::EPSILON;
         if needs_update {
+            cache.times_rendered += 1;
+            cache.fractal_type =
+                FractalConfig::default_from_index(self.fractal_index as u8).unwrap();
             cache.res_x = res_x;
             cache.res_y = res_y;
+            cache.window_diagonal = self.diagonal;
+            cache.center_cord.re = self.real_center;
+            cache.center_cord.im = self.imag_center;
             // Build schema using values from App
             let schema = ImageSchema {
                 resolution_x: res_x,

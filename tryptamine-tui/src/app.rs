@@ -20,6 +20,7 @@ pub struct FractalCache {
     pub center_cord: Compl,
     pub fractal_type: FractalConfig,
     pub buffer: Vec<u8>,
+    pub times_rendered: u64,
 }
 
 const DEFAULT_DIAGONAL: f64 = 4.0;
@@ -35,6 +36,7 @@ impl Default for FractalCache {
             center_cord: Compl::default(),
             buffer: Vec::with_capacity(2000),
             fractal_type: FractalConfig::default(),
+            times_rendered: 0,
         }
     }
 }
@@ -57,7 +59,7 @@ pub struct App {
     /// Is the application running?
     pub running: bool,
     /// Counter (unused for fractal but kept from template)
-    pub counter: u8,
+    pub counter: u64,
     /// Event handler
     pub events: EventHandler,
 }
@@ -68,7 +70,7 @@ impl Default for App {
             diagonal: 4.0,
             real_center: 2.0,
             imag_center: -1.5,
-            fractal_titles: vec!["Mandelbrot", "Julia", "Burning Ship"],
+            fractal_titles: vec!["Mandelbrot", "Julia", "Sin Julia"],
             fractal_index: 0,
             fractal_cache: RefCell::new(FractalCache::default()),
             running: true,
