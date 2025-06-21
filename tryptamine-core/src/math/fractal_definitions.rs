@@ -1,6 +1,5 @@
 use num_complex::Complex;
-use rand::{random, random_range};
-use smallvec::{SmallVec, smallvec};
+use rand::random_range;
 use tracing::debug;
 
 pub type RealType = f64;
@@ -34,15 +33,16 @@ impl Default for RegularJuliaSet {
     fn default() -> Self {
         Self {
             // c: Complex::new(0.2, 0.3),
-            // c: Complex::new(-0.8, 0.155),
-            c: Complex::new(-1.0, 0.0),
+            c: Complex::new(-0.8, 0.155),
+            // c: Complex::new(-1.0, 0.0),
             iterations: DEFAULT_MAX_ITERATIONS,
         }
     }
 }
+const INFINITE_BASIN_BAILOUT: f64 = 8.0;
 fn find_basins<T: ComplexFatouFractal>(config: T) -> Vec<Compl> {
-    const SEEDS: usize = 100;
-    const INSIDE_RANGE: f64 = 256.0;
+    const SEEDS: usize = 1000;
+    const INSIDE_RANGE: f64 = INFINITE_BASIN_BAILOUT;
     let seeds: Vec<Compl> = (1..SEEDS)
         .map(|_| {
             let rand_real = random_range(-INSIDE_RANGE..INSIDE_RANGE);
@@ -59,7 +59,6 @@ fn find_basins_from_iterated_seeds<T: ComplexFatouFractal>(
 ) -> Vec<Compl> {
     const DEFAULT_COMPUTED_ITERATIONS: usize = 2000;
     const EPSILON: f64 = 0.01;
-    const INFINITE_SQR_BAILOUT: f64 = 16.0;
     let mut basinvals = Vec::with_capacity(10);
 
     for seed in seeds {
@@ -72,7 +71,8 @@ fn find_basins_from_iterated_seeds<T: ComplexFatouFractal>(
                 let normsqr: f64 = subval.norm_sqr();
                 is_own_basin = is_own_basin && (normsqr < EPSILON);
             }
-            is_own_basin = is_own_basin && coll.norm_sqr() < INFINITE_SQR_BAILOUT;
+            is_own_basin =
+                is_own_basin && coll.norm_sqr() < INFINITE_BASIN_BAILOUT * INFINITE_BASIN_BAILOUT;
             if is_own_basin {
                 break;
             };
