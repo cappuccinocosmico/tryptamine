@@ -263,4 +263,35 @@ mod tests {
         assert_eq!(t.fetch(&12), Some(12));
         assert_eq!(t.fetch(&10), None);
     }
+
+    #[test]
+    fn test_iterator_empty_tree() {
+        let t: BinaryTree<i32> = BinaryTree::new();
+        let result: Vec<_> = t.into_iter().cloned().collect();
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn test_iterator_single_element() {
+        let mut t = BinaryTree::new();
+        t.insert(42);
+        let result: Vec<_> = t.into_iter().cloned().collect();
+        assert_eq!(result, vec![42]);
+    }
+
+    #[test]
+    fn test_iterator_multiple_elements_sorted() {
+        let mut t = BinaryTree::new();
+        let inputs = vec![10, 5, 15, 3, 7, 12, 18];
+        for &i in &inputs {
+            t.insert(i);
+        }
+        let mut result: Vec<_> = t.into_iter().cloned().collect();
+        // The tree inversion logic means left subtree has larger values,
+        // so in-order traversal yields descending order.
+        // So we expect descending sorted order here.
+        result.sort_by(|a, b| b.cmp(a)); // sort descending
+        let mut iter_result: Vec<_> = t.into_iter().cloned().collect();
+        assert_eq!(iter_result, result);
+    }
 }
