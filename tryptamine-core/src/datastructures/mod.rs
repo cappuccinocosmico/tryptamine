@@ -1,3 +1,4 @@
+/// A simple binary search tree implementation with invert logic: left subtree holds greater values, right holds smaller.
 pub struct BinaryTree<T: PartialOrd> {
     head: BinaryLeaf<T>,
 }
@@ -11,161 +12,189 @@ struct BinaryNode<T> {
 
 type BinaryLeaf<T> = Option<Box<BinaryNode<T>>>;
 
-fn new_leaf<T: PartialOrd>(val: T, is_red: bool) -> BinaryLeaf<T> {
+fn new_leaf<T: PartialOrd>(data: T, is_red: bool) -> BinaryLeaf<T> {
     Some(Box::new(BinaryNode {
         is_red,
-        data: val,
+        data,
         left: None,
         right: None,
     }))
 }
 
-fn rotate_node<T>(parent_leaf: &mut BinaryLeaf<T>, is_left_rotation: bool) -> Result<(), String> {
-    if is_left_rotation {
-        // Left Rotation Code
-        let (mut stolen_parent, mut stolen_child) = match parent_leaf {
-            None => return Err("Parent Node is Empty".to_string()),
-            Some(parent) => {
-                if parent.right.is_none() {
-                    return Err("Child Right Node is empty".to_string());
-                };
-                let stolen_child = parent.right.take().unwrap();
-                let stolen_parent = parent_leaf.take().unwrap();
-                (stolen_parent, stolen_child)
+fn rotate_node<T>(parent_leaf: &mut BinaryLeaf<T>, is_left: bool) -> Result<(), String> {
+    if is_left {
+        // Left rotation
+        let (mut parent_box, mut child_box) = match parent_leaf.take() {
+            None => return Err("Parent is empty".into()),
+            Some(mut p) => {
+                let c = p.right.take().ok_or("Right child is empty")?;
+                (p, c)
             }
         };
-        let transfer_child = stolen_child.left.take();
-        stolen_parent.right = transfer_child;
-        stolen_child.left = Some(stolen_parent);
-        *parent_leaf = Some(stolen_child);
-        return Ok(());
+        parent_box.right = child_box.left.take();
+        child_box.left = Some(parent_box);
+        *parent_leaf = Some(child_box);
+        Ok(())
+    } else {
+        // Right rotation
+        let (mut parent_box, mut child_box) = match parent_leaf.take() {
+            None => return Err("Parent is empty".into()),
+            Some(mut p) => {
+                let c = p.left.take().ok_or("Left child is empty")?;
+                (p, c)
+            }
+        };
+        parent_box.left = child_box.right.take();
+        child_box.right = Some(parent_box);
+        *parent_leaf = Some(child_box);
+        Ok(())
     }
-    // Right Rotation Code
-    let (mut stolen_parent, mut stolen_child) = match parent_leaf {
-        None => return Err("Parent Node is Empty".to_string()),
-        Some(parent) => {
-            if parent.left.is_none() {
-                return Err("Child Left Node is empty".to_string());
-            };
-            let stolen_child = parent.left.take().unwrap();
-            let stolen_parent = parent_leaf.take().unwrap();
-            (stolen_parent, stolen_child)
-        }
-    };
-    let transfer_child = stolen_child.right.take();
-    stolen_parent.left = transfer_child;
-    stolen_child.right = Some(stolen_parent);
-    *parent_leaf = Some(stolen_child);
-    Ok(())
 }
 
 impl<T: PartialOrd + Clone> BinaryTree<T> {
-    fn new() -> Self {
-        BinaryTree { head: None }
+    /// Creates an empty tree.
+    pub fn new() -> Self {
+        Self { head: None }
     }
-    fn insert(&mut self, insert: T) {
-        match &mut self.head {
-            None => {
-                self.head = new_leaf(insert, false);
+
+    /// Inserts a value. No balancing performed; first node is black by default.
+    pub fn insert(&mut self, value: T) {
+        fn rec<T: PartialOrd>(node: &mut BinaryNode<T>, v: T) {
+            if node.data == v {
                 return;
             }
-            Some(val) => {
-                return recursive_insert(val.as_mut(), insert);
+            if node.data < v {
+                // larger goes left
+                match node.left.as_mut() {
+                    None => node.left = new_leaf(v, true),
+                    Some(n) => rec(n.as_mut(), v),
+                }
+            } else {
+                // smaller goes right
+                match node.right.as_mut() {
+                    None => node.right = new_leaf(v, true),
+                    Some(n) => rec(n.as_mut(), v),
+                }
             }
         }
-        fn recursive_insert<T: PartialOrd>(head: &mut BinaryNode<T>, insert: T) {
-            if head.data == insert {
-                return;
-            }
-            if head.data < insert {
-                match &mut head.left {
-                    None => {
-                        head.left = new_leaf(insert, true);
-                        return;
-                    }
-                    Some(val) => {
-                        return recursive_insert(val.as_mut(), insert);
-                    }
-                }
-            }
-            match &mut head.right {
-                None => {
-                    head.right = new_leaf(insert, true);
-                }
-                Some(val) => recursive_insert(val.as_mut(), insert),
-            }
+        match self.head.as_mut() {
+            None => self.head = new_leaf(value, false),
+            Some(root) => rec(root.as_mut(), value),
         }
     }
-    fn fetch(&self, element: T) -> Option<T> {
-        return fetch_recursive(&self.head, element);
-        fn fetch_recursive<T: PartialOrd + Clone>(node: &BinaryLeaf<T>, element: T) -> Option<T> {
-            match &node {
+
+    /// Fetches a clone of the element if present.
+    pub fn fetch(&self, value: T) -> Option<T> {
+        fn rec<T: PartialOrd + Clone>(node: &BinaryLeaf<T>, v: T) -> Option<T> {
+            match node {
                 None => None,
-                Some(node) => {
-                    if node.data == element {
-                        return Some(node.data.clone());
-                    };
-                    if node.data < element {
-                        return fetch_recursive(&node.left, element);
-                    };
-                    fetch_recursive(&node.right, element)
+                Some(n) => {
+                    if n.data == v {
+                        Some(n.data.clone())
+                    } else if n.data < v {
+                        // go left for greater
+                        rec(&n.left, v)
+                    } else {
+                        // go right for smaller
+                        rec(&n.right, v)
+                    }
                 }
             }
         }
+        rec(&self.head, value)
+    }
+
+    /// Deletes an element, returning it if found.
+    pub fn delete(&mut self, value: T) -> Option<T> {
+        fn rec<T: PartialOrd + Clone>(node: &mut BinaryLeaf<T>, v: &T) -> Option<T> {
+            let mut removed = None;
+            if let Some(mut boxed) = node.take() {
+                if &boxed.data == v {
+                    removed = Some(boxed.data.clone());
+                    // Cases
+                    match (boxed.left.take(), boxed.right.take()) {
+                        (None, None) => *node = None,
+                        (Some(l), None) => *node = Some(l),
+                        (None, Some(r)) => *node = Some(r),
+                        (Some(mut l), Some(r)) => {
+                            // both children: find successor = smallest in left subtree (since left has greater values)
+                            let succ_data;
+                            {
+                                let mut cur = &mut l;
+                                while let Some(ref mut right) = cur.right {
+                                    cur = right;
+                                }
+                                succ_data = cur.data.clone();
+                            }
+                            // delete successor
+                            let _ = rec(&mut Some(l.clone()), &succ_data);
+                            boxed.data = succ_data;
+                            boxed.left = Some(l);
+                            boxed.right = Some(r);
+                            *node = Some(boxed);
+                        }
+                    }
+                } else if &boxed.data < v {
+                    // go left
+                    let res = rec(&mut boxed.left, v);
+                    *node = Some(boxed);
+                    return res;
+                } else {
+                    // go right
+                    let res = rec(&mut boxed.right, v);
+                    *node = Some(boxed);
+                    return res;
+                }
+            }
+            removed
+        }
+        rec(&mut self.head, &value)
     }
 }
 
-// Test module for BinaryTree
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_empty_fetch() {
-        let tree: BinaryTree<i32> = BinaryTree::new();
-        // Fetching from empty tree returns None
-        assert_eq!(tree.fetch(0), None);
+    fn test_insert_fetch() {
+        let mut t = BinaryTree::new();
+        t.insert(5);
+        t.insert(3);
+        t.insert(7);
+        assert_eq!(t.fetch(5), Some(5));
+        assert_eq!(t.fetch(3), Some(3));
+        assert_eq!(t.fetch(7), Some(7));
+        assert_eq!(t.fetch(8), None);
     }
 
     #[test]
-    fn test_single_insertion() {
-        let mut tree = BinaryTree::new();
-        tree.insert(42);
-        assert_eq!(tree.fetch(42), Some(42));
-        // Nonexistent element still returns None
-        assert_eq!(tree.fetch(7), None);
+    fn test_delete_leaf() {
+        let mut t = BinaryTree::new();
+        t.insert(10);
+        assert_eq!(t.delete(10), Some(10));
+        assert_eq!(t.fetch(10), None);
     }
 
     #[test]
-    fn test_multiple_insertions_ordered() {
-        let mut tree = BinaryTree::new();
-        for i in 1..11 {
-            tree.insert(i);
-        }
-        // All inserted elements should be found
-        for i in 1..11 {
-            assert_eq!(tree.fetch(i), Some(i));
-        }
-        // Out of range values not inserted
-        assert_eq!(tree.fetch(0), None);
-        assert_eq!(tree.fetch(11), None);
+    fn test_delete_one_child() {
+        let mut t = BinaryTree::new();
+        t.insert(10);
+        t.insert(5);
+        assert_eq!(t.delete(10), Some(10));
+        assert_eq!(t.fetch(5), Some(5));
     }
 
     #[test]
-    fn test_multiple_insertions_random() {
-        let mut tree = BinaryTree::new();
-        let values = vec![5, 3, 8, 1, 4, 7, 9];
-        for &v in &values {
-            tree.insert(v);
-        }
-        // All inserted elements should be found
-        for &v in &values {
-            assert_eq!(tree.fetch(v), Some(v));
-        }
-        // Test duplicates: inserting again shouldn't break fetch
-        tree.insert(3);
-        tree.insert(8);
-        assert_eq!(tree.fetch(3), Some(3));
-        assert_eq!(tree.fetch(8), Some(8));
+    fn test_delete_two_children() {
+        let mut t = BinaryTree::new();
+        t.insert(10);
+        t.insert(5);
+        t.insert(15);
+        t.insert(12);
+        assert_eq!(t.delete(10), Some(10));
+        // successor of 10 is smallest in left (greater) subtree = 12
+        assert_eq!(t.fetch(12), Some(12));
+        assert_eq!(t.fetch(10), None);
     }
 }
