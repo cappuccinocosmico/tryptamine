@@ -169,34 +169,33 @@ impl<'a, T: PartialOrd + Clone> Iterator for BinaryTreeIterator<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(direction) = self.tree_stack.pop() {
+        while let Some(direction) = self.tree_stack.pop() {
             match direction {
                 TreeRef::NotPushed(node) => {
-                    match node.left.as_deref() {
-                        None => {
-                            self.tree_stack.push(TreeRef::Pushed(node));
-                            return Some(&node.data);
-                        }
-                        Some(next_leftward) => {
-                            self.tree_stack.push(TreeRef::NotPushed(node))
-                            // Decend again until you get to the bottom leftmost node you havent
-                            // visited yet
-                        }
+                    if let Some(next_leftward) = node.left.as_deref() {
+                        self.tree_stack.push(TreeRef::NotPushed(node));
+                        self.tree_stack.push(TreeRef::NotPushed(next_leftward));
+                    } else {
+                        self.tree_stack.push(TreeRef::Pushed(node));
+                        return Some(&node.data);
                     }
                 }
                 TreeRef::Pushed(node) => {
-                    match node.right.as_deref() {
-                        None => {
-                            // Pop nodes off the vec until you get to a NotPushed node, then pop it
-                            // off and mark it as pushed and return that value. If there are no non
-                            // pushed values return nothing
+                    if let Some(next_rightward) = node.right.as_deref() {
+                        self.tree_stack.push(TreeRef::Pushed(node));
+                        self.tree_stack.push(TreeRef::NotPushed(next_rightward));
+                    } else {
+                        // Pop nodes until a NotPushed node is found, mark it as pushed and return its data
+                        while let Some(top) = self.tree_stack.pop() {
+                            match top {
+                                TreeRef::NotPushed(n) => {
+                                    self.tree_stack.push(TreeRef::Pushed(n));
+                                    return Some(&n.data);
+                                }
+                                TreeRef::Pushed(_) => continue,
+                            }
                         }
-                        Some(next_rightward) => {
-                            self.tree_stack.push(TreeRef::NotPushed(next_rightward))
-                            // Once at this point you can go back to treating the tree as a regular
-                            // not pushed node and begin descending left until you hit a value,
-                            // push that and then mark it as pushed
-                        }
+                        return None;
                     }
                 }
             }
