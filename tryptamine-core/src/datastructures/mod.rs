@@ -84,14 +84,14 @@ impl<T: PartialOrd + Clone> BinaryTree<T> {
     }
 
     /// Fetches a clone of the element if present.
-    pub fn fetch(&self, value: T) -> Option<T> {
-        fn rec<T: PartialOrd + Clone>(node: &BinaryLeaf<T>, v: T) -> Option<T> {
+    pub fn fetch(&self, value: &T) -> Option<T> {
+        fn rec<T: PartialOrd + Clone>(node: &BinaryLeaf<T>, v: &T) -> Option<T> {
             match node {
                 None => None,
                 Some(n) => {
-                    if n.data == v {
+                    if n.data == *v {
                         Some(n.data.clone())
-                    } else if n.data < v {
+                    } else if n.data < *v {
                         // go left for greater
                         rec(&n.left, v)
                     } else {
@@ -105,32 +105,34 @@ impl<T: PartialOrd + Clone> BinaryTree<T> {
     }
 
     /// Deletes an element, returning it if found.
-    pub fn delete(&mut self, value: T) -> Option<T> {
+    pub fn delete(&mut self, value: &T) -> Option<T> {
         fn rec<T: PartialOrd + Clone>(node: &mut BinaryLeaf<T>, v: &T) -> Option<T> {
             let mut removed = None;
             if let Some(mut boxed) = node.take() {
                 if &boxed.data == v {
-                    removed = Some(boxed.data.clone());
+                    removed = Some(v.clone());
                     // Cases
-                    match (boxed.left.take(), boxed.right.take()) {
+                    let mut taken_left = boxed.left.take();
+                    let mut taken_right = boxed.right.take();
+                    match (&mut taken_left, &mut taken_right) {
                         (None, None) => *node = None,
-                        (Some(l), None) => *node = Some(l),
-                        (None, Some(r)) => *node = Some(r),
-                        (Some(mut l), Some(r)) => {
+                        (Some(_), None) => *node = taken_left,
+                        (None, Some(_)) => *node = taken_right,
+                        (Some(l), Some(_r)) => {
                             // both children: find successor = smallest in left subtree (since left has greater values)
                             let succ_data;
                             {
-                                let mut cur = &mut l;
+                                let mut cur = l;
                                 while let Some(ref mut right) = cur.right {
                                     cur = right;
                                 }
                                 succ_data = cur.data.clone();
                             }
                             // delete successor
-                            let _ = rec(&mut Some(l.clone()), &succ_data);
+                            let _ = rec(&mut taken_left, &succ_data);
                             boxed.data = succ_data;
-                            boxed.left = Some(l);
-                            boxed.right = Some(r);
+                            boxed.left = taken_left;
+                            boxed.right = taken_right;
                             *node = Some(boxed);
                         }
                     }
@@ -148,7 +150,7 @@ impl<T: PartialOrd + Clone> BinaryTree<T> {
             }
             removed
         }
-        rec(&mut self.head, &value)
+        rec(&mut self.head, value)
     }
 }
 
@@ -162,18 +164,18 @@ mod tests {
         t.insert(5);
         t.insert(3);
         t.insert(7);
-        assert_eq!(t.fetch(5), Some(5));
-        assert_eq!(t.fetch(3), Some(3));
-        assert_eq!(t.fetch(7), Some(7));
-        assert_eq!(t.fetch(8), None);
+        assert_eq!(t.fetch(&5), Some(5));
+        assert_eq!(t.fetch(&3), Some(3));
+        assert_eq!(t.fetch(&7), Some(7));
+        assert_eq!(t.fetch(&8), None);
     }
 
     #[test]
     fn test_delete_leaf() {
         let mut t = BinaryTree::new();
         t.insert(10);
-        assert_eq!(t.delete(10), Some(10));
-        assert_eq!(t.fetch(10), None);
+        assert_eq!(t.delete(&10), Some(10));
+        assert_eq!(t.fetch(&10), None);
     }
 
     #[test]
@@ -181,8 +183,8 @@ mod tests {
         let mut t = BinaryTree::new();
         t.insert(10);
         t.insert(5);
-        assert_eq!(t.delete(10), Some(10));
-        assert_eq!(t.fetch(5), Some(5));
+        assert_eq!(t.delete(&10), Some(10));
+        assert_eq!(t.fetch(&5), Some(5));
     }
 
     #[test]
@@ -192,9 +194,9 @@ mod tests {
         t.insert(5);
         t.insert(15);
         t.insert(12);
-        assert_eq!(t.delete(10), Some(10));
+        assert_eq!(t.delete(&10), Some(10));
         // successor of 10 is smallest in left (greater) subtree = 12
-        assert_eq!(t.fetch(12), Some(12));
-        assert_eq!(t.fetch(10), None);
+        assert_eq!(t.fetch(&12), Some(12));
+        assert_eq!(t.fetch(&10), None);
     }
 }
