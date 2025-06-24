@@ -1,3 +1,5 @@
+///
+use std::collections::BTreeMap;
 /// A simple binary search tree implementation with invert logic: left subtree holds greater values, right holds smaller.
 pub struct BinaryTree<T: PartialOrd> {
     head: BinaryLeaf<T>,
@@ -154,6 +156,68 @@ impl<T: PartialOrd + Clone> BinaryTree<T> {
     }
 }
 
+enum TreeRef<'a, T> {
+    NotPushed(&'a BinaryNode<T>),
+    Pushed(&'a BinaryNode<T>),
+}
+
+pub struct BinaryTreeIterator<'a, T> {
+    tree_stack: Vec<TreeRef<'a, T>>,
+}
+
+impl<'a, T: PartialOrd + Clone> Iterator for BinaryTreeIterator<'a, T> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(direction) = self.tree_stack.pop() {
+            match direction {
+                TreeRef::NotPushed(node) => {
+                    match node.left.as_deref() {
+                        None => {
+                            self.tree_stack.push(TreeRef::Pushed(node));
+                            return Some(&node.data);
+                        }
+                        Some(next_leftward) => {
+                            self.tree_stack.push(TreeRef::NotPushed(node))
+                            // Decend again until you get to the bottom leftmost node you havent
+                            // visited yet
+                        }
+                    }
+                }
+                TreeRef::Pushed(node) => {
+                    match node.right.as_deref() {
+                        None => {
+                            // Pop nodes off the vec until you get to a NotPushed node, then pop it
+                            // off and mark it as pushed and return that value.
+                        }
+                        Some(next_rightward) => {
+                            self.tree_stack.push(TreeRef::NotPushed(next_rightward))
+                            // Once at this point you can go back to treating the tree as a regular
+                            // not pushed node and begin descending left until you hit a value,
+                            // push that and then mark it as pushed
+                        }
+                    }
+                }
+            }
+        }
+        None
+    }
+}
+
+impl<'a, T: PartialOrd + Clone> IntoIterator for &'a BinaryTree<T> {
+    type Item = &'a T;
+    type IntoIter = BinaryTreeIterator<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        let mut tree_stack = Vec::new();
+
+        if let Some(root) = self.head.as_deref() {
+            tree_stack.push(TreeRef::NotPushed(root));
+        }
+
+        BinaryTreeIterator { tree_stack }
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
