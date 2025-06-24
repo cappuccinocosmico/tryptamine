@@ -188,7 +188,8 @@ impl<'a, T: PartialOrd + Clone> Iterator for BinaryTreeIterator<'a, T> {
                     match node.right.as_deref() {
                         None => {
                             // Pop nodes off the vec until you get to a NotPushed node, then pop it
-                            // off and mark it as pushed and return that value.
+                            // off and mark it as pushed and return that value. If there are no non
+                            // pushed values return nothing
                         }
                         Some(next_rightward) => {
                             self.tree_stack.push(TreeRef::NotPushed(next_rightward))
