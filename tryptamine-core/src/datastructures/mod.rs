@@ -187,13 +187,10 @@ impl<'a, T: PartialOrd + Clone> Iterator for BinaryTreeIterator<'a, T> {
                     } else {
                         // Pop nodes until a NotPushed node is found, mark it as pushed and return its data
                         while let Some(top) = self.tree_stack.pop() {
-                            match top {
-                                TreeRef::NotPushed(n) => {
-                                    self.tree_stack.push(TreeRef::Pushed(n));
-                                    return Some(&n.data);
-                                }
-                                TreeRef::Pushed(_) => continue,
-                            }
+                            if let TreeRef::NotPushed(n) = top {
+                                self.tree_stack.push(TreeRef::Pushed(n));
+                                return Some(&n.data);
+                            };
                         }
                         return None;
                     }
