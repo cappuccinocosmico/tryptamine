@@ -1,7 +1,7 @@
 // #import "@preview/commute:0.3.0": node, arr, commutative-diagram
 #import "@preview/fletcher:0.5.8" as fletcher: diagram, node, edge
 #import "@preview/alchemist:0.1.6": *
-#import "@preview/commute:0.3.0": node as , arr, commutative-diagram
+#import "@preview/commute:0.3.0": node as cnode, arr, commutative-diagram
 #import fletcher.shapes: house, hexagon
 All of these top bits render as html as you would expect including things like *bold* text.
 
@@ -49,19 +49,40 @@ However, behold its mathematical power:
 ) $)
 //
 
-#fcen( commutative-diagram(
-  node((1, 0), [$a^b$]),
-  node((0, 0), [$c$]),
-  node((1, 2), [$a$]),
-  node((0, 1), [$c times b$]),
-  node((1, 1), [$a^b times b$]),
-  arr((0, 0), (1, 0), [$lambda$], label-pos: left),
-  arr((1, 1), (1, 2), [$"eval"$], label-pos: right),
-  arr((0, 1), (1, 1), [$lambda times id_b$]),
-  arr((0, 1), (1, 2), []),
-))
 
-A machine learning diagram
+A machine learning diagram rendered from within math mode
+
+#fcen($#diagram(
+	spacing: 8pt,
+	cell-size: (8mm, 10mm),
+	edge-stroke: 1pt,
+	edge-corner-radius: 5pt,
+	mark-scale: 70%,
+
+	blob((0,1), [Add & Norm], tint: yellow, shape: hexagon),
+	edge(),
+	blob((0,2), [Multi-Head\ Attention], tint: orange),
+	blob((0,4), [Input], shape: house.with(angle: 30deg),
+		width: auto, tint: red),
+
+	for x in (-.3, -.1, +.1, +.3) {
+		edge((0,2.8), (x,2.8), (x,2), "-|>")
+	},
+	edge((0,2.8), (0,4)),
+
+	edge((0,3), "l,uu,r", "--|>"),
+	edge((0,1), (0, 0.35), "r", (1,3), "r,u", "-|>"),
+	edge((1,2), "d,rr,uu,l", "--|>"),
+
+	blob((2,0), [Softmax], tint: green),
+	edge("<|-"),
+	blob((2,1), [Add & Norm], tint: yellow, shape: hexagon),
+	edge(),
+	blob((2,2), [Feed\ Forward], tint: blue),
+)$
+)
+
+and rendered from regular mode
 
 #fcen(diagram(
 	spacing: 8pt,
@@ -94,7 +115,8 @@ A machine learning diagram
 )
 
 A molecule diagram:
-#fcen(skeletize({
+
+#fcen($#skeletize({
 cycle(6, {
 single()
 double()
@@ -120,10 +142,9 @@ single()
 })
 double()
 })
-}))
+})$)
 
-And some category theory
-
+And some category theory, such as this example diagram:
 
 #fcen(diagram(
   spacing: (40mm, 35mm),
@@ -181,3 +202,61 @@ And some category theory
 
   edge(c(1,1,1), c(2,1,1), $Ω$, "<..>", bend: 40deg)
 }))
+
+but also easier to understand stuff like the defintion of the set of functions a -> b
+
+#fcen( commutative-diagram(
+  cnode((1, 0), [$a^b$]),
+  cnode((0, 0), [$c$]),
+  cnode((1, 2), [$a$]),
+  cnode((0, 1), [$c times b$]),
+  cnode((1, 1), [$a^b times b$]),
+  arr((0, 0), (1, 0), [$lambda$], label-pos: left),
+  arr((1, 1), (1, 2), [$"eval"$], label-pos: right),
+  arr((0, 1), (1, 1), [$lambda times id_b$] , label-pos: right),
+  arr((0, 1), (1, 2), []),
+))
+
+and the cartesian product of sets a and b
+
+// https://t.yw.je/#N4Igdg9gJgpgziAXAbVABwnAlgFyxMJZABgBoBGAXVJADcBDAGwFcYkR6QBfU9TXfIRQAmCtTpNW7AEbdeIDNjwEi5MTQYs2iDgAI8AW3i7ZPPksGrSxcZqk6Axt3EwoAc3hFQAMwBOEAyQAZhocCCRiMxA-AODQ8MRyKJjAxFEQMKQ1EEZ6aRhGAAV+ZSEQXyw3AAscEA1JbRAACnp9LCM4EwBKZCo5H39U9MzEMhy8guKLFR1GGG9a+q12FraO7pJKfujBuIyE9Nz8opLLWfnFiWWdAEI6nKwwRqgIHBxXZy4gA
+#fcen(commutative-diagram(
+  cnode((1, 0), [$a$]),
+  cnode((1, 2), [$b$]),
+  cnode((1, 1), [$a times b$]),
+  cnode((0, 1), [$c$]),
+  arr((0, 1), (1, 0), []),
+  arr((0, 1), (1, 2), []),
+  arr((1, 1), (1, 2), [$(a times b)[1]$], label-pos: right),
+  arr((1, 1), (1, 0), [$(a times b)[0]$], label-pos: left),
+  arr((0, 1), (1, 1), [$!$], label-pos: left, "dotted"),
+))
+or the natural numbers:
+// https://t.yw.je/#N4Igdg9gJgpgziAXAbVABwnAlgFyxMJZABgBpiBdUkANwEMAbAVxiRAEYQBfU9TXfIRTtyVWoxZsAclO68QGbHgJEATKOr1mrRCBly+SwURHsxWyboCCBhf2VDk6s5ok6QNrmJhQA5vCJQADMAJwgAWyQREBwIJHVxbTY4JgBjVNtQiKQyGLjEaIt3YkywyMRc2KQAZlck3WIAfRtqBjoAIxgGAAV7Y10QrF8ACxxS7MRavKQAFlaOrt6jFQGh0ZA6yxAU9Obx8uiqyc33Jn346iO5xK2zry4gA
+#fcen(commutative-diagram(
+  cnode((0, 0), [$bold(1)$]),
+  cnode((0, 1), [$NN$]),
+  cnode((0, 2), [$NN$]),
+  cnode((1, 1), [$A$]),
+  cnode((1, 2), [$A$]),
+  arr((0, 1), (0, 2), [$"succ"$]),
+  arr((0, 0), (0, 1), [$0$]),
+  arr((0, 0), (1, 1), [$0_A$], label-pos: right),
+  arr((1, 1), (1, 2), [$"succ"_A$], label-pos: right),
+  arr((0, 1), (1, 1), [$u$]),
+  arr((0, 2), (1, 2), [$u$]),
+))
+Or even the set of boolean values {true,false} or Ω
+// https://t.yw.je/#N4Igdg9gJgpgziAXAbVABwnAlgFyxMJZABgBpiBdUkANwEMAbAVxiRAEEQBfU9TXfIRQBGclVqMWbYd14gM2PASKjh4+s1aIQAeQC2MAOZ1ZfRYKJk11DVO0ANbuJhRD8IqABmAJwh6kAMzUOBBIAEzUDHQARjAMAAr8SkIg3liGABY4IDaSWiAAxhlYAPqepiA+fkhkICGBwXRYDGwZEBAA1jkSmmzlkTFxiebK2mmZ2Txevv6IonWhiBE9diAAOnXeTDgZGxVVs7X1c1wUXEA
+#fcen( commutative-diagram(
+  cnode((0, 0), [$A$]),
+  cnode((0, 1), [$1$]),
+  cnode((1, 1), [$Omega$]),
+  cnode((1, 0), [$X$]),
+  arr((1, 0), (1, 1), [$chi_f$], label-pos: right),
+  arr((0, 0), (1, 0), [$f$], label-pos: right, "inj"),
+  arr((0, 1), (1, 1), [$"truth"$]),
+  arr((0, 0), (0, 1), []),
+))
+pretty cool right?
+
