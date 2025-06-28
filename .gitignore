@@ -12,6 +12,9 @@ backend-rust/styles/main.css
 
 **/*.rs.bk
 
+blog-generator/ilm/*pdf
+blog-generator/ilm/*html
+
 tryptamine-core/*.jpg
 # Added by cargo
 
