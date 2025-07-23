@@ -12,13 +12,13 @@ All the political analysis about the types is totally accurate though. The power
 
 - **Power needs connections.** An org/activist can totally tank their credibility and reputation if they ever try direct action or even combative tactics in the media. This happens a lot with elected representatives like AOC, etc..
 
-- **(USA Exlusive) Asking Permission with Police Permits:** For any protest a police permit is mostly a meaningless peice of paper, they can be unilaterally revoked for any protest that does get them, and both permitted and unprermiited protests have all the same constitutional protections. The main reason IMO police departments push them so heavily is because they want people to get in the mindset of asking them for permission first
+- **(USA Exlusive) Asking Permission with Police Permits:** For any protest a police permit is mostly a meaningless piece of paper, they can be unilaterally revoked for any protest that does get them, and both permitted and unpermitted protests have all the same constitutional protections. The main reason IMO police departments push them so heavily is because they want people to get in the mindset of asking them for permission first
 
 # The tactics are a sign of good organizing.
 
 I personally have learned really like it when these tactics get used against orgs I am with.
 
-Every campaign starts off not really challenging any power structures, in this stage these tactics are never going to be used against you because your action isnt even worthy of a response. If the system has the option of completely ignoring your action, it absolutely will.
+Every campaign starts off not really challenging any power structures, in this stage these tactics are never going to be used against you because your action isn't even worthy of a response. If the system has the option of completely ignoring your action, it absolutely will.
 
 Using these kinds of tactics against a campaign always costs the system something, whether that be time or organizational capacity. It wouldn't do that unless the campaign was actually working in causing pain to said power structures.
 
@@ -46,8 +46,8 @@ In very general terms a good campaign by a small org targeting some actor should
 
 2. **Dont take advice from people who have a vested interest in seeing you fail.**
 
-Good life advice generally, but especially true for political organizing. [Unlike lots of other areas in life political power, expecially political power between classes is a zero sum game (rob reich has a good lecture on this)](https://www.youtube.com/watch?v=kQS2ptfayVI).
-In genreral this tells us that you dont loose much by ignoring all these offers, nothing really good can come from ignoring them, and 90% of the time the main goal of these is to get you to give up all the leverage for almost nothing in return. Sometimes these will come from affiliated NGO's or other political parties, but sometimes they are just hillariously craven attempts by the power structures to get you to give up.
+Good life advice generally, but especially true for political organizing. [Unlike lots of other areas in life political power, expecially political power between classes is a zero sum game (Rob Reich has a good lecture on this)](https://www.youtube.com/watch?v=kQS2ptfayVI).
+In general this tells us that you dont loose much by ignoring all these offers, nothing really good can come from ignoring them, and 90% of the time the main goal of these is to get you to give up all the leverage for almost nothing in return. Sometimes these will come from affiliated NGO's or other political parties, but sometimes they are just hilariously craven attempts by the power structures to get you to give up.
 There was one time when I got arrested (in a planned manner) and after releasing us on bail at 2:00 AM an random police officer casually and unprompted started talking about how he just loved the work we were doing, and how we could get so much more done if we just asked for police permits before all of our actions.
 
 3. **Treat these offers like [draw offers in chess](https://en.wikipedia.org/wiki/Draw_by_agreement).**
