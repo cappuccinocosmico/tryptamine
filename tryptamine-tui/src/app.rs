@@ -7,9 +7,8 @@ use ratatui::{
 /// Cache for fractal buffer
 use std::{cell::RefCell, vec};
 use tryptamine_core::math::fractal_definitions::{
-    Compl, ComplexFatouFractal, FractalConfig, MandelbrotSet, RegularJuliaSet, SinJuliaSet,
+    Compl, FractalConfig,
 };
-use tryptamine_core::math::fractal_logic::ImageSchema;
 
 /// Cache for fractal buffer and parameters
 #[derive(Debug)]

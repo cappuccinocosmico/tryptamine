@@ -8,7 +8,7 @@ use ratatui::{
 
 use crate::app::App;
 use tryptamine_core::math::fractal_definitions::{
-    Compl, FractalConfig, MandelbrotSet, RegularJuliaSet, SinJuliaSet,
+    Compl, FractalConfig,
 };
 use tryptamine_core::math::fractal_logic::{ImageSchema, generate_raw_image_buffer};
 

@@ -1,5 +1,3 @@
-///
-use std::collections::BTreeMap;
 /// A simple binary search tree implementation with invert logic: left subtree holds greater values, right holds smaller.
 pub struct BinaryTree<T: PartialOrd> {
     head: BinaryLeaf<T>,
@@ -288,7 +286,7 @@ mod tests {
         // so in-order traversal yields descending order.
         // So we expect descending sorted order here.
         result.sort_by(|a, b| b.cmp(a)); // sort descending
-        let mut iter_result: Vec<_> = t.into_iter().cloned().collect();
+        let iter_result: Vec<_> = t.into_iter().cloned().collect();
         assert_eq!(iter_result, result);
     }
 }
