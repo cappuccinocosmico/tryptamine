@@ -1,9 +1,17 @@
-Yeah I will see if I can find some time to do that. I have been trying to force myself to write down my thoughts on organizing for a while, and having an actual structure to write could be nice.
+## Pendantic Critique: I think "radicals, idealists, and realists" are more "modes of problem solving" than "types of activists"
 
-Pages you sent were interesting, here's a couple thoughts so far:
+There absolutely are organizations and activists that really only focus on one type. Lots of orgs do more then one type, and activists often switch what kind of tactics they bring to bear on an issue depending on what they think is most effective.
 
-## Needlessly Pendantic Critique: I dont know if "radicals, idealists, and realists" are more "modes of problem solving" than "types of activists"
+This isnt to say ideology is unimportant, but it has more to do with unlocking different methods of solving problems. Anarchists frequently lobby regulatory agencies or canvas for political candidates. But it isn't common to find socially progressive liberals trying to shut down construction of an oil pipeline.
 
-The main differences in ideology is that they can unlock different methods of solving problems. Anarchists frequently lobby regulatory agencies or canvas for political candidates. But it isn't common to find socially progressive liberals trying to shut down construction of an oil pipeline.
+All the political analysis about the types is totally accurate though. The power structures try to make doing radical activism miserable and try to paint idealistic and realistic methods as easier and more effective. Likewise, always try to push the people doing idealistic activism into realistic activism using all the tricks talked about in the book.
 
-I think its probably better to describe them as "modes of operation" for individual activists, and the broader organizations that they interact with. (Although describing them as types of Organizations/Affinity Groups is still pretty accurate.)
+## A couple more tricks
+
+- **(USA Exclusive) Play around with 501c3 non profit status.**  This is given to nonprofits at the IRS's discretion and can be revoked at any time, which can completely shut off an organizations ability to accept donations. This typically means that certified nonprofits never touch or work with orgs who do NVDA, just because planning or associating with them can potentially cause problems for the org's certification.
+
+- **Power needs connections.** An org/activist can totally tank their credibility and reputation if they ever try direct action or even combative tactics in the media. This happens a lot with elected representatives like AOC, etc..
+
+- **(USA Exlusive) Asking Permission with Police Permits:** For any protest a police permit is mostly a meaningless peice of paper, they can be unilaterally revoked for any protest that does get them, and both permitted and unprermiited protests have all the same constitutional protections. The main reason IMO police departments push them so heavily is because they want people to get in the mindset of asking them for permission first
+
+# Tactics to prevent power organizing.
