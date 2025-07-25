@@ -1,8 +1,94 @@
-use std::{collections::HashSet, usize};
+use std::collections::HashSet;
 
+// Write a program to solve a Sudoku puzzle by filling the empty cells.
+//
+// A sudoku solution must satisfy all of the following rules:
+//
+//     Each of the digits 1-9 must occur exactly once in each row.
+//     Each of the digits 1-9 must occur exactly once in each column.
+//     Each of the digits 1-9 must occur exactly once in each of the 9 3x3 sub-boxes of the grid.
+//
+// The '.' character indicates empty cells.
+//
+
+// Input: board = [["5","3",".",".","7",".",".",".","."],["6",".",".","1","9","5",".",".","."],[".","9","8",".",".",".",".","6","."],["8",".",".",".","6",".",".",".","3"],["4",".",".","8",".","3",".",".","1"],["7",".",".",".","2",".",".",".","6"],[".","6",".",".",".",".","2","8","."],[".",".",".","4","1","9",".",".","5"],[".",".",".",".","8",".",".","7","9"]]
+// Output: [["5","3","4","6","7","8","9","1","2"],["6","7","2","1","9","5","3","4","8"],["1","9","8","3","4","2","5","6","7"],["8","5","9","7","6","1","4","2","3"],["4","2","6","8","5","3","7","9","1"],["7","1","3","9","2","4","8","5","6"],["9","6","1","5","3","7","2","8","4"],["2","8","7","4","1","9","6","3","5"],["3","4","5","2","8","6","1","7","9"]]
+// Explanation: The input board is shown above and the only valid solution is shown below:
+// Could you write a couple adapter functions to conver the characters to and from colors and color
+// options. (Use the new from opt color for the color options)
+fn convert_char_to_option(c: char) -> Option<SudokuColor> {
+    match c {
+        '1' => Some(SudokuColor::One),
+        '2' => Some(SudokuColor::Two),
+        '3' => Some(SudokuColor::Three),
+        '4' => Some(SudokuColor::Four),
+        '5' => Some(SudokuColor::Five),
+        '6' => Some(SudokuColor::Six),
+        '7' => Some(SudokuColor::Seven),
+        '8' => Some(SudokuColor::Eight),
+        '9' => Some(SudokuColor::Nine),
+        '.' => None,
+        _ => panic!("Invalid Sudoku character: {c}"),
+    }
+}
+
+fn convert_option_to_char(opt: Option<SudokuColor>) -> char {
+    match opt {
+        Some(SudokuColor::One) => '1',
+        Some(SudokuColor::Two) => '2',
+        Some(SudokuColor::Three) => '3',
+        Some(SudokuColor::Four) => '4',
+        Some(SudokuColor::Five) => '5',
+        Some(SudokuColor::Six) => '6',
+        Some(SudokuColor::Seven) => '7',
+        Some(SudokuColor::Eight) => '8',
+        Some(SudokuColor::Nine) => '9',
+        None => '.',
+    }
+}
+
+// Convert entire Sudoku board (9x9 chars) to a flat vector of GraphColorOptions
+fn board_to_color_options(board: &[Vec<char>]) -> Vec<GraphColorOption<FiniteSodokuColorSet>> {
+    board
+        .iter()
+        .flatten()
+        .map(|&c| GraphColorOption::new_from_opt_color(convert_char_to_option(c)))
+        .collect()
+}
+
+// Convert solved color results (Vec<SudokuColor>) back to 9x9 char board
+fn color_vec_to_board(colors: Vec<SudokuColor>) -> Vec<Vec<char>> {
+    colors
+        .chunks(9)
+        .map(|chunk| {
+            chunk
+                .iter()
+                .map(|&color| convert_option_to_char(Some(color)))
+                .collect()
+        })
+        .collect()
+}
+
+// Implement solver using these adapters
 struct Solution {}
 impl Solution {
-    pub fn solve_sudoku(board: &mut Vec<Vec<char>>) {}
+    pub fn solve_sudoku(board: &mut Vec<Vec<char>>) {
+        // Generate Sudoku constraint graph
+        let graph_nodes = generate_sudoku_graph_nodes();
+
+        // Convert input board to color options
+        let color_options = board_to_color_options(board);
+
+        // Solve using graph coloring algorithm
+        let result =
+            solve_graph_coloring(color_options, &graph_nodes).expect("Sudoku has no solution");
+
+        // Convert solution back to board format
+        let solved_board = color_vec_to_board(result);
+
+        // Update original board in-place
+        *board = solved_board;
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -136,6 +222,12 @@ impl<S: FiniteEnumFixedSet> GraphColorOption<S> {
         match self {
             Self::Fixed(_) => 1,
             Self::Variable(val) => val.len(),
+        }
+    }
+    fn new_from_opt_color(c: Option<S::FiniteEnumType>) -> GraphColorOption<S> {
+        match c {
+            Some(color) => GraphColorOption::Fixed(color),
+            None => GraphColorOption::Variable(S::new_full()),
         }
     }
     fn new_from_enumset(set: S) -> Option<GraphColorOption<S>> {
