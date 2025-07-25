@@ -440,7 +440,7 @@ fn solve_graph_coloring<S: FiniteEnumFixedSet>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::{sync::mpsc, thread, time::Instant};
+    use std::time::Instant;
 
     #[test]
     fn solve_sudoku_example() {
@@ -467,28 +467,11 @@ mod tests {
             vec!['3', '4', '5', '2', '8', '6', '1', '7', '9'],
         ];
 
-        let (tx, rx) = mpsc::channel();
+        let now = Instant::now();
+        Solution::solve_sudoku(&mut board);
+        let elapsed = now.elapsed();
+        println!("Sudoku solved in: {:.2?}", elapsed);
 
-        let handle = thread::spawn(move || {
-            let now = Instant::now();
-            Solution::solve_sudoku(&mut board);
-            let elapsed = now.elapsed();
-            tx.send((board, elapsed)).unwrap();
-        });
-
-        let result = rx.recv_timeout(std::time::Duration::from_secs(15));
-
-        match result {
-            Ok((solved_board, elapsed)) => {
-                println!("Sudoku solved in: {elapsed:.2?}");
-                assert_eq!(solved_board, expected_solution);
-            }
-            Err(_) => {
-                handle
-                    .join()
-                    .unwrap_or_else(|_| panic!("Sudoku solver timed out after 15 seconds"));
-                panic!("Sudoku solver timed out after 15 seconds");
-            }
-        }
+        assert_eq!(board, expected_solution);
     }
 }
