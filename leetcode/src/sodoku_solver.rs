@@ -1,3 +1,5 @@
+use std::{collections::HashSet, usize};
+
 struct Solution {}
 impl Solution {
     pub fn solve_sudoku(board: &mut Vec<Vec<char>>) {}
@@ -25,8 +27,8 @@ pub trait FiniteEnum: Copy + Sized + Eq {
 
 trait FiniteEnumFixedSet: Copy + Sized {
     type FiniteEnumType: FiniteEnum;
-    fn set(&mut self, val: Self::FiniteEnumType);
-    fn remove(&mut self, val: Self::FiniteEnumType);
+    fn set(&mut self, val: Self::FiniteEnumType) -> Option<Self::FiniteEnumType>;
+    fn remove(&mut self, val: Self::FiniteEnumType) -> Option<Self::FiniteEnumType>;
     fn contains(&self, val: Self::FiniteEnumType) -> bool;
     fn len(&self) -> usize;
     fn into_vec(self) -> Vec<Self::FiniteEnumType>;
@@ -39,11 +41,15 @@ struct FiniteSodokuColorSet {
 }
 impl FiniteEnumFixedSet for FiniteSodokuColorSet {
     type FiniteEnumType = SudokuColor;
-    fn set(&mut self, val: SudokuColor) {
-        self.raw_inner[val.get_index()] = true
+    fn set(&mut self, val: SudokuColor) -> Option<SudokuColor> {
+        let prev = self.contains(val).then_some(val);
+        self.raw_inner[val.get_index()] = true;
+        prev
     }
-    fn remove(&mut self, val: SudokuColor) {
-        self.raw_inner[val.get_index()] = false
+    fn remove(&mut self, val: SudokuColor) -> Option<SudokuColor> {
+        let prev = self.contains(val).then_some(val);
+        self.raw_inner[val.get_index()] = false;
+        prev
     }
     fn contains(&self, val: SudokuColor) -> bool {
         self.raw_inner[val.get_index()]
@@ -51,7 +57,7 @@ impl FiniteEnumFixedSet for FiniteSodokuColorSet {
     fn len(&self) -> usize {
         let mut collector = 0;
         for val in self.raw_inner {
-            collector = collector + val as usize
+            collector += val as usize
         }
         collector
     }
@@ -123,19 +129,32 @@ enum GraphColorOption<S: FiniteEnumFixedSet> {
     Fixed(S::FiniteEnumType),
     Variable(S),
 }
+impl<S: FiniteEnumFixedSet> GraphColorOption<S> {}
 
-impl<T: FiniteEnumFixedSet> GraphColorOption<T> {
+impl<S: FiniteEnumFixedSet> GraphColorOption<S> {
     fn len(&self) -> usize {
         match self {
-            Self::Fixed(_) => 0,
+            Self::Fixed(_) => 1,
             Self::Variable(val) => val.len(),
         }
     }
-    fn new_from_enumset(set: T) -> Option<GraphColorOption<T>> {
+    fn new_from_enumset(set: S) -> Option<GraphColorOption<S>> {
         match set.len() {
             0 => None,
             1 => Some(Self::Fixed(set.into_vec()[0])),
             _ => Some(Self::Variable(set)),
+        }
+    }
+
+    fn remove(&mut self, val: S::FiniteEnumType) -> Option<S::FiniteEnumType> {
+        match self {
+            Self::Fixed(_) => None,
+            Self::Variable(set) => {
+                set.remove(val);
+                let newval = Self::new_from_enumset(*set)?;
+                *self = newval;
+                Some(val)
+            }
         }
     }
 }
@@ -157,7 +176,47 @@ fn generate_sudoku_graph_nodes() -> CondensedGraphNodes {
     // And the values for this are condensed, so (x,y) -> 9*x+y.
     // (Also no graph nodes are connected to themselves, and also the list of all graph nodes
     // should be deduplicated and sorted.)
-    todo!()
+    let mut graph = Vec::with_capacity(81);
+
+    for i in 0..81 {
+        let row = i / 9;
+        let col = i % 9;
+        let box_r_start = (row / 3) * 3;
+        let box_c_start = (col / 3) * 3;
+
+        let mut neighbors_set = HashSet::with_capacity(20);
+
+        for c in 0..9 {
+            if c != col {
+                let neighbor_idx = row * 9 + c;
+                neighbors_set.insert(neighbor_idx);
+            }
+        }
+
+        for r in 0..9 {
+            if r != row {
+                let neighbor_idx = r * 9 + col;
+                neighbors_set.insert(neighbor_idx);
+            }
+        }
+
+        for dr in 0..3 {
+            for dc in 0..3 {
+                let r_idx = box_r_start + dr;
+                let c_idx = box_c_start + dc;
+                if r_idx != row || c_idx != col {
+                    let neighbor_idx = r_idx * 9 + c_idx;
+                    neighbors_set.insert(neighbor_idx);
+                }
+            }
+        }
+
+        let mut neighbors_vec: Vec<usize> = neighbors_set.into_iter().collect();
+        neighbors_vec.sort_unstable();
+        graph.push(neighbors_vec);
+    }
+
+    CondensedGraphNodes { size: 81, graph }
 }
 
 fn eliminate_ambiguity_color_graph<T: FiniteEnumFixedSet>(
@@ -179,8 +238,10 @@ fn eliminate_ambiguity_color_graph<T: FiniteEnumFixedSet>(
                 if let GraphColorOption::Fixed(color) = options[*edge_index] {
                     // If color is in color_options then remove it from the list, and then set
                     // no_more_work equal to false.
-                    color_options.remove(color);
-                    changed_edges = true;
+                    let opt = color_options.remove(color);
+                    if opt.is_some() {
+                        changed_edges = true;
+                    }
                 }
             }
             if changed_edges {
@@ -193,4 +254,127 @@ fn eliminate_ambiguity_color_graph<T: FiniteEnumFixedSet>(
         }
     }
     Ok(())
+}
+
+fn is_color_guess_complete<S: FiniteEnumFixedSet>(
+    partial_colors: &[GraphColorOption<S>],
+) -> Option<Vec<S::FiniteEnumType>> {
+    if partial_colors
+        .iter()
+        .all(|color| matches!(color, GraphColorOption::Fixed(_)))
+    {
+        let mut result = Vec::with_capacity(partial_colors.len());
+        for color in partial_colors {
+            if let GraphColorOption::Fixed(val) = color {
+                result.push(*val);
+            }
+        }
+        Some(result)
+    } else {
+        None
+    }
+}
+
+fn make_color_guess<S: FiniteEnumFixedSet>(
+    partial_colors: &[GraphColorOption<S>],
+) -> (usize, S::FiniteEnumType) {
+    let mut best_index = 0;
+    let mut best_len = partial_colors[0].len();
+    for (index, color) in partial_colors.iter().enumerate() {
+        let len = color.len();
+        if len < best_len && len >= 2 {
+            best_index = index;
+            best_len = len;
+        }
+    }
+    let color = match partial_colors[best_index] {
+        GraphColorOption::Fixed(_) => unreachable!(),
+        GraphColorOption::Variable(set) => set.into_vec()[0],
+    };
+    (best_index, color)
+}
+
+struct GameState<S: FiniteEnumFixedSet> {
+    board: Vec<GraphColorOption<S>>,
+    decision_index: usize,
+    decision_color: S::FiniteEnumType,
+}
+
+// fn solve_graph_coloring<S: FiniteEnumFixedSet>(
+//     partial_colors: Vec<GraphColorOption<S>>,
+//     graphnodes: &CondensedGraphNodes,
+// ) -> Result<Vec<S::FiniteEnumType>, &'static str> {
+//     let mut gamestack: Vec<GameState<S>> = Vec::with_capacity(100);
+//     let mut gamehead = partial_colors;
+//     loop {
+//         match eliminate_ambiguity_color_graph(&mut gamehead, graphnodes) {
+//             Ok(_) => (),
+//             Err(_) => {
+//                 let prev_game = match gamestack.pop() {
+//                     Some(val) => val,
+//                     None => return Err("Ran out of game states in main loop"),
+//                 };
+//                 // This game state failed to produce any valid game options which lets us know our
+//                 // initial guess was wrong:
+//                 gamehead = prev_game.board;
+//                 let opt = gamehead[prev_game.decision_index].remove(prev_game.decision_color);
+//                 // If opt is none, its an indication that the gamestate we generated by trying to
+//                 // remove an option is corrupted and we need to pop another gamestate. and set that
+//                 // as the gamehead before continuing
+//                 continue;
+//             }
+//         }
+//     }
+//     // Err("Encountered error and somehow ran out of gamestates")
+// }
+
+fn solve_graph_coloring<S: FiniteEnumFixedSet>(
+    partial_colors: Vec<GraphColorOption<S>>,
+    graphnodes: &CondensedGraphNodes,
+) -> Result<Vec<S::FiniteEnumType>, &'static str> {
+    type State<S> = GameState<S>;
+
+    let mut gamestack: Vec<State<S>> = Vec::new(); // Stack for backtracking
+    let mut gamehead = partial_colors; // Current coloring state
+
+    loop {
+        // Propagate constraints: Reduce ambiguities through constraint propagation
+        match eliminate_ambiguity_color_graph(&mut gamehead, graphnodes) {
+            Ok(_) => {
+                // Check if all nodes are solved (fixed to a single color)
+
+                if let Some(result) = is_color_guess_complete(&gamehead) {
+                    return Ok(result);
+                }
+                // Find an ambiguous node to make a guess
+                let (guess_index, guess_color) = make_color_guess(&gamehead);
+
+                // Save current state FOR backtracking
+                gamestack.push(State {
+                    board: gamehead.clone(), // Snapshot of entire state
+                    decision_index: guess_index,
+                    decision_color: guess_color,
+                });
+
+                // Make a guess: Fix this node to chosen_color
+                gamehead[guess_index] = GraphColorOption::Fixed(guess_color);
+            }
+
+            Err(_) => {
+                // Backtrack: Restore previous state and remove failed choice
+                let prev_state = gamestack.pop().ok_or("No states left to backtrack")?;
+                gamehead = prev_state.board;
+
+                // Eliminate last guessed color from possibilities
+                if gamehead[prev_state.decision_index]
+                    .remove(prev_state.decision_color)
+                    .is_none()
+                {
+                    return Err(
+                        "Got into unreachable code path, it probably indicates one of the fields got horrifically overconstrained and the graph is impossible to solve.",
+                    );
+                }
+            }
+        }
+    }
 }
