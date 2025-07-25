@@ -1,21 +1,5 @@
 use std::collections::HashSet;
 
-// Write a program to solve a Sudoku puzzle by filling the empty cells.
-//
-// A sudoku solution must satisfy all of the following rules:
-//
-//     Each of the digits 1-9 must occur exactly once in each row.
-//     Each of the digits 1-9 must occur exactly once in each column.
-//     Each of the digits 1-9 must occur exactly once in each of the 9 3x3 sub-boxes of the grid.
-//
-// The '.' character indicates empty cells.
-//
-
-// Input: board = [["5","3",".",".","7",".",".",".","."],["6",".",".","1","9","5",".",".","."],[".","9","8",".",".",".",".","6","."],["8",".",".",".","6",".",".",".","3"],["4",".",".","8",".","3",".",".","1"],["7",".",".",".","2",".",".",".","6"],[".","6",".",".",".",".","2","8","."],[".",".",".","4","1","9",".",".","5"],[".",".",".",".","8",".",".","7","9"]]
-// Output: [["5","3","4","6","7","8","9","1","2"],["6","7","2","1","9","5","3","4","8"],["1","9","8","3","4","2","5","6","7"],["8","5","9","7","6","1","4","2","3"],["4","2","6","8","5","3","7","9","1"],["7","1","3","9","2","4","8","5","6"],["9","6","1","5","3","7","2","8","4"],["2","8","7","4","1","9","6","3","5"],["3","4","5","2","8","6","1","7","9"]]
-// Explanation: The input board is shown above and the only valid solution is shown below:
-// Could you write a couple adapter functions to conver the characters to and from colors and color
-// options. (Use the new from opt color for the color options)
 fn convert_char_to_option(c: char) -> Option<SudokuColor> {
     match c {
         '1' => Some(SudokuColor::One),
@@ -447,7 +431,7 @@ mod tests {
 
     #[test]
     fn solve_sudoku_example() {
-        let mut board = vec![
+        let board = vec![
             vec!['5', '3', '.', '.', '7', '.', '.', '.', '.'],
             vec!['6', '.', '.', '1', '9', '5', '.', '.', '.'],
             vec!['.', '9', '8', '.', '.', '.', '.', '6', '.'],
@@ -469,6 +453,7 @@ mod tests {
             vec!['2', '8', '7', '4', '1', '9', '6', '3', '5'],
             vec!['3', '4', '5', '2', '8', '6', '1', '7', '9'],
         ];
+        let now = Instant::now();
         let (sender, receiver) = std::sync::mpsc::channel();
         let mut board_clone = board.clone();
 
@@ -480,16 +465,12 @@ mod tests {
         match receiver.recv_timeout(Duration::from_secs(15)) {
             Ok(solved_board) => {
                 assert_eq!(solved_board, expected_solution);
+                let elapsed = now.elapsed();
+                println!("Sudoku solved in: {elapsed:.2?}");
             }
             Err(_) => {
                 panic!("Sudoku solver timed out after 15 seconds.");
             }
         }
-        let now = Instant::now();
-        Solution::solve_sudoku(&mut board);
-        let elapsed = now.elapsed();
-        println!("Sudoku solved in: {:.2?}", elapsed);
-
-        assert_eq!(board, expected_solution);
     }
 }
