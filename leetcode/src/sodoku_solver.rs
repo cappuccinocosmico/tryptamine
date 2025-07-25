@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+struct Solution {}
 fn convert_char_to_option(c: char) -> Option<SudokuColor> {
     match c {
         '1' => Some(SudokuColor::One),
@@ -54,7 +55,6 @@ fn color_vec_to_board(colors: Vec<SudokuColor>) -> Vec<Vec<char>> {
 }
 
 // Implement solver using these adapters
-struct Solution {}
 impl Solution {
     pub fn solve_sudoku(board: &mut Vec<Vec<char>>) {
         // Generate Sudoku constraint graph
@@ -95,13 +95,13 @@ pub trait FiniteEnum: Copy + Sized + Eq {
     fn get_index(&self) -> usize;
 }
 
-trait FiniteEnumFixedSet: Copy + Sized {
-    type FiniteEnumType: FiniteEnum;
-    fn set(&mut self, val: Self::FiniteEnumType) -> Option<Self::FiniteEnumType>;
-    fn remove(&mut self, val: Self::FiniteEnumType) -> Option<Self::FiniteEnumType>;
-    fn contains(&self, val: Self::FiniteEnumType) -> bool;
+trait CopiableEnumSet: Copy + Sized {
+    type Value: FiniteEnum;
+    fn set(&mut self, val: Self::Value) -> Option<Self::Value>;
+    fn remove(&mut self, val: Self::Value) -> Option<Self::Value>;
+    fn contains(&self, val: Self::Value) -> bool;
     fn len(&self) -> usize;
-    fn into_vec(self) -> Vec<Self::FiniteEnumType>;
+    fn into_vec(self) -> Vec<Self::Value>;
     fn new_full() -> Self;
 }
 
@@ -109,8 +109,8 @@ trait FiniteEnumFixedSet: Copy + Sized {
 struct FiniteSodokuColorSet {
     raw_inner: [bool; 9],
 }
-impl FiniteEnumFixedSet for FiniteSodokuColorSet {
-    type FiniteEnumType = SudokuColor;
+impl CopiableEnumSet for FiniteSodokuColorSet {
+    type Value = SudokuColor;
     fn set(&mut self, val: SudokuColor) -> Option<SudokuColor> {
         let prev = self.contains(val).then_some(val);
         self.raw_inner[val.get_index()] = true;
@@ -195,20 +195,20 @@ impl FiniteEnum for SudokuColor {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
-enum GraphColorOption<S: FiniteEnumFixedSet> {
-    Fixed(S::FiniteEnumType),
+enum GraphColorOption<S: CopiableEnumSet> {
+    Fixed(S::Value),
     Variable(S),
 }
-impl<S: FiniteEnumFixedSet> GraphColorOption<S> {}
+impl<S: CopiableEnumSet> GraphColorOption<S> {}
 
-impl<S: FiniteEnumFixedSet> GraphColorOption<S> {
+impl<S: CopiableEnumSet> GraphColorOption<S> {
     fn len(&self) -> usize {
         match self {
             Self::Fixed(_) => 1,
             Self::Variable(val) => val.len(),
         }
     }
-    fn new_from_opt_color(c: Option<S::FiniteEnumType>) -> GraphColorOption<S> {
+    fn new_from_opt_color(c: Option<S::Value>) -> GraphColorOption<S> {
         match c {
             Some(color) => GraphColorOption::Fixed(color),
             None => GraphColorOption::Variable(S::new_full()),
@@ -222,7 +222,7 @@ impl<S: FiniteEnumFixedSet> GraphColorOption<S> {
         }
     }
 
-    fn remove(&mut self, val: S::FiniteEnumType) -> Option<S::FiniteEnumType> {
+    fn remove(&mut self, val: S::Value) -> Option<S::Value> {
         match self {
             Self::Fixed(_) => None,
             Self::Variable(set) => {
@@ -295,7 +295,7 @@ fn generate_sudoku_graph_nodes() -> CondensedGraphNodes {
     CondensedGraphNodes { size: 81, graph }
 }
 
-fn eliminate_ambiguity_color_graph<T: FiniteEnumFixedSet>(
+fn eliminate_ambiguity_color_graph<T: CopiableEnumSet>(
     options: &mut [GraphColorOption<T>],
     graphnodes: &CondensedGraphNodes,
 ) -> Result<(), &'static str> {
@@ -333,9 +333,9 @@ fn eliminate_ambiguity_color_graph<T: FiniteEnumFixedSet>(
     Ok(())
 }
 
-fn is_color_guess_complete<S: FiniteEnumFixedSet>(
+fn is_color_guess_complete<S: CopiableEnumSet>(
     partial_colors: &[GraphColorOption<S>],
-) -> Option<Vec<S::FiniteEnumType>> {
+) -> Option<Vec<S::Value>> {
     if partial_colors
         .iter()
         .all(|color| matches!(color, GraphColorOption::Fixed(_)))
@@ -352,11 +352,11 @@ fn is_color_guess_complete<S: FiniteEnumFixedSet>(
     }
 }
 
-fn make_color_guess<S: FiniteEnumFixedSet>(
+fn make_color_guess<S: CopiableEnumSet>(
     partial_colors: &[GraphColorOption<S>],
-) -> (usize, S::FiniteEnumType) {
+) -> (usize, S::Value) {
     let mut best_index = 0;
-    let mut best_len = S::FiniteEnumType::QUANTITY + 1; // Initialize with a value larger than any possible len
+    let mut best_len = S::Value::QUANTITY + 1; // Initialize with a value larger than any possible len
 
     for (index, color) in partial_colors.iter().enumerate() {
         let len = color.len();
@@ -373,45 +373,46 @@ fn make_color_guess<S: FiniteEnumFixedSet>(
     (best_index, color)
 }
 
-struct GameState<S: FiniteEnumFixedSet> {
+struct GraphState<S: CopiableEnumSet> {
     board: Vec<GraphColorOption<S>>,
     decision_index: usize,
-    decision_color: S::FiniteEnumType,
+    decision_color: S::Value,
 }
 
-fn solve_graph_coloring<S: FiniteEnumFixedSet>(
+fn solve_graph_coloring<S: CopiableEnumSet>(
     partial_colors: Vec<GraphColorOption<S>>,
     graphnodes: &CondensedGraphNodes,
-) -> Result<Vec<S::FiniteEnumType>, &'static str> {
-    let mut gamestack: Vec<GameState<S>> = Vec::new(); // Stack for backtracking
-    let mut gamehead = partial_colors; // Current coloring state
+) -> Result<Vec<S::Value>, &'static str> {
+    let mut graphstack: Vec<GraphState<S>> = Vec::new(); // Stack for backtracking
+    let mut graphhead = partial_colors; // Current coloring state
 
     loop {
-        match eliminate_ambiguity_color_graph(&mut gamehead, graphnodes) {
+        match eliminate_ambiguity_color_graph(&mut graphhead, graphnodes) {
             Ok(_) => {
-                if let Some(result) = is_color_guess_complete(&gamehead) {
+                if let Some(result) = is_color_guess_complete(&graphhead) {
                     return Ok(result);
                 }
                 // Find an ambiguous node to make a guess
-                let (guess_index, guess_color) = make_color_guess(&gamehead);
+                let (guess_index, guess_color) = make_color_guess(&graphhead);
 
-                gamestack.push(GameState {
-                    board: gamehead.clone(), // Snapshot of entire state
+                graphstack.push(GraphState {
+                    board: graphhead.clone(), // Should be pretty cheap since all the elements are
+                    // copy.
                     decision_index: guess_index,
                     decision_color: guess_color,
                 });
 
                 // Make a guess: Fix this node to chosen_color
-                gamehead[guess_index] = GraphColorOption::Fixed(guess_color);
+                graphhead[guess_index] = GraphColorOption::Fixed(guess_color);
             }
 
             Err(_) => {
                 // Backtrack: Restore previous state and remove failed choice
-                let prev_state = gamestack.pop().ok_or("No states left to backtrack")?;
-                gamehead = prev_state.board;
+                let prev_state = graphstack.pop().ok_or("No states left to backtrack")?;
+                graphhead = prev_state.board;
 
                 // Eliminate last guessed color from possibilities
-                if gamehead[prev_state.decision_index]
+                if graphhead[prev_state.decision_index]
                     .remove(prev_state.decision_color)
                     .is_none()
                 {
