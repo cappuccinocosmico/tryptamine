@@ -300,8 +300,9 @@ fn eliminate_ambiguity_color_graph<T: FiniteEnumFixedSet>(
     graphnodes: &CondensedGraphNodes,
 ) -> Result<(), &'static str> {
     let edges_list = &*graphnodes.graph;
-    let mut no_more_work = true;
-    while no_more_work {
+    let mut work_done = true;
+    while work_done {
+        work_done = false;
         for (index, edges) in edges_list.iter().enumerate() {
             let mut color_options = match options[index] {
                 GraphColorOption::Fixed(_) => {
@@ -313,7 +314,7 @@ fn eliminate_ambiguity_color_graph<T: FiniteEnumFixedSet>(
             for edge_index in edges {
                 if let GraphColorOption::Fixed(color) = options[*edge_index] {
                     // If color is in color_options then remove it from the list, and then set
-                    // no_more_work equal to false.
+                    // work_done equal to false.
                     let opt = color_options.remove(color);
                     if opt.is_some() {
                         changed_edges = true;
@@ -325,7 +326,7 @@ fn eliminate_ambiguity_color_graph<T: FiniteEnumFixedSet>(
                     Some(val) => val,
                     None => return Err("One solve instance had zero solutions."),
                 };
-                no_more_work = true;
+                work_done = true;
             }
         }
     }
@@ -355,7 +356,8 @@ fn make_color_guess<S: FiniteEnumFixedSet>(
     partial_colors: &[GraphColorOption<S>],
 ) -> (usize, S::FiniteEnumType) {
     let mut best_index = 0;
-    let mut best_len = partial_colors[0].len();
+    let mut best_len = S::FiniteEnumType::QUANTITY + 1; // Initialize with a value larger than any possible len
+
     for (index, color) in partial_colors.iter().enumerate() {
         let len = color.len();
         if len < best_len && len >= 2 {
@@ -363,6 +365,7 @@ fn make_color_guess<S: FiniteEnumFixedSet>(
             best_len = len;
         }
     }
+
     let color = match partial_colors[best_index] {
         GraphColorOption::Fixed(_) => unreachable!(),
         GraphColorOption::Variable(set) => set.into_vec()[0],
