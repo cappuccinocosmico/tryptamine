@@ -1,3 +1,11 @@
++++
+title = "Thai Coconut"
+date = 2025-01-01
+
+[extra]
+author = "Nicole Venner"
++++
+
 ---
 title: Thai Coconut Soup
 tag: activism

@@ -1,3 +1,11 @@
++++
+title = "Improve Onbaording"
+date = 2025-01-01
+
+[extra]
+author = "Nicole Venner"
++++
+
 
 Hi, I'm glad you found my ramblings valuable! Although the more I think about it I think I completely agree with your critique about trying to prevent the "savior" narrative in newcomers. Its good for me to remember that in lots of spaces this attitude can be extremely damaging, from needlessly escalating with law enforcement and bringing it down into the communities they are trying to protect, to bringing a bunch of unprocessed racism/queerphobia into organizing circles. However in my background of climate organizing those problematic attitudes are less likely to cause conflict since most climate activists are financially well off white people.
 

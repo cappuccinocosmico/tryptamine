@@ -1,3 +1,11 @@
++++
+title = "Big O And Black Holes"
+date = 2025-01-01
+
+[extra]
+author = "Nicole Venner"
++++
+
 # It is impossible to build a computer that can do array lookups in less then $\mathcal{O}(\sqrt{N})$
 
 

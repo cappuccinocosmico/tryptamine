@@ -1,3 +1,11 @@
++++
+title = "Hollandaise"
+date = 2025-01-01
+
+[extra]
+author = "Nicole Venner"
++++
+
 ### Recipe
 
 6 whole eggs

@@ -1,3 +1,11 @@
++++
+title = "Nutsbolts"
+date = 2025-01-01
+
+[extra]
+author = "Nicole Venner"
++++
+
 up salt
 up worch
 up butter

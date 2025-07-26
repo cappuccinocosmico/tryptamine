@@ -1,3 +1,11 @@
++++
+title = "A Confalgration Is Coming"
+date = 2025-01-01
+
+[extra]
+author = "Nicole Venner"
++++
+
 ---
 title: A Confalgration is Coming
 summary: Leftist organizing is in a great space, dispite claims to the contrary.

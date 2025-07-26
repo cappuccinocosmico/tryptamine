@@ -1,3 +1,11 @@
++++
+title = "Victory 1 Embracing Failure"
+date = 2025-01-01
+
+[extra]
+author = "Nicole Venner"
++++
+
 ---
 title: 'Victory 1: Embracing Failure'
 date: '2023-11-14'

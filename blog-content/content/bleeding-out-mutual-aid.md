@@ -1,3 +1,11 @@
++++
+title = "Bleeding Out Mutual Aid"
+date = 2025-01-01
+
+[extra]
+author = "Nicole Venner"
++++
+
 # Why Aren't Anarchists Mutual Aiding Themselves?
 
 But seriously, why arent they?

@@ -1,3 +1,11 @@
++++
+title = "Read Less Theory"
+date = 2025-01-01
+
+[extra]
+author = "Nicole Venner"
++++
+
 ---
 title: Stop Reading Theory
 intro: And what you should do instead.

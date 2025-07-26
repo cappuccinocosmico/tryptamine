@@ -1,3 +1,11 @@
++++
+title = "Quantum Info Theory"
+date = 2025-01-01
+
+[extra]
+author = "Nicole Venner"
++++
+
 Lets do some maaaath.
 
 So
