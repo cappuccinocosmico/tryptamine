@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 mod big_substring;
+mod maximize_subarrays;
 mod merge_sorted_linked_lists;
 mod sodoku_solver;
 
