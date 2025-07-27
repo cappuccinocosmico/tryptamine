@@ -24,6 +24,7 @@
 // At index 4: The closest non-equal neighbors of 6 are 1 and 5. Since 6 > 1 and 6 > 5, index 4 is a hill.
 // At index 5: There is no non-equal neighbor of 5 on the right, so index 5 is neither a hill nor a valley.
 // There are 3 hills and valleys so we return 3.
+struct Solution {}
 impl Solution {
     pub fn count_hill_valley(nums: Vec<i32>) -> i32 {}
 }
