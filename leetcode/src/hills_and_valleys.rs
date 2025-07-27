@@ -26,5 +26,24 @@
 // There are 3 hills and valleys so we return 3.
 struct Solution {}
 impl Solution {
-    pub fn count_hill_valley(nums: Vec<i32>) -> i32 {}
+    pub fn count_hill_valley(nums: Vec<i32>) -> i32 {
+        let mut inflection_count = 0;
+        if nums.len() <= 2 {
+            return inflection_count;
+        }
+        let mut previous_inflection = None;
+        for index in 1..nums.len() {
+            let (prev_num, current_num) = (nums[index - 1], nums[index]);
+            if prev_num != current_num {
+                let sign = prev_num < current_num;
+                if let Some(prev_infl) = previous_inflection
+                    && prev_infl != sign
+                {
+                    inflection_count += 1;
+                }
+                previous_inflection = Some(sign);
+            }
+        }
+        inflection_count
+    }
 }
