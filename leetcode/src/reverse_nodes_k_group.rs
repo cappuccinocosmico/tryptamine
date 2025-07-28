@@ -44,7 +44,7 @@ impl Solution {
         let mut previous_head = &mut head;
         loop {
             let mut rev_head = previous_head.next.take();
-            let mut tail = match advance_k_in_linked_list(&mut rev_head, k) {
+            let tail = match advance_k_in_linked_list(&mut rev_head, k) {
                 Some(val) => val,
                 None => {
                     previous_head.next = rev_head;
@@ -53,12 +53,13 @@ impl Solution {
             };
 
             let mut next_head = tail.next.take();
-            while let Some(mut poped_node) = pop_and_advance_linked_node(&mut rev_head) {
+            let mut build_reverse_ref = &mut next_head;
+            while let Some(mut poped_node) = pop_and_advance_linked_node(&mut build_reverse_ref) {
                 poped_node.next = next_head;
                 next_head = Some(poped_node);
             }
             previous_head.next = next_head;
-            previous_head = tail
+            // previous_head = tail
         }
     }
 }
