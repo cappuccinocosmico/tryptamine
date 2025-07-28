@@ -38,6 +38,29 @@ fn advance_k_in_linked_list(
     begin_ref.as_mut()
 }
 
+/// Takes in two linked lists, appends the first one onto the second, and returns an owned complete
+/// list, and a reference to the cut point in the list. Modifies the root append node to be the
+/// root of the new list with the appended items. And for convienence returns a reference to the
+/// point in the list where the cut was made.
+fn append_reverse_onto_linked_list(
+    mut to_append: Option<Box<ListNode>>,
+    root_append: &mut Option<Box<ListNode>>,
+) -> &mut Option<Box<ListNode>> {
+    let Some(mut first_append) = pop_and_advance_linked_node(&mut to_append) else {
+        return root_append;
+    };
+    first_append.next = root_append.take();
+    *root_append = Some(first_append);
+    let cut_pointer = &raw mut root_append.as_mut().unwrap().next;
+    while let Some(mut next_append) = pop_and_advance_linked_node(&mut to_append) {
+        next_append.next = root_append.take();
+        *root_append = Some(next_append);
+    }
+    unsafe {
+        let return_ref = &mut (*cut_pointer);
+        return return_ref;
+    }
+}
 impl Solution {
     pub fn reverse_k_group(head: Option<Box<ListNode>>, k: i32) -> Option<Box<ListNode>> {
         let mut head = head?;
@@ -51,15 +74,13 @@ impl Solution {
                     return Some(head);
                 }
             };
-
-            let mut next_head = tail.next.take();
-            let mut build_reverse_ref = &mut next_head;
-            while let Some(mut poped_node) = pop_and_advance_linked_node(&mut build_reverse_ref) {
-                poped_node.next = next_head;
-                next_head = Some(poped_node);
-            }
-            previous_head.next = next_head;
-            // previous_head = tail
+            let mut append_root = tail.next.take();
+            let tail_pointer = append_reverse_onto_linked_list(rev_head, &mut append_root);
+            previous_head.next = append_root;
+            previous_head = match tail_pointer {
+                Some(val) => val,
+                None => return Some(head),
+            };
         }
     }
 }
