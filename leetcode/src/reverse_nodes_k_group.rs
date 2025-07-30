@@ -20,58 +20,67 @@ impl ListNode {
 
 struct Solution {}
 
+fn pop_and_advance_linked_node(node: &mut Option<Box<ListNode>>) -> Option<Box<ListNode>> {
+    let mut owned_node = node.take()?;
+    let next_node = owned_node.next.take();
+    *node = next_node;
+    Some(owned_node)
+}
+
+fn advance_k_in_linked_list(
+    begin_node: &mut Option<Box<ListNode>>,
+    k: i32,
+) -> Option<&mut Box<ListNode>> {
+    let mut begin_ref = begin_node;
+    for _ in 0..k {
+        begin_ref = &mut begin_ref.as_mut()?.next
+    }
+    begin_ref.as_mut()
+}
+
+/// Takes in two linked lists, appends the first one onto the second, and returns an owned complete
+/// list, and a reference to the cut point in the list. Modifies the root append node to be the
+/// root of the new list with the appended items. And for convienence returns a reference to the
+/// point in the list where the cut was made.
+fn append_reverse_onto_linked_list(
+    mut to_append: Option<Box<ListNode>>,
+    root_append: &mut Option<Box<ListNode>>,
+) -> &mut Option<Box<ListNode>> {
+    let Some(mut first_append) = pop_and_advance_linked_node(&mut to_append) else {
+        return root_append;
+    };
+    first_append.next = root_append.take();
+    *root_append = Some(first_append);
+    let cut_pointer = &raw mut root_append.as_mut().unwrap().next;
+    while let Some(mut next_append) = pop_and_advance_linked_node(&mut to_append) {
+        next_append.next = root_append.take();
+        *root_append = Some(next_append);
+    }
+    unsafe {
+        let return_ref = &mut (*cut_pointer);
+        return return_ref;
+    }
+}
 impl Solution {
     pub fn reverse_k_group(head: Option<Box<ListNode>>, k: i32) -> Option<Box<ListNode>> {
-        if k <= 1 {
-            return head;
+        let mut head = head?;
+        let mut previous_head = &mut head;
+        loop {
+            let mut rev_head = previous_head.next.take();
+            let tail = match advance_k_in_linked_list(&mut rev_head, k) {
+                Some(val) => val,
+                None => {
+                    previous_head.next = rev_head;
+                    return Some(head);
+                }
+            };
+            let mut append_root = tail.next.take();
+            let tail_pointer = append_reverse_onto_linked_list(rev_head, &mut append_root);
+            previous_head.next = append_root;
+            previous_head = match tail_pointer {
+                Some(val) => val,
+                None => return Some(head),
+            };
         }
-        let k = k as usize;
-        let mut head = head;
-        let mut dummy = Some(Box::new(ListNode::new(0)));
-        let mut tail = &mut dummy;
-
-        while head.is_some() {
-            // 1. Check if there are k nodes left
-            let mut probe = &head;
-            let mut count = 0;
-            for _ in 0..k {
-                if let Some(node) = probe {
-                    probe = &node.next;
-                    count += 1;
-                } else {
-                    break;
-                }
-            }
-
-            if count == k {
-                // 2. Reverse k nodes
-                let mut group_head = head;
-                let mut prev = None;
-                for _ in 0..k {
-                    if let Some(mut node) = group_head {
-                        group_head = node.next.take();
-                        node.next = prev;
-                        prev = Some(node);
-                    }
-                }
-                // `prev` is now the head of the reversed group.
-                // `group_head` is the start of the rest of the list.
-
-                // 3. Link the reversed group
-                tail.as_mut().unwrap().next = prev;
-
-                // 4. Move the tail to the end of the newly added group.
-                while tail.as_ref().unwrap().next.is_some() {
-                    tail = &mut tail.as_mut().unwrap().next;
-                }
-                head = group_head;
-            } else {
-                // Not enough nodes, append the rest and break.
-                tail.as_mut().unwrap().next = head;
-                break;
-            }
-        }
-
-        dummy.unwrap().next
     }
 }
