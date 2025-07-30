@@ -1,3 +1,6 @@
 [submodule "blog-content/themes/duckquill"]
 	path = blog-content/themes/duckquill
 	url = https://codeberg.org/daudix/duckquill
+[submodule "blog-content/themes/lightspeed"]
+	path = blog-content/themes/lightspeed
+	url = https://github.com/carpetscheme/lightspeed.git
