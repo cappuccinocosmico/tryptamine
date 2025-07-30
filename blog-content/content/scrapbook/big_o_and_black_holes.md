@@ -52,14 +52,14 @@ We can see that the main operation that indexes into the list just consists of a
 
 A lot of Big-$cal(O)$'s weird and confusing behavior comes from the fact that it doesn't really measure "performance of an algorithm as its input grows" so much as it measures "performance of an algorithm at infinite sized inputs"[1]. Mainly because if we can define big $cal(O)$ as an equivalence relation.
 
-$$
-cal(O)(A) = cal(O)(B) \text{  if and only if  }\lim_{n \rightarrow \infty} \frac{\text{Runtime}(A(n))}{\text{Runtime}(B(n))}= \text{a nonzero real number}
-$$
+<!-- $$ -->
+<!-- cal(O)(A) = cal(O)(B) upright(  if and only if  )\lim_{n arrow \infty} \frac{upright(Runtime)(A(n))}{upright(Runtime)(B(n))}= upright(a nonzero real number) -->
+<!-- $$ -->
 
-Not only does this mean that any algorithm's performance below any fixed input size, like $100^{(100^100)}$, or $Tree(3)$ has no impact on the Big-$cal(O)$, but it isnt even possible to define on programs that dont infinitely scale.
+Not only does this mean that any algorithm's performance below any fixed input size, like $100^(100^100)$, or $op("Tree")(3)$ has no impact on the Big-$cal(O)$, but it isnt even possible to define on programs that dont infinitely scale.
 
-This is where our program above runs into its first limitation. Because on a regular 64 bit compilation target you only have access to $2^64$ memory addresses. And in general on any computer accessing a location in a list, will at least require parsing the address. Which should always take $\log_2(N)$ bits to store. Thus making our algorithm have a complexity of at least $cal(O)(\log(N))$
+This is where our program above runs into its first limitation. Because on a regular 64 bit compilation target you only have access to $2^64$ memory addresses. And in general on any computer accessing a location in a list, will at least require parsing the address. Which should always take $log_2(N)$ bits to store. Thus making our algorithm have a complexity of at least $cal(O)(log(N))$
 
-[1]: Under a nonstandard analysis framework (calculus but with values that are infinitely large ($\omega$) or infinitely small ($\epsilon$)), this statement is literally true, where an algorithm $A$ is in $\mathcal(O)(\sqrt{n})$ if and only if the runtime of $A$ with an input of size $\omega$ is some real multiple of $\sqrt{\omega}$.
+[1]: Under a nonstandard analysis framework (calculus but with values that are infinitely large $(omega)$ or infinitely small $(epsilon)$, this statement is literally true, where an algorithm $A$ is in $cal(O)(sqrt(n)$ if and only if the runtime of $A$ with an input of size $omega$ is some real multiple of $sqrt(omega)$.
 
 ### Stage 3:

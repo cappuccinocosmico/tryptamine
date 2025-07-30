@@ -1,3 +1,6 @@
 [submodule "blog-content/themes/radion"]
 	path = blog-content/themes/radion
 	url = https://github.com/micahkepe/radion
+[submodule "blog-content/themes/duckquill"]
+	path = blog-content/themes/duckquill
+	url = https://codeberg.org/daudix/duckquill
