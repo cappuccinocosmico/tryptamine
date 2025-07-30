@@ -27,60 +27,72 @@ fn pop_and_advance_linked_node(node: &mut Option<Box<ListNode>>) -> Option<Box<L
     Some(owned_node)
 }
 
-fn advance_k_in_linked_list(
+/// Pops off the first k elements if they exist, otherwise it will return none and leave the
+/// original list unchanged.
+fn pop_off_k_in_linked_list(
     begin_node: &mut Option<Box<ListNode>>,
     k: i32,
-) -> Option<&mut Box<ListNode>> {
-    let mut begin_ref = begin_node;
+) -> Option<Box<ListNode>> {
+    let mut owned_begin_node = begin_node.take();
+    let mut seeking_ref = &mut owned_begin_node;
+    seeking_ref = match seek_pointer_forward_by_k(seeking_ref, k) {
+        Some(val) => &mut val.next,
+        None => {
+            *begin_node = owned_begin_node;
+            return None;
+        }
+    };
+    let owned_tail = seeking_ref.as_mut().and_then(|x| x.next.take());
+    *begin_node = owned_tail;
+    owned_begin_node
+}
+fn seek_pointer_forward_by_k(
+    mut pointer: &mut Option<Box<ListNode>>,
+    k: i32,
+) -> &mut Option<Box<ListNode>> {
     for _ in 0..k {
-        begin_ref = &mut begin_ref.as_mut()?.next
+        let Some(actual_val) = pointer else {
+            return pointer;
+        };
+        pointer = &mut actual_val.next
     }
-    begin_ref.as_mut()
+    pointer
 }
 
 /// Takes in two linked lists, appends the first one onto the second, and returns an owned complete
 /// list, and a reference to the cut point in the list. Modifies the root append node to be the
-/// root of the new list with the appended items. And for convienence returns a reference to the
-/// point in the list where the cut was made.
+/// root of the new list with the appended items.
 fn append_reverse_onto_linked_list(
     mut to_append: Option<Box<ListNode>>,
     root_append: &mut Option<Box<ListNode>>,
-) -> &mut Option<Box<ListNode>> {
+) {
     let Some(mut first_append) = pop_and_advance_linked_node(&mut to_append) else {
-        return root_append;
+        return;
     };
     first_append.next = root_append.take();
     *root_append = Some(first_append);
-    let cut_pointer = &raw mut root_append.as_mut().unwrap().next;
     while let Some(mut next_append) = pop_and_advance_linked_node(&mut to_append) {
         next_append.next = root_append.take();
         *root_append = Some(next_append);
     }
-    unsafe {
-        let return_ref = &mut (*cut_pointer);
-        return return_ref;
-    }
 }
 impl Solution {
-    pub fn reverse_k_group(head: Option<Box<ListNode>>, k: i32) -> Option<Box<ListNode>> {
-        let mut head = head?;
-        let mut previous_head = &mut head;
+    pub fn reverse_k_group(mut head: Option<Box<ListNode>>, k: i32) -> Option<Box<ListNode>> {
+        let head_to_consume_ref = &mut head;
+        let mut return_list_head = None;
+        let mut return_list_tail_ref = &mut return_list_head;
         loop {
-            let mut rev_head = previous_head.next.take();
-            let tail = match advance_k_in_linked_list(&mut rev_head, k) {
+            let owned_chunk = match pop_off_k_in_linked_list(head_to_consume_ref, k) {
                 Some(val) => val,
                 None => {
-                    previous_head.next = rev_head;
-                    return Some(head);
+                    *return_list_tail_ref = head_to_consume_ref.take();
+                    return return_list_head;
                 }
             };
-            let mut append_root = tail.next.take();
-            let tail_pointer = append_reverse_onto_linked_list(rev_head, &mut append_root);
-            previous_head.next = append_root;
-            previous_head = match tail_pointer {
-                Some(val) => val,
-                None => return Some(head),
-            };
+            let mut root_of_reversed = None;
+            append_reverse_onto_linked_list(Some(owned_chunk), &mut root_of_reversed);
+            *return_list_tail_ref = root_of_reversed;
+            return_list_tail_ref = seek_pointer_forward_by_k(return_list_tail_ref, k + 1)
         }
     }
 }
