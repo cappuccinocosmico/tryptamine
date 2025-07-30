@@ -51,11 +51,11 @@ So lets try to generalize this, into a
 
 Def: Presheaf on the Real Numbers.
 
-A Preseaf $\mathcal{S}$ Is an association, for every open subset $U$ of $\mathbb{R}$. To a set $\mathcal{S}(U)$.
+A Preseaf $cal(S)$ Is an association, for every open subset $U$ of $RR$. To a set $cal(S)(U)$.
 
 For every open subset $V \subseteq U$. There exists a function
 
-$$\mathcal{S}(U) \xrightarrow{\text{restrict}_\mathcal{S}(U,V)} \mathcal{S}(V)$$
+$$cal(S)(U) \xrightarrow{\text{restrict}_cal(S)(U,V)} cal(S)(V)$$
 
 And if there is a chain of subsets $U \supseteq V \supseteq W$. Then
 
@@ -63,7 +63,7 @@ $$\text{restrict}(U,W) = \text{restrict}(U,V) \circ \text{restrict}(V,W)$$
 
 And also since restricting to the same set shouldnt do anything we can express that like so:
 
-$$\text{restrict}(U,U) = \text{the identity function on }(\mathcal{S}(U))$$
+$$\text{restrict}(U,U) = \text{the identity function on }(cal(S)(U))$$
 
 TALK MORE ABOUT THE GLUING AXIOMS
 
@@ -84,10 +84,10 @@ $$
 
 Then we can codify our rules from previously by saying that:
 
-1. For every object in our graph $\mathcal{S}$ associates it with a set $S(U)$
-2. For every arrow in our graph $U \xrightarrow{f}{} V$, gets associated with an equivalent function between the sets: $\mathcal{S}(U) \xrightarrow{\mathcal{S}(f)} \mathcal{S}(V)$
+1. For every object in our graph $cal(S)$ associates it with a set $S(U)$
+2. For every arrow in our graph $U \xrightarrow{f}{} V$, gets associated with an equivalent function between the sets: $cal(S)(U) \xrightarrow{cal(S)(f)} cal(S)(V)$
    And this association must obey the following 2 properties namely the identity property
-   $$\mathcal{S}(id_U)=id_{\mathcal{S}(U)}$$
+   $$cal(S)(id_U)=id_{cal(S)(U)}$$
    and the associative property
-   $$\mathcal{S}(g\circ f)=\mathcal{S}(g) \circ \mathcal{S}(f)$$
+   $$cal(S)(g\circ f)=cal(S)(g) \circ cal(S)(f)$$
    Sheaves at least under most formulations are valuble for exploring different kinds of mathematical universes

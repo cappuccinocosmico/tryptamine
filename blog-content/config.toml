@@ -15,3 +15,10 @@ highlight_code = true
 [extra]
 # Put all your custom variables here
 comments = false
+
+[markdown.math]
+# Enable math rendering - options: "none", "katex", "typst" 
+engine = "typst" # or "katex"
+
+# Optional: Enable SVGO optimization for generated math SVGs
+svgo = true # true, false, or "config_path"
