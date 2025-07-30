@@ -7,6 +7,7 @@ theme = "radion"
 # Whether to build a search index to be used later on by a JavaScript library
 build_search_index = true
 
+
 [markdown]
 # Whether to do syntax highlighting
 # Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
@@ -22,3 +23,6 @@ engine = "typst" # or "katex"
 
 # Optional: Enable SVGO optimization for generated math SVGs
 svgo = true # true, false, or "config_path"
+
+
+css = "static/math.css"
