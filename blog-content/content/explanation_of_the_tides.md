@@ -70,9 +70,9 @@ So the front component of the planet is experiencing an acceleration of $frac(M,
 So solving for the difference in force $X$ gives us
 
 $$
-X &= frac(M, (R-D)^2) - frac(M, (R+D)^2) \\
-X(R-D)^2(R+D)^2  &= M ( (R+D)^2 - (R-D)^2 ) \\
-X(R^2-D^2)^2 &= M ( (R^2+2 R D+D^2) - (R^2-2 R D+D^2) ) \\
-X(R^2-D^2) &= M ( 4 R D ) \\
+X &= frac(M, (R-D)^2) - frac(M, (R+D)^2) \
+X(R-D)^2(R+D)^2  &= M ( (R+D)^2 - (R-D)^2 ) \
+X(R^2-D^2)^2 &= M ( (R^2+2 R D+D^2) - (R^2-2 R D+D^2) ) \
+X(R^2-D^2) &= M ( 4 R D ) \
 X &= frac(4 M R D, (R^2-D^2)^2)
 $$
