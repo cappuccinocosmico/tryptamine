@@ -1,58 +1,35 @@
 struct Solution {}
 impl Solution {
     pub fn longest_palindrome(s: String) -> String {
-        longest_palindrome_str(&s).to_string()
+        longest_palindrome_str_slow(&s).to_string()
     }
 }
 
-fn longest_palindrome_str(s: &str) -> &str {
-    if s.is_empty() {
-        return "";
-    }
-    let mut longest_str = &s[0..1];
-    for middle_index in 0..s.len() {
-        let max_even_size = middle_index.max(s.len() - middle_index - 2);
-        for even_offset in 1..max_even_size {
-            let candidate_len = 2 * even_offset;
-            let begin_index = middle_index - even_offset;
-            let ending_index = middle_index + even_offset - 1;
-            // TODO: Make a unicode compaitble version
-            if s.as_bytes()[begin_index] == s.as_bytes()[ending_index] {
-                if candidate_len > longest_str.len() {
-                    longest_str = &s[begin_index..ending_index + 1]
-                }
-            } else {
-                break;
-            }
-        }
-        let odd_max_size = middle_index.max(s.len() - middle_index - 1);
-        for odd_offset in 1..odd_max_size {
-            let candidate_len = 2 * odd_offset + 1;
-            let begin_index = middle_index - odd_offset;
-            let ending_index = middle_index + odd_offset;
-            // TODO: Make a unicode compaitble version
-            if s.as_bytes()[begin_index] == s.as_bytes()[ending_index] {
-                if candidate_len > longest_str.len() {
-                    longest_str = &s[begin_index..ending_index + 1]
-                }
-            } else {
-                break;
-            }
+fn is_string_byte_palindrome(s: &str) -> bool {
+    for i in 0..s.len() / 2 {
+        if s.as_bytes()[i] != s.as_bytes()[s.len() - 1 - i] {
+            return false;
         }
     }
-    longest_str
+    true
 }
 
-// Example 1:
-//
-// Input: s = "babad"
-// Output: "bab"
-// Explanation: "aba" is also a valid answer.
-//
-// Example 2:
-//
-// Input: s = "cbbd"
-// Output: "bb"
+fn check_all_substrings_for_longest(s: &str, eval: impl Fn(&str) -> bool) -> &str {
+    for substring_len in (0..s.len()).rev() {
+        for starting_index in 0..(s.len() - substring_len) {
+            let substring = &s[starting_index..starting_index + substring_len + 1];
+            if eval(substring) {
+                return substring;
+            }
+            println!("Substring did not meet eval: {substring}")
+        }
+    }
+    ""
+}
+
+fn longest_palindrome_str_slow(s: &str) -> &str {
+    check_all_substrings_for_longest(s, is_string_byte_palindrome)
+}
 
 #[cfg(test)]
 mod tests {
