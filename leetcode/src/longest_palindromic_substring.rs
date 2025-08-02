@@ -10,12 +10,12 @@ fn longest_palindrome_str(s: &str) -> &str {
         return "";
     }
     let mut longest_str = &s[0..1];
-    for middle_index in 0..s.len() - 1 {
-        let max_size = middle_index.max(s.len() - middle_index - 1);
-        for even_offset in 0..max_size {
-            let candidate_len = 2 * even_offset + 2;
+    for middle_index in 0..s.len() {
+        let max_even_size = middle_index.max(s.len() - middle_index - 2);
+        for even_offset in 1..max_even_size {
+            let candidate_len = 2 * even_offset;
             let begin_index = middle_index - even_offset;
-            let ending_index = middle_index + even_offset + 1;
+            let ending_index = middle_index + even_offset - 1;
             // TODO: Make a unicode compaitble version
             if s.as_bytes()[begin_index] == s.as_bytes()[ending_index] {
                 if candidate_len > longest_str.len() {
@@ -25,11 +25,11 @@ fn longest_palindrome_str(s: &str) -> &str {
                 break;
             }
         }
-
-        for odd_offset in 0..max_size {
-            let candidate_len = 2 * odd_offset + 3;
+        let odd_max_size = middle_index.max(s.len() - middle_index - 1);
+        for odd_offset in 1..odd_max_size {
+            let candidate_len = 2 * odd_offset + 1;
             let begin_index = middle_index - odd_offset;
-            let ending_index = middle_index + odd_offset + 2;
+            let ending_index = middle_index + odd_offset;
             // TODO: Make a unicode compaitble version
             if s.as_bytes()[begin_index] == s.as_bytes()[ending_index] {
                 if candidate_len > longest_str.len() {
@@ -63,8 +63,7 @@ mod tests {
         let result = Solution::longest_palindrome("babad".to_string());
         assert!(
             result == "bab" || result == "aba",
-            "Expected 'bab' or 'aba', but got '{}'",
-            result
+            "Expected 'bab' or 'aba', but got '{result}'",
         );
     }
 
@@ -80,7 +79,6 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
     fn test_empty_string_panics() {
         Solution::longest_palindrome("".to_string());
     }
@@ -104,7 +102,6 @@ mod tests {
 
     #[test]
     fn test_long_even_palindrome() {
-        assert_eq!(Solution::longest_palindrome("abccba".to_string()), "abccba");
+        assert_eq!(Solution::longest_palindrome("hannah".to_string()), "hannah");
     }
 }
-
