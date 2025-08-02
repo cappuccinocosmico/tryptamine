@@ -35,10 +35,10 @@ fn pop_off_k_in_linked_list(
 ) -> Option<Box<ListNode>> {
     let mut owned_begin_node = begin_node.take();
     let mut seeking_ref = &mut owned_begin_node;
-    let seeked_forward = seek_pointer_forward_by_k(seeking_ref, k);
-    seeking_ref = match seeked_forward {
-        Some(_) => seeked_forward,
-        None => {
+    let (seeked_forward, reached_end) = seek_pointer_forward_by_k(seeking_ref, k);
+    seeking_ref = match reached_end {
+        true => seeked_forward,
+        false => {
             *begin_node = owned_begin_node;
             return None;
         }
@@ -50,14 +50,14 @@ fn pop_off_k_in_linked_list(
 fn seek_pointer_forward_by_k(
     mut pointer: &mut Option<Box<ListNode>>,
     k: i32,
-) -> &mut Option<Box<ListNode>> {
+) -> (&mut Option<Box<ListNode>>, bool) {
     for _ in 0..k {
         let Some(actual_val) = pointer else {
-            return pointer;
+            return (pointer, false);
         };
         pointer = &mut actual_val.next
     }
-    pointer
+    (pointer, true)
 }
 
 /// Takes in two linked lists, appends the first one onto the second, and returns an owned complete
@@ -93,7 +93,7 @@ impl Solution {
             let mut root_of_reversed = None;
             append_reverse_onto_linked_list(Some(owned_chunk), &mut root_of_reversed);
             *return_list_tail_ref = root_of_reversed;
-            return_list_tail_ref = seek_pointer_forward_by_k(return_list_tail_ref, k + 1)
+            (return_list_tail_ref, _) = seek_pointer_forward_by_k(return_list_tail_ref, k + 1)
         }
     }
 }
@@ -147,5 +147,53 @@ mod tests {
         let k = 3;
         let result = Solution::reverse_k_group(head, k);
         assert_eq!(to_vec(result), vec![3, 2, 1, 4, 5]);
+    }
+
+    #[test]
+    fn test_reverse_k_group_k_2_simple() {
+        let head = to_list(&[1, 2]);
+        let k = 2;
+        let result = Solution::reverse_k_group(head, k);
+        assert_eq!(to_vec(result), vec![2, 1]);
+    }
+
+    #[test]
+    fn test_empty_list() {
+        let head = to_list(&[]);
+        let k = 1;
+        let result = Solution::reverse_k_group(head, k);
+        assert_eq!(to_vec(result), vec![]);
+    }
+
+    #[test]
+    fn test_single_node_k_1() {
+        let head = to_list(&[1]);
+        let k = 1;
+        let result = Solution::reverse_k_group(head, k);
+        assert_eq!(to_vec(result), vec![1]);
+    }
+
+    #[test]
+    fn test_single_node_k_2() {
+        let head = to_list(&[1]);
+        let k = 2;
+        let result = Solution::reverse_k_group(head, k);
+        assert_eq!(to_vec(result), vec![1]);
+    }
+
+    #[test]
+    fn test_k_equals_length() {
+        let head = to_list(&[1, 2, 3]);
+        let k = 3;
+        let result = Solution::reverse_k_group(head, k);
+        assert_eq!(to_vec(result), vec![3, 2, 1]);
+    }
+
+    #[test]
+    fn test_k_is_1() {
+        let head = to_list(&[1, 2, 3]);
+        let k = 1;
+        let result = Solution::reverse_k_group(head, k);
+        assert_eq!(to_vec(result), vec![1, 2, 3]);
     }
 }
