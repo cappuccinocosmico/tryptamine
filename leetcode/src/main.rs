@@ -2,6 +2,7 @@
 mod add_numbers;
 mod big_substring;
 mod hills_and_valleys;
+mod longest_palindromic_substring;
 mod maximize_subarrays;
 mod merge_sorted_linked_lists;
 mod reverse_nodes_k_group;
