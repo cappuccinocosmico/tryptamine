@@ -35,14 +35,15 @@ fn pop_off_k_in_linked_list(
 ) -> Option<Box<ListNode>> {
     let mut owned_begin_node = begin_node.take();
     let mut seeking_ref = &mut owned_begin_node;
-    seeking_ref = match seek_pointer_forward_by_k(seeking_ref, k) {
-        Some(val) => &mut val.next,
+    let seeked_forward = seek_pointer_forward_by_k(seeking_ref, k);
+    seeking_ref = match seeked_forward {
+        Some(_) => seeked_forward,
         None => {
             *begin_node = owned_begin_node;
             return None;
         }
     };
-    let owned_tail = seeking_ref.as_mut().and_then(|x| x.next.take());
+    let owned_tail = seeking_ref.take();
     *begin_node = owned_tail;
     owned_begin_node
 }
@@ -94,5 +95,57 @@ impl Solution {
             *return_list_tail_ref = root_of_reversed;
             return_list_tail_ref = seek_pointer_forward_by_k(return_list_tail_ref, k + 1)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Helper function to create a linked list from a vector
+    fn to_list(vec: &[i32]) -> Option<Box<ListNode>> {
+        let mut current = None;
+        for &val in vec.iter().rev() {
+            let mut new_node = ListNode::new(val);
+            new_node.next = current;
+            current = Some(Box::new(new_node));
+        }
+        current
+    }
+
+    // Helper function to convert a linked list to a vector
+    fn to_vec(mut list: Option<Box<ListNode>>) -> Vec<i32> {
+        let mut vec = Vec::new();
+        while let Some(node) = list {
+            vec.push(node.val);
+            list = node.next;
+        }
+        vec
+    }
+    #[test]
+    fn check_that_pop_returns_right_length() {
+        let test_vec: Vec<_> = (1..100).collect();
+        for i in 0..50 {
+            let mut test_list = to_list(&test_vec);
+            let popped_value = pop_off_k_in_linked_list(&mut test_list, i);
+            let popped_to_vec = to_vec(popped_value);
+            assert_eq!(popped_to_vec.len(), i as usize);
+        }
+    }
+
+    #[test]
+    fn test_reverse_k_group_k_2() {
+        let head = to_list(&[1, 2, 3, 4, 5]);
+        let k = 2;
+        let result = Solution::reverse_k_group(head, k);
+        assert_eq!(to_vec(result), vec![2, 1, 4, 3, 5]);
+    }
+
+    #[test]
+    fn test_reverse_k_group_k_3() {
+        let head = to_list(&[1, 2, 3, 4, 5]);
+        let k = 3;
+        let result = Solution::reverse_k_group(head, k);
+        assert_eq!(to_vec(result), vec![3, 2, 1, 4, 5]);
     }
 }
