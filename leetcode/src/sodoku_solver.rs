@@ -461,7 +461,7 @@ mod tests {
         let (sender, receiver) = std::sync::mpsc::channel();
         let mut board_clone = board.clone();
 
-        let handle = thread::spawn(move || {
+        let _ = thread::spawn(move || {
             Solution::solve_sudoku(&mut board_clone);
             sender.send(board_clone).unwrap();
         });

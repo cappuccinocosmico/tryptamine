@@ -7,6 +7,7 @@ mod maximize_subarrays;
 mod merge_sorted_linked_lists;
 mod reverse_nodes_k_group;
 mod sodoku_solver;
+mod substring_concatanation;
 
 fn main() {
     println!("Hello, world!");
