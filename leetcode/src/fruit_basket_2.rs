@@ -1,5 +1,3 @@
-use std::collections::{BTreeMap, VecDeque};
-
 // You are given two arrays of integers, fruits and baskets, each of length n, where fruits[i] represents the quantity of the ith type of fruit, and baskets[j] represents the capacity of the jth basket.
 //
 // From left to right, place the fruits according to these rules:
