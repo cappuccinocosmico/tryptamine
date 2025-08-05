@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 mod add_numbers;
 mod big_substring;
+mod fruit_basket_2;
 mod hills_and_valleys;
 mod longest_palindromic_substring;
 mod maximize_subarrays;
