@@ -1,0 +1,12 @@
+// Eventual goal of the project is to learn about dependant type theory by implementing a system like it but in rust. Maybe even if I can get really far, I want to be able to type check a proof that the square root of 2 is irrational.
+// The language should support comments, and functions like so:
+fn add(a :i32, b :i32) -> i32 {
+    return a+b;
+  }
+// For starting all functions should be pure, if you want to use impure code you must annotate the function with a dirty keyword. I also think it should be possible to write regular rust code, by using a reserved keyword rs in the main function body:
+dirty fn main() {
+    rs {
+      println!("Hello World");
+    }
+}
+// I feel like thats hard enough for the first couple days of work.

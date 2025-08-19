@@ -1,0 +1,11 @@
+[package]
+name = "mosslang"
+version = "0.1.0"
+authors = ["Nicole Venner <n@mycor.io>"]
+edition = "2024"
+
+[build-dependencies] # <-- We added this and everything after!
+lalrpop = "0.22.2"
+
+[dependencies]
+lalrpop-util = { version = "0.22.0", features = ["lexer", "unicode"] }
