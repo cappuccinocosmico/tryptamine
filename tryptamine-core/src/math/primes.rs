@@ -1,3 +1,288 @@
+use std::{collections::HashMap, ops::Mul};
+
+use num_bigint::BigUint;
+use num_traits::{FromPrimitive, One, Zero};
+use rand::{Rng, rng};
+
+type NaturalRaw = BigUint;
+
+#[derive(Clone)]
+struct NaturalFactored(HashMap<NaturalRaw, u32>);
+
+impl NaturalFactored {
+    fn from_prime_factors(factors: &[(NaturalRaw, u32)]) -> Option<Self> {
+        for (factor, _) in factors {
+            if !factor.is_prime() {
+                return None;
+            }
+        }
+        unsafe {
+            return Some(Self::from_prime_factors_unchecked(factors));
+        }
+    }
+
+    unsafe fn from_prime_factors_unchecked(unchecked_factors: &[(NaturalRaw, u32)]) -> Self {
+        let map = unchecked_factors.iter().cloned().collect::<HashMap<_, _>>();
+        NaturalFactored(map)
+    }
+    fn underlying_nat(&self) -> NaturalRaw {
+        self.0.iter().map(|(prime, exp)| prime.pow(*exp)).product()
+    }
+    fn totient(&self) -> NaturalRaw {
+        self.0
+            .iter()
+            .map(|(prime, exp)| {
+                if exp.is_zero() {
+                    return BigUint::one();
+                }
+                (prime - 1_usize) * prime.pow(exp - 1)
+            })
+            .product()
+    }
+}
+
+impl Mul for &NaturalFactored {
+    type Output = NaturalFactored;
+    fn mul(self, rhs: Self) -> Self::Output {
+        let mut return_num = self.clone();
+        for (prime, exp) in rhs.0.iter() {
+            if let Some(val) = return_num.0.get_mut(prime) {
+                *val += exp
+            } else {
+                return_num.0.insert(prime.clone(), *exp);
+            }
+        }
+        return_num
+    }
+}
+
+trait NaturalNumberMathematics {
+    fn is_prime(&self) -> bool;
+    fn factor_slow(&self) -> NaturalFactored;
+    // I want to try and implement this, dont do it for me
+    // fn factor_with_totient(&self, totient: &Self) -> NaturalFactored;
+}
+
+impl NaturalNumberMathematics for BigUint {
+    fn is_prime(&self) -> bool {
+        miller_rabin_primality(self, DEFAULT_WITNESSES)
+    }
+    fn factor_slow(&self) -> NaturalFactored {
+        if self.is_prime() {
+            unsafe { return NaturalFactored::from_prime_factors_unchecked(&[(self.clone(), 1)]) }
+        }
+
+        todo!()
+    }
+}
+
+/// Generate the first N prime numbers at compile time.
+/// Very simple sieve-like approach, O(N^2) but fine for small N like 100.
+const fn generate_first_small_primes<const N: usize>() -> [u32; N] {
+    let mut primes = [0u32; N];
+    let mut count = 0;
+    let mut candidate = 2u32;
+
+    while count < N {
+        let mut is_prime = true;
+        let mut i = 0;
+        while i < count {
+            let p = primes[i];
+            if p * p > candidate {
+                break;
+            }
+            if candidate % p == 0 {
+                is_prime = false;
+                break;
+            }
+            i += 1;
+        }
+        if is_prime {
+            primes[count] = candidate;
+            count += 1;
+        }
+        candidate += 1;
+    }
+
+    primes
+}
+
+const SMALL_PRIMES: [u32; 100] = generate_first_small_primes::<100>();
+
+fn strip_small_prime_factors(
+    mut input: BigUint,
+    out_factors: &mut HashMap<BigUint, u32>,
+) -> BigUint {
+    for prime in SMALL_PRIMES {
+        while (&input % prime).is_zero() {
+            input /= prime;
+            *out_factors.entry(prime.into()).or_insert(0) += 1;
+        }
+        if input <= (prime * prime).into() {
+            *out_factors.entry(input).or_insert(0) += 1;
+            return BigUint::one();
+        }
+    }
+    input
+}
+
+fn lenestra_ellyptic_curve_factorization(num: &BigUint) -> NaturalFactored {
+    todo!()
+}
+
+const DEFAULT_WITNESSES: &[u32] = &[2, 3, 5];
+
+pub fn miller_rabin_primality(num: &BigUint, witnesses: &[u32]) -> bool {
+    if *num <= BigUint::one() {
+        return false;
+    }
+    if num % 2 as usize == BigUint::ZERO {
+        return false;
+    }
+    fn even_exp_factorize(num: &BigUint) -> (BigUint, u64) {
+        let exp = num.trailing_zeros();
+        if let Some(exp) = exp {
+            let odd = num << exp;
+            return (odd, exp);
+        }
+        unreachable!(
+            "Somehow you encountered unreachable code by passing zero into the primality function, dispite a check for zero existing."
+        )
+    }
+
+    fn miller_rabin_iteration(
+        witness: &u32,
+        z: &BigUint,
+        z_odd: &BigUint,
+        z_exp: u64,
+        num: &BigUint,
+    ) -> bool {
+        // Choose a witness between 2 and n-2
+        let mut x = BigUint::from(witness.clone()).modpow(z_odd, num);
+        if x.is_one() {
+            return true;
+        }
+        for _ in 0..z_exp {
+            if &x == z {
+                return true;
+            }
+            x = x.pow(2) % num;
+            if x.is_one() {
+                return false;
+            }
+        }
+        false
+    }
+    let z = num - (1 as u32);
+    let (z_odd, z_exp) = even_exp_factorize(&z);
+
+    for witness in witnesses {
+        if num % witness == BigUint::ZERO {
+            if num > &BigUint::from(witness.clone()) {
+                return false;
+            }
+            return true;
+        }
+        if !miller_rabin_iteration(witness, &z, &z_odd, z_exp, num) {
+            return false;
+        }
+    }
+    true
+}
+fn gcd_biguint_in_place(mut a: BigUint, mut b: BigUint) -> BigUint {
+    while !b.is_zero() {
+        let r = a % &b;
+        a = b;
+        b = r;
+    }
+    a
+}
+/// Pollard's Rho single-run attempt to find a nontrivial factor of `n`.
+/// Returns Some(factor) with 1 < factor < n, or None if failed; caller may retry.
+fn pollards_rho_once_not_even(n: &BigUint, seed1: &BigUint, seed2: &BigUint) -> Option<BigUint> {
+    let (mut x, mut y) = (seed1.clone(), seed1.clone());
+
+    // f(z) = z^2 + c (mod n)
+    let f = |z: &BigUint| ((z * z) + seed2) % n;
+
+    let mut d: BigUint;
+    // iteration limit per run to avoid infinite loops — caller can re-run
+    for _ in 0..(1 << 16) {
+        // 65536 steps; tune as desired
+        x = f(&x);
+        y = f(&f(&y));
+        let diff = if &x > &y { &x - &y } else { &y - &x };
+        if diff.is_zero() {
+            // cycle collapsed; fail this run to restart with new constants
+            return None;
+        }
+        d = gcd_biguint_in_place(diff, n.clone());
+        if d > BigUint::one() && d < *n {
+            return Some(d);
+        }
+        if d == *n {
+            return None; // failure for this run, caller should retry
+        }
+    }
+    None
+}
+
+/// Pollard-Rho with restarts until it finds a factor (or determines probable failure).
+/// This will keep trying a limited number of times and then give up (return None).
+fn pollards_rho_find_factor_no_even_or_zero(n: &BigUint, attempts: u32) -> Option<BigUint> {
+    let mut rng = rng();
+
+    // Choose random starting x, c in [1..n-1]
+    // We generate random u64 and reduce; this is simple and OK for testing purposes.
+    let n_minus_one = n - 1_u64;
+    if n_minus_one.is_zero() {
+        return None;
+    }
+
+    // helper to produce a random BigUint in [1, n-1]
+    let rand_below = |rng: &mut rand::rngs::ThreadRng| -> BigUint {
+        // draw a u64 then reduce; biased for huge n but fine for typical testing.
+        let r: u64 = rng.random();
+        let mut rbig = BigUint::from(r);
+        rbig %= &n_minus_one;
+        rbig + 1_u64
+    };
+
+    // try several runs with random constants
+    for _attempt in 0..attempts {
+        let seed1 = rand_below(&mut rng);
+        let seed2 = rand_below(&mut rng);
+        if let Some(f) = pollards_rho_once_not_even(n, &seed1, &seed2) {
+            return Some(f);
+        }
+    }
+    None
+}
+
+/// Recursively factor `n` into the provided map (prime -> exponent).
+fn factor_pollard_recursive_no_even_or_zero(n: BigUint, out: &mut HashMap<BigUint, u32>) {
+    if n <= BigUint::one() {
+        return;
+    }
+    // If n is prime, increment count and return
+    if miller_rabin_primality(&n, DEFAULT_WITNESSES) {
+        *out.entry(n).or_insert(0) += 1;
+        return;
+    }
+
+    // Use Pollard-Rho to find a nontrivial factor
+    if let Some(factor) = pollards_rho_find_factor_no_even_or_zero(&n, 16) {
+        // factor may not be prime; recurse on both parts
+        let other = &n / &factor;
+        factor_pollard_recursive_no_even_or_zero(factor, out);
+        factor_pollard_recursive_no_even_or_zero(other, out);
+    } else {
+        panic!("Failed to get pollards rho to factor an integer.")
+        // // As a fallback, if Pollard fails, treat n as "prime-ish" to avoid infinite loops.
+        // // In practice you might want more attempts or a different strategy.
+        // *out.entry(n).or_insert(0) += 1;
+    }
+}
 // // So the prime count estimator pi(x) is always strictly less than x/ln(x) for x>69 according to a
 // // stackoverflow theorem. (Starting with SMALL_PRIMES ensures we are always over that threshold)
 // // However, we have a secondary problem, trying to guess how many numbers we have to guess for an
@@ -55,68 +340,7 @@
 //     }
 // }
 //
-// pub fn miller_rabin_primality(num: &BigUint, witnesses: &Vec<u32>) -> bool {
-//     if num % 2 as usize == BigUint::ZERO {
-//         return false;
-//     }
-//     fn even_exp_factorize(num: &BigUint) -> (BigUint, u64) {
-//         let exp = num.trailing_zeros();
-//         if let Some(exp) = exp {
-//             let odd = num << exp;
-//             return (odd, exp);
-//         }
-//         panic!("Somehow you encountered unreachable code by passing zero into the primality function, dispite a check for zero existing.")
-//     }
-//
-//     fn miller_rabin_iteration(
-//         witness: &u32,
-//         z: &BigUint,
-//         z_odd: &BigUint,
-//         z_exp: u64,
-//         num: &BigUint,
-//     ) -> bool {
-//         // Choose a witness between 2 and n-2
-//         let mut x = BigUint::from(witness.clone()).modpow(z_odd, num);
-//         if x.is_one() {
-//             return true;
-//         }
-//         for _ in 0..z_exp {
-//             if &x == z {
-//                 return true;
-//             }
-//             x = x.pow(2) % num;
-//             if x.is_one() {
-//                 return false;
-//             }
-//         }
-//         false
-//     }
-//     let z = num - (1 as u32);
-//     let (z_odd, z_exp) = even_exp_factorize(&z);
-//
-//     for witness in witnesses {
-//         if num % witness == BigUint::ZERO {
-//             if num > &BigUint::from(witness.clone()) {
-//                 return false;
-//             }
-//             return true;
-//         }
-//         if !miller_rabin_iteration(witness, &z, &z_odd, z_exp, num) {
-//             return false;
-//         }
-//     }
-//     true
-// }
-//
-// fn small_prime_factorize(num: &BigUint) -> Option<[BigUint; 2]> {
-//     // let largest_small_prime = small_primes[small_primes.len() - 1];
-//     for prime in SMALL_PRIMES {
-//         if num % prime == BigUint::ZERO {
-//             return Some([num.clone() / prime, BigUint::from_usize(prime).unwrap()]);
-//         }
-//     }
-//     None
-// }
+
 //
 // fn generate_smooth_vector(num: &BigUint, list: &Vec<usize>) -> Option<Vec<u8>> {
 //     let mut remainder = num.clone();
