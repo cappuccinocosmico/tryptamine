@@ -1,5 +1,8 @@
 #![allow(dead_code)]
 mod add_numbers;
+mod advent_2025_1;
+mod advent_2025_2;
+mod advent_2025_3;
 mod big_substring;
 mod fruit_basket_2;
 mod hills_and_valleys;
@@ -9,7 +12,6 @@ mod merge_sorted_linked_lists;
 mod reverse_nodes_k_group;
 mod sodoku_solver;
 mod substring_concatanation;
-
 fn main() {
     println!("Hello, world!");
 }
