@@ -3,6 +3,7 @@ mod add_numbers;
 mod advent_2025_1;
 mod advent_2025_2;
 mod advent_2025_3;
+mod advent_2025_4;
 mod big_substring;
 mod fruit_basket_2;
 mod hills_and_valleys;
