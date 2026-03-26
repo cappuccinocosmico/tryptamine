@@ -1,0 +1,15 @@
+fn main() {
+    println!("Hello, world!");
+}
+// use bevy::prelude::*;
+//
+// fn main() {
+//     App::new()
+//         .add_plugins(DefaultPlugins)
+//         .add_startup_system(setup)
+//         .run();
+// }
+//
+// fn setup() {
+//     println!("Hello, World!")
+// }
