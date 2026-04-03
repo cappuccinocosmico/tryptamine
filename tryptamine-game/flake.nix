@@ -38,6 +38,7 @@
                 vulkan-tools
                 # Other dependencies
                 libudev-zero
+                wayland
                 xorg.libX11
                 xorg.libXcursor
                 xorg.libXi
@@ -47,6 +48,7 @@
             RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
             LD_LIBRARY_PATH = lib.makeLibraryPath [
               vulkan-loader
+              wayland
               xorg.libX11
               xorg.libXi
               xorg.libXcursor
