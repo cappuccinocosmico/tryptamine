@@ -1,7 +1,12 @@
-use bevy::{input::keyboard::KeyboardInput, prelude::*, sprite::Anchor};
+use bevy::{
+    input::keyboard::KeyboardInput, prelude::*, sprite::Anchor, sprite_render::Material2dPlugin,
+};
 use bevy_prng::WyRand;
 use bevy_rand::{global::GlobalRng, plugin::EntropyPlugin};
 use rand_core::Rng;
+
+use crate::fractal::{FractalMaterial, INITIAL_FRACTAL};
+mod fractal;
 
 #[derive(Resource)]
 struct ObstacleSpawningTimer(Timer);
@@ -9,6 +14,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(EntropyPlugin::<WyRand>::default())
+        .add_plugins(Material2dPlugin::<FractalMaterial>::default())
         .add_systems(Startup, setup)
         .add_systems(Update, (jump, apply_gravity, player_movement))
         .add_systems(
@@ -29,8 +35,8 @@ fn main() {
 }
 const GROUND_LEVEL: f32 = -100.0;
 const PLAYER_X: f32 = -300.0;
-const GROUND_EDGE: f32 = 1000.0;
-const GAME_SPEED: f32 = 1.0;
+const GROUND_EDGE: f32 = 400.0;
+const GAME_SPEED: f32 = 500.0;
 
 #[derive(Component)]
 struct Player;
@@ -38,17 +44,19 @@ struct Player;
 #[derive(Component)]
 struct Velocity(Vec3);
 
-fn setup(mut commands: Commands) {
+fn setup(
+    mut commands: Commands,
+
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<FractalMaterial>>,
+) {
     commands.spawn(Camera2d::default());
 
     // Player
     commands.spawn((
         Player,
-        Sprite {
-            color: Color::srgb(0.5, 1.0, 0.5),
-            custom_size: Some(Vec2::new(30.0, 50.0)),
-            ..default()
-        },
+        Mesh2d(meshes.add(Circle::new(50.0))),
+        MeshMaterial2d(materials.add(INITIAL_FRACTAL)),
         Anchor::BOTTOM_CENTER,
         Transform::from_xyz(PLAYER_X, GROUND_LEVEL, 0.0),
         Velocity(Vec3::ZERO),
@@ -58,15 +66,15 @@ fn setup(mut commands: Commands) {
     commands.spawn((
         Sprite {
             color: Color::srgb(0.5, 0.5, 0.5),
-            custom_size: Some(Vec2::new(800.0, 10.0)),
+            custom_size: Some(Vec2::new(2.0 * GROUND_EDGE, 10.0)),
             ..default()
         },
         Anchor::TOP_LEFT,
-        Transform::from_xyz(-400.0, GROUND_LEVEL, 0.0),
+        Transform::from_xyz(-GROUND_EDGE, GROUND_LEVEL, 0.0),
     ));
 }
 
-const JUMP_FORCE: f32 = 600.0;
+const JUMP_IMPULSE: f32 = 600.0;
 fn jump(
     mut msgs: MessageReader<KeyboardInput>,
     mut query: Query<(&mut Velocity, &Transform), With<Player>>,
@@ -77,7 +85,7 @@ fn jump(
             && let Ok((mut velocity, transform)) = query.single_mut()
             && transform.translation.y <= GROUND_LEVEL
         {
-            velocity.0.y = JUMP_FORCE;
+            velocity.0.y = JUMP_IMPULSE;
         }
     }
 }
