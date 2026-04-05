@@ -3,6 +3,7 @@ use std::time::Duration;
 use bevy::{input::keyboard::KeyboardInput, prelude::*, sprite_render::Material2dPlugin};
 
 use crate::fractal::{FractalHandle, FractalMaterial, INITIAL_FRACTAL};
+mod colors;
 mod fractal;
 
 fn main() {
@@ -68,8 +69,8 @@ impl MovementDirection {
     }
     fn move_fractal(&self, fractal_data: &mut FractalMaterial, delta_time: &Duration) {
         const SPEED: f32 = 1.0;
-        let move_displacement = 0.2 * SPEED * fractal_data.view_radius * delta_time.as_secs_f32();
-        let move_scale: f32 = 1.1 * SPEED * delta_time.as_secs_f32();
+        let move_displacement = 2.0 * SPEED * fractal_data.view_radius * delta_time.as_secs_f32();
+        let move_scale: f32 = 1.0 + 0.4 * SPEED * delta_time.as_secs_f32();
         match self {
             Self::Up => fractal_data.center.y += move_displacement,
             Self::Down => fractal_data.center.y -= move_displacement,

@@ -6,7 +6,7 @@ struct SceneUniforms {
     screen_size: vec2<f32>,
 };
 
-@group(0) @binding(0) var<uniform> scene: SceneUniforms;
+@group(2) @binding(0) var<uniform> scene: SceneUniforms;
 
 @fragment
 fn fs_main(@builtin(position) position: vec4<f32>) -> @location(0) vec4<f32> {
@@ -14,7 +14,7 @@ fn fs_main(@builtin(position) position: vec4<f32>) -> @location(0) vec4<f32> {
     // return vec4<f32>(position.x / 1920.0, position.y / 1080.0, 0.0, 1.0);
 
     // Debug: show screen_size uniform
-    return vec4<f32>(scene.screen_size.x / 1920.0, scene.screen_size.y / 1080.0, 0.0, 1.0);
+    // return vec4<f32>(scene.screen_size.x / 1920.0, scene.screen_size.y / 1080.0, 0.0, 1.0);
 
     // Debug: show view_radius uniform
     // return vec4<f32>(scene.view_radius / 10.0, 0.0, 0.0, 1.0);
@@ -24,7 +24,7 @@ fn fs_main(@builtin(position) position: vec4<f32>) -> @location(0) vec4<f32> {
 
     let normalized = (position.xy / scene.screen_size) * 2.0 - 1.0;
     let fractal_pos = derive_position_from_screen(normalized);
-    return vec4<f32>(fractal_pos.x, fractal_pos.y, 1.0, 1.0);
+    // return vec4<f32>(fractal_pos.x, fractal_pos.y, 1.0, 1.0);
     let iterations = perform_fractal_iterations(fractal_pos);
     return generate_fractal_color(iterations);
 }

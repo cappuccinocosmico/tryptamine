@@ -3818,6 +3818,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallete"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5cb50621669ebc1eef4671a1f590f6575cfe1b41f930d19b49bbee35c25a5349"
+dependencies = [
+ "termcolor",
+]
+
+[[package]]
 name = "parking"
 version = "2.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4881,6 +4890,7 @@ dependencies = [
  "bevy",
  "bevy_prng",
  "bevy_rand",
+ "pallete",
  "rand_core 0.10.0",
 ]
 
