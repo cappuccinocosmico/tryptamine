@@ -3,20 +3,34 @@ struct SceneUniforms {
     center: vec2<f32>,
     view_radius: f32,
     aspect_ratio: f32,
+    screen_size: vec2<f32>,
 };
 
 @group(0) @binding(0) var<uniform> scene: SceneUniforms;
 
 @fragment
-fn fs_main(@location(0) uv: vec2<f32>) -> @location(0) vec4<f32> {
-    let fractal_pos = derive_position(uv);
+fn fs_main(@builtin(position) position: vec4<f32>) -> @location(0) vec4<f32> {
+    // Debug: show raw position
+    // return vec4<f32>(position.x / 1920.0, position.y / 1080.0, 0.0, 1.0);
+
+    // Debug: show screen_size uniform
+    return vec4<f32>(scene.screen_size.x / 1920.0, scene.screen_size.y / 1080.0, 0.0, 1.0);
+
+    // Debug: show view_radius uniform
+    // return vec4<f32>(scene.view_radius / 10.0, 0.0, 0.0, 1.0);
+
+    // Debug: show center uniform
+    // return vec4<f32>(scene.center.x + 0.5, scene.center.y + 0.5, 0.0, 1.0);
+
+    let normalized = (position.xy / scene.screen_size) * 2.0 - 1.0;
+    let fractal_pos = derive_position_from_screen(normalized);
+    return vec4<f32>(fractal_pos.x, fractal_pos.y, 1.0, 1.0);
     let iterations = perform_fractal_iterations(fractal_pos);
     return generate_fractal_color(iterations);
 }
 
-fn derive_position(uv: vec2<f32>) -> vec2<f32> {
-    let centered = uv * 2.0 - 1.0;
-    let aspect_corrected = vec2<f32>(centered.x * scene.aspect_ratio, centered.y);
+fn derive_position_from_screen(normalized: vec2<f32>) -> vec2<f32> {
+    let aspect_corrected = vec2<f32>(normalized.x * scene.aspect_ratio, normalized.y);
     return scene.center + scene.view_radius * aspect_corrected;
 }
 
