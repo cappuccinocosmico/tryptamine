@@ -1,0 +1,6 @@
+[cargo]
+# Use a separate target directory for rust-analyzer so LSP analysis builds
+# don't invalidate (or get invalidated by) actual cargo builds.
+# Different rustc versions from different tools each write incompatible
+# fingerprints; keeping them in separate target dirs prevents cascading rebuilds.
+targetDir = true
