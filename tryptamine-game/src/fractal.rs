@@ -1,25 +1,30 @@
 use bevy::{
     asset::{Asset, Handle},
     ecs::resource::Resource,
-    math::{Vec2, vec2},
+    math::{vec2, Vec2},
+    mesh::MeshVertexBufferLayoutRef,
     reflect::TypePath,
-    render::render_resource::{AsBindGroup, ShaderType},
+    render::render_resource::{
+        AsBindGroup, RenderPipelineDescriptor, ShaderDefVal, ShaderType,
+        SpecializedMeshPipelineError,
+    },
     shader::ShaderRef,
-    sprite_render::Material2d,
+    sprite_render::{Material2d, Material2dKey},
 };
 
 use crate::colors::RgbWrapper;
-// TODO: I am wanting to move to having the uniforms passed around in these types:
 
-// Not quite sure how to implement this, probably have each one of these
+#[derive(Eq, PartialEq, Hash, Clone, Copy)]
 pub enum FractalAlgorithm {
-    SinJulia(Vec2),
-    SquareMandelbrot,
-    SquareJulia(Vec2),
+    SinJulia,
+    // SquareMandelbrot,
+    // SquareJulia,
 }
 
 pub struct FractalData {
     pub algo: FractalAlgorithm,
+    pub paramater: Vec2,
+    pub max_iterations: u32,
     pub center: Vec2,
     pub view_radius: Vec2,
 }
@@ -64,17 +69,33 @@ impl<'a> From<&'a FractalMaterial> for FractalUniform {
 }
 
 #[derive(Asset, AsBindGroup, TypePath, Clone, Copy)]
+#[bind_group_data(FractalKey)]
 #[uniform(0, FractalUniform)]
 pub struct FractalMaterial {
+    pub algorithm: FractalAlgorithm,
     pub c: Vec2,
     pub center: Vec2,
     pub view_radius: f32,
+}
+
+#[derive(Eq, PartialEq, Hash, Clone, Copy)]
+pub struct FractalKey {
+    pub algorithm: FractalAlgorithm,
+}
+
+impl From<&FractalMaterial> for FractalKey {
+    fn from(mat: &FractalMaterial) -> Self {
+        Self {
+            algorithm: mat.algorithm,
+        }
+    }
 }
 
 #[derive(Resource)]
 pub struct FractalHandle(pub Handle<FractalMaterial>);
 
 pub const INITIAL_FRACTAL: FractalMaterial = FractalMaterial {
+    algorithm: FractalAlgorithm::SinJulia,
     c: vec2(1.0, 0.5),
     center: vec2(0.0, 0.0),
     view_radius: 3.0,
@@ -83,5 +104,21 @@ pub const INITIAL_FRACTAL: FractalMaterial = FractalMaterial {
 impl Material2d for FractalMaterial {
     fn fragment_shader() -> ShaderRef {
         "shaders/fractal.wgsl".into()
+    }
+
+    fn specialize(
+        descriptor: &mut RenderPipelineDescriptor,
+        _layout: &MeshVertexBufferLayoutRef,
+        key: Material2dKey<Self>,
+    ) -> Result<(), SpecializedMeshPipelineError> {
+        let fragment = descriptor.fragment.as_mut().unwrap();
+        match key.bind_group_data.algorithm {
+            FractalAlgorithm::SinJulia => {
+                fragment
+                    .shader_defs
+                    .push(ShaderDefVal::Bool("SIN_JULIA".into(), true));
+            }
+        }
+        Ok(())
     }
 }

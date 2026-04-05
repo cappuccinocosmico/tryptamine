@@ -66,7 +66,13 @@ fn perform_fractal_iterations(init_pos: vec2<f32>) -> i32 {
 }
 
 fn iteration(input: vec2<f32>) -> vec2<f32> {
-    return cmul(scene.c, csin(input));
+    #ifdef SIN_JULIA
+        return cmul(scene.c, csin(input));
+    #endif
+    #ifdef SQUARE_JULIA
+        return cmul(input, input) + scene.c;
+    #endif
+    return input;
 }
 
 fn cmul(a: vec2<f32>, b: vec2<f32>) -> vec2<f32> {
