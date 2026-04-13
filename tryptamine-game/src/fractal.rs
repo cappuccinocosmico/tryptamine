@@ -1,14 +1,13 @@
 use bevy::{
     asset::{Asset, Handle},
     ecs::resource::Resource,
-    math::{vec2, Vec2},
+    math::{Vec2, vec2},
     mesh::MeshVertexBufferLayoutRef,
     reflect::TypePath,
     render::render_resource::{
-        AsBindGroup, RenderPipelineDescriptor, ShaderDefVal, ShaderType,
-        SpecializedMeshPipelineError,
+        AsBindGroup, RenderPipelineDescriptor, ShaderType, SpecializedMeshPipelineError,
     },
-    shader::ShaderRef,
+    shader::{ShaderDefVal, ShaderRef},
     sprite_render::{Material2d, Material2dKey},
 };
 
@@ -18,7 +17,7 @@ use crate::colors::RgbWrapper;
 pub enum FractalAlgorithm {
     SinJulia,
     // SquareMandelbrot,
-    // SquareJulia,
+    SquareJulia,
 }
 
 pub struct FractalData {
