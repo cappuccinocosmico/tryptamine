@@ -72,8 +72,8 @@ impl MovementDirection {
         let move_displacement = 2.0 * SPEED * fractal_data.view_radius * delta_time.as_secs_f32();
         let move_scale: f32 = 1.0 + 0.4 * SPEED * delta_time.as_secs_f32();
         match self {
-            Self::Up => fractal_data.center.y += move_displacement,
-            Self::Down => fractal_data.center.y -= move_displacement,
+            Self::Up => fractal_data.center.y -= move_displacement,
+            Self::Down => fractal_data.center.y += move_displacement,
             Self::Right => fractal_data.center.x += move_displacement,
             Self::Left => fractal_data.center.x -= move_displacement,
             Self::ZoomOut => fractal_data.view_radius *= move_scale,

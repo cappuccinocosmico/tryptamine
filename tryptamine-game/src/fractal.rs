@@ -117,6 +117,11 @@ impl Material2d for FractalMaterial {
                     .shader_defs
                     .push(ShaderDefVal::Bool("SIN_JULIA".into(), true));
             }
+            FractalAlgorithm::SquareJulia => {
+                fragment
+                    .shader_defs
+                    .push(ShaderDefVal::Bool("SQUARE_JULIA".into(), true));
+            }
         }
         Ok(())
     }
